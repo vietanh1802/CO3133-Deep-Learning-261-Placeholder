@@ -1,9 +1,7 @@
 # AI Usage Disclosure
 
 ## Assignment 1
-
 <!-- One entry per tool use. Template below. -->
-
 ### Entry 1
 - **Tool / model:**
 - **Used by:**
