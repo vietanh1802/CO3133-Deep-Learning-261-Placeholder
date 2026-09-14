@@ -1,8 +1,10 @@
 # CO3133 - Deep Learning and Its Applications (Semester 261)
 
-Course project repository. Group: _(fill in)_
+Course project repository. Group: Placeholder
 
-**Project website:** _(paste GitHub Pages URL)_
+**Project website:** https://vietanh1802.github.io/CO3133-Deep-Learning-261-Placeholder/
+
+**Assignment pages:** [Assignment 1](assignment1.md) · [Assignment 2](assignment2.md) · [Assignment 3](assignment3.md)
 
 ## Installation
 _(TBA)_

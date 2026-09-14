@@ -12,7 +12,7 @@ description: Group course project · Assignments 1–3 · Semester 261
 - **Instructor:** Lê Thành Sách
 
 ## Group Information
-**Group name / ID:** _(fill in)_
+**Group name / ID:** Placeholder
 
 | Full name | Student ID | Role / Contribution | GitHub |
 |---|---|---|---|
@@ -21,7 +21,7 @@ description: Group course project · Assignments 1–3 · Semester 261
 | Lê Nguyên Khang | 2352470 | _(fill in)_ | [khenm](https://github.com/khenm) |
 | Trần Nguyên Giáp | 2352284 | _(fill in)_ | [nguyenzap](https://github.com/nguyenzap) |
 
-**Code repository:** [vietanh1802/CO3133-deep-learning-261](https://github.com/vietanh1802/CO3133-deep-learning-261)
+**Code repository:** [vietanh1802/CO3133-Deep-Learning-261-Placeholder](https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder)
 
 ## Assignments
 - [Assignment 1 - Foundations of Deep Learning Pipelines and Architectures](assignment1.md)
