@@ -3,7 +3,7 @@
 - Decisions: 
   - D-01: Use Factory Pattern for Data Loading, Model Registration. 
 - Task split for the coming week (who does what across all four modules):
-  - 2352470 -> Error Analysis; Model Implementation (Gru); Utilities. 
+  - 2352470 -> Error Analysis; Model Implementation (Gru); Utilities; Review.
   - 2352067 -> Data Loader, Data Preprocessing and EDA (MNIST, and FASHION-MNIST); Model Implementation (Transformers); Metrics. 
   - 2352284 -> Model implementation (Linear, Recurrent, CNN); Utilities. Evaluation Pipeline.
   - 2352074 -> Maintain web, update web and ui; Training pipeline; Model Implementation (LSTM)
