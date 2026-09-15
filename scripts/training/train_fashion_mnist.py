@@ -1,4 +1,4 @@
-"""Training entry point for development runs."""
+"""Training entry point for the primary Fashion-MNIST experiments."""
 
 
 def main() -> None:
