@@ -1,9 +1,18 @@
-import random
-import numpy as np
-import torch
+"""Random-number-generator controls for reproducible experiments."""
 
-def seed_everything(seed_value):
-    random.seed(seed_value)
-    np.random.seed(seed_value)
-    torch.manual_seed(seed_value)
-    torch.benchmark.deterministic.seed(seed_value)
+from typing import Any
+
+
+def seed_everything(seed: int) -> None:
+    """Seed Python, NumPy, PyTorch, CUDA, and DataLoader workers."""
+    raise NotImplementedError
+
+
+def capture_rng_state() -> dict[str, Any]:
+    """Capture RNG state for exact checkpoint resumption."""
+    raise NotImplementedError
+
+
+def restore_rng_state(state: dict[str, Any]) -> None:
+    """Restore a state returned by :func:`capture_rng_state`."""
+    raise NotImplementedError
