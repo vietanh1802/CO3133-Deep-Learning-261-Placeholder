@@ -14,6 +14,7 @@ class EvaluationResult:
     """Metrics and evidence collected from one held-out evaluation."""
 
     metrics: ClassificationMetrics
+    sample_indices: torch.Tensor
     targets: torch.Tensor
     predictions: torch.Tensor
     probabilities: torch.Tensor
