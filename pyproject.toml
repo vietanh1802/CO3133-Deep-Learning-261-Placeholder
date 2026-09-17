@@ -1,0 +1,41 @@
+[project]
+name = "co3133-deep-learning-261-placeholder"
+version = "0.1.0"
+description = "CO3133 Assignment 1 image-classification experiments"
+requires-python = ">=3.11"
+dependencies = [
+    "loguru>=0.7,<1",
+    "matplotlib>=3.8,<4",
+    "numpy>=1.26,<3",
+    "pandas>=2.2,<3",
+    "pyyaml>=6.0,<7",
+    "scikit-learn>=1.4,<2",
+    "seaborn>=0.13,<1",
+    "torch>=2.2,<3",
+    "torchvision>=0.17,<1",
+    "tqdm>=4.66,<5",
+]
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.0,<5",
+    "pytest>=8.0,<9",
+    "ruff>=0.16,<1",
+    "ty>=0.0.19,<1",
+]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP", "B", "SIM", "RET", "C4"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ty.environment]
+python-version = "3.11"
