@@ -1,13 +1,22 @@
-"""Prediction-error analysis contracts."""
+"""Prediction-error analysis contracts and construction helpers."""
 
-from dataclasses import dataclass
+from src.error.base import ErrorAnalyzer, build_error_analyzer, register_error_analyzer
+from src.error.classification import (
+    ClassificationError,
+    ClassificationErrorAnalyzer,
+    ClassificationErrorReport,
+    ConfusionPair,
+)
+from src.error.selection import select_bottom_k, select_top_k
 
-
-@dataclass(frozen=True)
-class ErrorExample:
-    """One misclassified example retained for qualitative analysis."""
-
-    sample_index: int
-    target: int
-    prediction: int
-    confidence: float
+__all__ = [
+    "ClassificationError",
+    "ClassificationErrorAnalyzer",
+    "ClassificationErrorReport",
+    "ConfusionPair",
+    "ErrorAnalyzer",
+    "build_error_analyzer",
+    "register_error_analyzer",
+    "select_bottom_k",
+    "select_top_k",
+]
