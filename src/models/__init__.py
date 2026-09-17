@@ -1,20 +1,25 @@
-"""Assignment 1 model interfaces."""
+"""Model components and task-specific heads."""
 
-from src.models.base import ImageClassifier, build_model
-from src.models.cnn import CNNClassifier
-from src.models.gru import GRUClassifier
-from src.models.linear import LinearClassifier
-from src.models.mlp import MLPClassifier
-from src.models.recurrent import LSTMClassifier
-from src.models.transformer import TransformerClassifier
+from src.models.base import Model, build_model, register_model
+from src.models.classifier import ImageClassifier
+from src.models.cnn import CNN
+from src.models.gru import GRU
+from src.models.linear import Linear
+from src.models.lstm import LSTM
+from src.models.mlp import MLP
+from src.models.rnn import RNN
+from src.models.transformer import Transformer
 
 __all__ = [
-    "CNNClassifier",
-    "GRUClassifier",
+    "CNN",
+    "GRU",
     "ImageClassifier",
-    "LSTMClassifier",
-    "LinearClassifier",
-    "MLPClassifier",
-    "TransformerClassifier",
+    "LSTM",
+    "Linear",
+    "MLP",
+    "Model",
+    "RNN",
+    "Transformer",
     "build_model",
+    "register_model",
 ]

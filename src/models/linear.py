@@ -1,17 +1,18 @@
-"""Linear image classifier."""
+"""Linear-model image encoder."""
 
 import torch
 
-from src.models.base import ImageClassifier
+from src.models.base import Model, register_model
 
 
-class LinearClassifier(ImageClassifier):
-    """Flatten an image and return unnormalized class logits."""
+@register_model("linear")
+class Linear(Model):
+    """Prepare flattened image features for a linear classification head."""
 
-    def __init__(self, input_dim: int = 28 * 28, num_classes: int = 10) -> None:
+    def __init__(self, input_dim: int = 28 * 28) -> None:
         super().__init__()
-        raise NotImplementedError
+        pass
 
-    def forward(self, images: torch.Tensor) -> torch.Tensor:
-        """Return logits shaped ``[batch, num_classes]``."""
-        raise NotImplementedError
+    def forward(self, images: torch.Tensor) -> torch.Tensor:  # ty: ignore[empty-body]
+        """Return flattened image features."""
+        pass

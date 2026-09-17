@@ -2,9 +2,10 @@
 
 from pathlib import Path
 
-from src.data.base import DataLoaders
+from src.data.base import DataLoaders, ImageClassificationBatch, register_dataset
 
 
+@register_dataset("mnist")
 def build_mnist_loaders(
     data_dir: str | Path,
     *,
@@ -12,6 +13,6 @@ def build_mnist_loaders(
     val_fraction: float,
     seed: int,
     num_workers: int = 0,
-) -> DataLoaders:
+) -> DataLoaders[ImageClassificationBatch]:
     """Build MNIST loaders using a reproducible split."""
     raise NotImplementedError

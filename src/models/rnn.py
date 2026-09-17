@@ -1,13 +1,13 @@
-"""GRU image-sequence encoder."""
+"""Vanilla RNN image-sequence encoder."""
 
 import torch
 
 from src.models.base import Model, register_model
 
 
-@register_model("gru")
-class GRU(Model):
-    """Encode image sequences with a GRU."""
+@register_model("rnn")
+class RNN(Model):
+    """Interpret image rows, columns, or patches as a sequence."""
 
     def __init__(
         self,

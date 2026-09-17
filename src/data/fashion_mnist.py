@@ -2,9 +2,10 @@
 
 from pathlib import Path
 
-from src.data.base import DataLoaders
+from src.data.base import DataLoaders, ImageClassificationBatch, register_dataset
 
 
+@register_dataset("fashion_mnist")
 def build_fashion_mnist_loaders(
     data_dir: str | Path,
     *,
@@ -12,7 +13,7 @@ def build_fashion_mnist_loaders(
     val_fraction: float,
     seed: int,
     num_workers: int = 0,
-) -> DataLoaders:
+) -> DataLoaders[ImageClassificationBatch]:
     """Build the shared Fashion-MNIST train/validation/test split."""
     raise NotImplementedError
 

@@ -1,17 +1,18 @@
-"""Convolutional image classifier."""
+"""Convolutional image encoder."""
 
 import torch
 
-from src.models.base import ImageClassifier
+from src.models.base import Model, register_model
 
 
-class CNNClassifier(ImageClassifier):
-    """Self-designed CNN for 28-by-28 grayscale images."""
+@register_model("cnn")
+class CNN(Model):
+    """Encode 28-by-28 grayscale images with a self-designed CNN."""
 
-    def __init__(self, in_channels: int = 1, num_classes: int = 10) -> None:
+    def __init__(self, in_channels: int = 1) -> None:
         super().__init__()
-        raise NotImplementedError
+        pass
 
-    def forward(self, images: torch.Tensor) -> torch.Tensor:
-        """Return unnormalized class logits."""
-        raise NotImplementedError
+    def forward(self, images: torch.Tensor) -> torch.Tensor:  # ty: ignore[empty-body]
+        """Return encoded image features."""
+        pass
