@@ -2,12 +2,16 @@
 
 import sys
 import time
-from collections.abc import Iterator, Mapping
+from collections.abc import Iterable, Iterator, Mapping
 from contextlib import contextmanager
 from enum import StrEnum
-from typing import Any
+from pathlib import Path
+from typing import Any, TypeVar
 
 from loguru import logger
+from tqdm.auto import tqdm
+
+T = TypeVar("T")
 
 
 class ExperimentState(StrEnum):
@@ -23,15 +27,33 @@ class ExperimentState(StrEnum):
     FAILED = "Failed"
 
 
-def setup_logging(level: str = "INFO") -> None:
-    """Configure one concise Loguru console handler."""
+def setup_logging(level: str = "INFO", log_file: str | Path | None = None) -> None:
+    """Configure concise console logging and an optional run log file."""
     logger.remove()
     logger.add(
-        sys.stderr,
+        _tqdm_sink,
         level=level.upper(),
         colorize=True,
         format="<green>{time:HH:mm:ss}</green> | <level>{level: <8}</level> | {message}",
     )
+    if log_file is not None:
+        path = Path(log_file)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        logger.add(
+            path,
+            level=level.upper(),
+            format="{time:YYYY-MM-DD HH:mm:ss} | {level: <8} | {message}",
+        )
+
+
+def _tqdm_sink(message: Any) -> None:
+    """Write a Loguru message without corrupting an active progress bar."""
+    tqdm.write(str(message), file=sys.stderr, end="")
+
+
+def progress_bar(iterable: Iterable[T], **kwargs: Any) -> Iterable[T]:
+    """Create a stderr progress bar compatible with the Loguru console sink."""
+    return tqdm(iterable, file=sys.stderr, dynamic_ncols=True, **kwargs)
 
 
 def log_config(config: Mapping[str, Any]) -> None:
