@@ -54,9 +54,7 @@ def build_dataloaders(
 
     if key not in _DATASET_REGISTRY:
         available = ", ".join(sorted(_DATASET_REGISTRY))
-        raise ValueError(
-            f"Unknown dataset {name!r}. Available datasets: {available}"
-        )
+        raise ValueError(f"Unknown dataset {name!r}. Available datasets: {available}")
 
     return _DATASET_REGISTRY[key](**dict(config))
 
@@ -79,6 +77,7 @@ def split_train_validation_indices(
     num_val = int(num_samples * val_fraction)
 
     return permutation[num_val:], permutation[:num_val]
+
 
 def build_image_classification_loaders(
     *,
