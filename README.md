@@ -4,27 +4,64 @@ Course project repository. Group: Placeholder
 
 **Project website:** https://vietanh1802.github.io/CO3133-Deep-Learning-261-Placeholder/
 
-**Assignment pages:** [Assignment 1](assignment1.md) · [Assignment 2](assignment2.md) · [Assignment 3](assignment3.md)
+**Assignment pages:** [Assignment 1](web/assignment1.html) · [Assignment 2](web/assignment2.html) · [Assignment 3](web/assignment3.html)
 
 ## Installation
-_(TBA)_
+
+```bash
+uv sync --dev
+uv run pre-commit install
+```
 
 ## Dataset Preparation
-_(TBA)_
+
+Fashion-MNIST, MNIST, and CIFAR-10 are downloaded and integrity-checked automatically.
+Fashion-MNIST remains the Assignment 1 evaluation dataset; MNIST and CIFAR-10 are available
+for development and later experiments. Generate the required A1 EDA figures with:
+
+```bash
+uv run python -m scripts.eda.run_fashion_mnist
+```
 
 ## Training
-_(TBA)_
+
+```bash
+uv run python -m scripts.training.train_image_classification --data fashion_mnist --config configs/image_classification/fashion_mnist/linear.yaml
+uv run python -m scripts.training.train_image_classification --data fashion_mnist --config configs/image_classification/fashion_mnist/mlp.yaml
+```
+
+Development dataset runs use their matching entry points and shape-compatible configs:
+
+```bash
+uv run python -m scripts.training.train_image_classification --data mnist --config configs/image_classification/mnist/linear.yaml
+uv run python -m scripts.training.train_image_classification --data cifar10 --config configs/image_classification/cifar10/cnn.yaml
+```
+
+The best-validation checkpoints are written to `checkpoints/<run-name>/best.pt`. Training
+logs, curves, and exact summaries are written to `results/a1/<run-name>/`.
 
 ## Evaluation
-_(TBA)_
+
+```bash
+uv run python -m scripts.evaluation.evaluate --data fashion_mnist --config configs/image_classification/fashion_mnist/linear.yaml
+uv run python -m scripts.evaluation.evaluate --data fashion_mnist --config configs/image_classification/fashion_mnist/mlp.yaml
+uv run python -m scripts.evaluation.compare --results-dir results/a1
+```
+
+Each evaluation writes the required confusion matrix, per-class accuracy and support,
+most-confused class pairs, and representative correct, confident-error, and uncertain-error
+figures under `results/a1/<run-name>/`.
 
 ## Reproducibility
-- Configuration files: _(TBA)_
-- Random seed: _(TBA)_
-- Dependency versions: _(TBA)_
-- Hardware: _(TBA)_
-- Checkpoints: _(TBA)_
+
+- Configuration files: `configs/image_classification/<dataset>/`
+- Draft random seed: 42
+- Dependency versions: locked in `uv.lock`
+- Draft hardware: Apple Silicon MPS for training; CPU for reported inference timing
+- Checkpoint selection: lowest validation loss
+- Checkpoint reconstruction: run the training commands above
 
 ## Documents
-- Report: _(TBA)_
+
+- [Assignment 1 draft report](reports/assignment1-draft.md)
 - [AI Usage Disclosure](AI_USAGE.md)
