@@ -40,6 +40,17 @@ uv run python -m scripts.training.train_image_classification --data cifar10 --co
 The best-validation checkpoints are written to `checkpoints/<run-name>/best.pt`. Training
 logs, curves, and exact summaries are written to `results/a1/<run-name>/`.
 
+Package optional checkpoint downloads separately for each dataset:
+
+```bash
+uv run python -m scripts.release.package_checkpoints --data fashion_mnist
+uv run python -m scripts.release.package_checkpoints --data mnist
+uv run python -m scripts.release.package_checkpoints --data cifar10
+```
+
+Each command writes `artifacts/<dataset>-checkpoints.zip`. Upload these archives as GitHub
+Release assets; they are not downloaded when cloning the repository.
+
 ## Evaluation
 
 ```bash
