@@ -78,14 +78,18 @@ class GRU(Model):
 
     def forward(self, images: torch.Tensor) -> torch.Tensor:
         """Return the final hidden features of the last recurrent layer."""
-        if images.ndim != 4 or images.shape[1] != 1:
-            raise ValueError("images must have shape [batch, 1, sequence_length, input_size]")
-        if images.shape[-1] != self.input_size:
-            raise ValueError(f"image width must equal input_size={self.input_size}")
+        if images.ndim != 4:
+            raise ValueError("images must have shape [batch, channels, height, width]")
         if images.shape[2] == 0:
             raise ValueError("sequence length must be positive")
 
-        layer_input = images.squeeze(1)
+        batch_size, channels, height, width = images.shape
+        layer_input = images.permute(0, 2, 1, 3).reshape(batch_size, height, channels * width)
+        if layer_input.shape[-1] != self.input_size:
+            raise ValueError(
+                f"channels * image width must equal input_size={self.input_size}, "
+                f"got {layer_input.shape[-1]}"
+            )
         hidden = layer_input.new_zeros(layer_input.shape[0], self.hidden_size)
 
         for layer_index, cell in enumerate(self.cells):

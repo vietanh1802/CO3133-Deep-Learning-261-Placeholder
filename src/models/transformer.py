@@ -21,6 +21,9 @@ class Transformer(Model):
         dropout: float = 0.0,
     ) -> None:
         super().__init__()
+        if token_dim <= 0:
+            raise ValueError("token_dim must be positive")
+        self.token_dim = token_dim
         self.output_dim = embedding_dim
 
         self.token_projection = nn.Linear(token_dim, embedding_dim)
@@ -36,8 +39,15 @@ class Transformer(Model):
 
     def forward(self, images: torch.Tensor) -> torch.Tensor:
         """Return encoded image-token features."""
-        # [batch, 1, height, width] -> [batch, height, width]: each row becomes one token.
-        tokens = images.squeeze(1)
+        if images.ndim != 4:
+            raise ValueError("images must have shape [batch, channels, height, width]")
+        batch_size, channels, height, width = images.shape
+        tokens = images.permute(0, 2, 1, 3).reshape(batch_size, height, channels * width)
+        if tokens.shape[-1] != self.token_dim:
+            raise ValueError(
+                f"channels * image width must equal token_dim={self.token_dim}, "
+                f"got {tokens.shape[-1]}"
+            )
 
         embedded = self.token_projection(tokens)  # [batch, seq_len, embedding_dim]
         embedded = embedded + self._positional_encoding(embedded)
