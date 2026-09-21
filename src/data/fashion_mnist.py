@@ -12,7 +12,7 @@ from src.data.base import (
 )
 from src.data.transform import build_eval_transform, build_train_transform
 
-_CLASS_NAMES = (
+FASHION_MNIST_CLASS_NAMES = (
     "T-shirt/top",
     "Trouser",
     "Pullover",
@@ -55,4 +55,4 @@ def build_fashion_mnist_loaders(
 
 def class_names() -> tuple[str, ...]:
     """Return Fashion-MNIST class names in label-index order."""
-    return _CLASS_NAMES
+    return FASHION_MNIST_CLASS_NAMES
