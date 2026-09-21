@@ -43,50 +43,99 @@
 
   <section id="problem">
     <h2>Problem Statement</h2>
-    <p class="pending">(To be added)</p>
+    <p>We classify each 28-by-28 grayscale Fashion-MNIST image into one of ten clothing
+    categories. The draft establishes a shared PyTorch pipeline and compares a linear
+    classifier with a multilayer perceptron under the same split and evaluation protocol.</p>
   </section>
 
   <section id="dataset">
     <h2>Dataset Description and EDA</h2>
-    <p class="pending">(To be added - must cover at least class distribution, input size, imbalance analysis, and representative samples.)</p>
+    <p>Fashion-MNIST contains 60,000 official training images and 10,000 official test
+    images. Every class has exactly 6,000 training examples, giving a maximum-to-minimum
+    class ratio of 1.00. We reserve 6,000 training examples for validation using seed 42;
+    the remaining 54,000 are used for training. Images are converted to float tensors,
+    normalized to approximately [-1, 1], and training images receive a small random affine
+    augmentation. The generated class-distribution and representative-sample figures are
+    retained with the experiment artifacts:</p>
+    <ul class="links">
+      <li><a href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder/blob/dev/a1/results/a1/eda/fashion_mnist/class_distribution.png">Class distribution</a></li>
+      <li><a href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder/blob/dev/a1/results/a1/eda/fashion_mnist/representative_samples.png">Representative samples</a></li>
+    </ul>
   </section>
 
   <section id="methodology">
     <h2>Methodology</h2>
-    <p class="pending">(To be added - pipeline diagram, architecture of the five mandatory models, loss functions, input representations.)</p>
+    <p>The current draft compares two flattened-pixel models. Linear maps 784 input values
+    directly to ten logits. MLP uses hidden dimensions 256 and 128 with ReLU and dropout
+    0.2 before the shared ten-class head. Both optimize cross-entropy directly from logits.
+    CNN, GRU, and Transformer results will be added for the final submission.</p>
   </section>
 
   <section id="setup">
     <h2>Experimental Setup</h2>
-    <p class="pending">(To be added - optimizer, learning rate, batch size, epochs, seed, hardware, checkpoint selection rule.)</p>
+    <p>Both draft models use Adam, learning rate 0.001, batch size 128, five epochs, and
+    seed 42. Training ran on Apple MPS; reported inference timings were measured on CPU.
+    The selected checkpoint is the epoch with the lowest validation loss. These are
+    preliminary single-seed runs.</p>
   </section>
 
   <section id="results">
     <h2>Results</h2>
-    <p class="pending">(To be added - accuracy, macro-F1, parameter count, training time, inference time, learning curves, confusion matrix.)</p>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Model</th><th>Accuracy</th><th>Macro-F1</th><th>Parameters</th><th>Training</th><th>Inference</th></tr></thead>
+        <tbody>
+          <tr><td>Linear</td><td>0.7612</td><td>0.7591</td><td>7,850</td><td>50.5 s</td><td>0.005 s</td></tr>
+          <tr><td>MLP</td><td>0.8198</td><td>0.8154</td><td>235,146</td><td>56.7 s</td><td>0.019 s</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Metrics use the untouched 10,000-image test split. Learning curves, confusion
+    matrices, serialized prediction evidence, and exact JSON records are stored under
+    <code>results/a1/</code>.</p>
   </section>
 
   <section id="comparison">
     <h2>Comparison and Discussion</h2>
-    <p class="pending">(To be added - how data representation and inductive bias affect performance.)</p>
+    <p>The MLP improves test accuracy by 5.86 percentage points and macro-F1 by 0.0563,
+    indicating that nonlinear combinations of flattened pixels are useful. It requires
+    roughly thirty times as many parameters and has slower inference. Neither model uses
+    spatial locality, so this draft does not yet establish the benefit of convolutional or
+    sequence-oriented inductive biases.</p>
   </section>
 
   <section id="error-analysis">
     <h2>Error Analysis</h2>
-    <p class="pending">(To be added)</p>
+    <p>Both preliminary models struggle most with visually similar upper-body garments.
+    Shirt has the lowest test accuracy: 35.3% for the linear model and 41.8% for the MLP.
+    The linear model most often maps Shirt to Coat or Pullover; the MLP most often maps it
+    to T-shirt/top or Pullover. Pullover and Coat are also confused in both directions.
+    This is consistent with both encoders flattening away explicit spatial locality.</p>
+    <p>The saved qualitative evidence separates representative correct predictions,
+    confident errors, and uncertain errors. Some mistakes exceed 99% confidence, so the
+    current models' confidence should not be treated as calibrated.</p>
+    <ul class="links">
+      <li><a href="../results/a1/linear_seed42/test_confident_errors.png">Linear confident errors</a></li>
+      <li><a href="../results/a1/linear_seed42/test_uncertain_errors.png">Linear uncertain errors</a></li>
+      <li><a href="../results/a1/mlp_seed42/test_confident_errors.png">MLP confident errors</a></li>
+      <li><a href="../results/a1/mlp_seed42/test_uncertain_errors.png">MLP uncertain errors</a></li>
+    </ul>
   </section>
 
   <section id="limitations">
     <h2>Limitations and Conclusion</h2>
-    <p class="pending">(To be added)</p>
+    <p>These are five-epoch, single-seed draft results and should not be interpreted as the
+    final architecture comparison. The final study must add CNN, GRU, and Transformer
+    runs, repeated seeds where feasible, and a complete inductive-bias discussion.</p>
   </section>
 
   <section id="links">
     <h2>Links</h2>
     <ul class="links">
       <li><strong>Source code:</strong> <a href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder">GitHub repository</a></li>
-      <li><strong>Checkpoints / reproduction instructions:</strong> <span class="pending">(To be added)</span></li>
-      <li><strong>Report and slides:</strong> <span class="pending">(To be added)</span></li>
+      <li><strong>Checkpoint reconstruction:</strong> <a href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder/blob/dev/a1/README.md">Reproduction commands</a></li>
+      <li><strong>Draft report:</strong> <a href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder/blob/dev/a1/reports/assignment1-draft.md">Assignment 1 draft</a></li>
+      <li><strong>Slides:</strong> <span class="pending">(Required for final)</span></li>
       <li><strong>YouTube presentation:</strong> <span class="pending">(To be added)</span></li>
     </ul>
   </section>

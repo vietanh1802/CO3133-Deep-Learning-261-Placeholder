@@ -1,0 +1,41 @@
+{
+  "name": "linear_seed42",
+  "model": "linear",
+  "seed": 42,
+  "epochs": 5,
+  "best_epoch": 3,
+  "best_validation_loss": 0.6713403674761454,
+  "training_seconds": 50.52099637500214,
+  "train_loss": [
+    0.9394151065437882,
+    0.8139449608767474,
+    0.794895223070074,
+    0.7925659162203471,
+    0.7899650710777
+  ],
+  "validation_loss": [
+    0.7111287941932678,
+    0.6943604873021444,
+    0.6713403674761454,
+    0.6942924914360047,
+    0.6752508683204651
+  ],
+  "checkpoint": "checkpoints/linear_seed42/best.pt",
+  "config": {
+    "name": "linear_seed42",
+    "model": "linear",
+    "model_config": {
+      "input_dim": 784
+    },
+    "dataset": "fashion_mnist",
+    "seed": 42,
+    "batch_size": 128,
+    "learning_rate": 0.001,
+    "epochs": 5,
+    "num_workers": 0,
+    "val_fraction": 0.1,
+    "data_dir": "data",
+    "checkpoint_dir": "checkpoints",
+    "results_dir": "results"
+  }
+}

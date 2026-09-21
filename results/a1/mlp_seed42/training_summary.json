@@ -1,0 +1,46 @@
+{
+  "name": "mlp_seed42",
+  "model": "mlp",
+  "seed": 42,
+  "epochs": 5,
+  "best_epoch": 5,
+  "best_validation_loss": 0.4752279356320699,
+  "training_seconds": 56.68221783400077,
+  "train_loss": [
+    0.8505168963361669,
+    0.6715531442430285,
+    0.6229434667163425,
+    0.6008070902824402,
+    0.5812749338679843
+  ],
+  "validation_loss": [
+    0.596073404788971,
+    0.5596889783541361,
+    0.5305343694686889,
+    0.4916740756034851,
+    0.4752279356320699
+  ],
+  "checkpoint": "checkpoints/mlp_seed42/best.pt",
+  "config": {
+    "name": "mlp_seed42",
+    "model": "mlp",
+    "model_config": {
+      "input_dim": 784,
+      "hidden_dims": [
+        256,
+        128
+      ],
+      "dropout": 0.2
+    },
+    "dataset": "fashion_mnist",
+    "seed": 42,
+    "batch_size": 128,
+    "learning_rate": 0.001,
+    "epochs": 5,
+    "num_workers": 0,
+    "val_fraction": 0.1,
+    "data_dir": "data",
+    "checkpoint_dir": "checkpoints",
+    "results_dir": "results"
+  }
+}

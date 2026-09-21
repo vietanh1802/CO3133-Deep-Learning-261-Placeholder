@@ -1,0 +1,3 @@
+model,runs,seeds,accuracy_mean,accuracy_std,macro_f1_mean,macro_f1_std,parameter_count,training_seconds_mean,training_seconds_std,inference_seconds_mean,inference_seconds_std,git_commits
+linear,1,42,0.7612000107765198,0.0,0.7591074093753785,0.0,7850,50.52099637500214,0.0,0.004739955998957157,0.0,c130fea1e66792612f4370b79bb0bc72104ac1c5-dirty
+mlp,1,42,0.8198000192642212,0.0,0.8153915175467589,0.0,235146,56.68221783400077,0.0,0.016692958986823214,0.0,c130fea1e66792612f4370b79bb0bc72104ac1c5-dirty

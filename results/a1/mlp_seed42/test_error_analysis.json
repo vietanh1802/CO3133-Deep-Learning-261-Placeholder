@@ -1,0 +1,179 @@
+{
+  "per_class_accuracy": {
+    "T-shirt/top": 0.853,
+    "Trouser": 0.97,
+    "Pullover": 0.706,
+    "Dress": 0.791,
+    "Coat": 0.786,
+    "Sandal": 0.894,
+    "Shirt": 0.418,
+    "Sneaker": 0.854,
+    "Bag": 0.961,
+    "Ankle boot": 0.965
+  },
+  "per_class_support": {
+    "T-shirt/top": 1000,
+    "Trouser": 1000,
+    "Pullover": 1000,
+    "Dress": 1000,
+    "Coat": 1000,
+    "Sandal": 1000,
+    "Shirt": 1000,
+    "Sneaker": 1000,
+    "Bag": 1000,
+    "Ankle boot": 1000
+  },
+  "most_confused_pairs": [
+    {
+      "target": 6,
+      "prediction": 0,
+      "count": 247
+    },
+    {
+      "target": 2,
+      "prediction": 4,
+      "count": 171
+    },
+    {
+      "target": 6,
+      "prediction": 2,
+      "count": 147
+    },
+    {
+      "target": 6,
+      "prediction": 4,
+      "count": 136
+    },
+    {
+      "target": 4,
+      "prediction": 2,
+      "count": 124
+    }
+  ],
+  "confident_errors": [
+    {
+      "sample_index": 9582,
+      "target": 2,
+      "prediction": 1,
+      "confidence": 0.9995124340057373,
+      "true_class_probability": 0.0002858056395780295,
+      "margin": 0.9992266297340393
+    },
+    {
+      "sample_index": 6281,
+      "target": 3,
+      "prediction": 1,
+      "confidence": 0.9979369640350342,
+      "true_class_probability": 0.001590715954080224,
+      "margin": 0.9963462352752686
+    },
+    {
+      "sample_index": 3487,
+      "target": 5,
+      "prediction": 9,
+      "confidence": 0.9973715543746948,
+      "true_class_probability": 0.0014175776159390807,
+      "margin": 0.9959539771080017
+    },
+    {
+      "sample_index": 7349,
+      "target": 4,
+      "prediction": 8,
+      "confidence": 0.9968915581703186,
+      "true_class_probability": 0.0007430142140947282,
+      "margin": 0.9961485266685486
+    },
+    {
+      "sample_index": 2022,
+      "target": 7,
+      "prediction": 9,
+      "confidence": 0.9952612519264221,
+      "true_class_probability": 0.004640632774680853,
+      "margin": 0.9906206130981445
+    }
+  ],
+  "uncertain_errors": [
+    {
+      "sample_index": 3829,
+      "target": 6,
+      "prediction": 2,
+      "confidence": 0.19512483477592468,
+      "true_class_probability": 0.01674370840191841,
+      "margin": 0.17838113009929657
+    },
+    {
+      "sample_index": 3699,
+      "target": 4,
+      "prediction": 6,
+      "confidence": 0.22190788388252258,
+      "true_class_probability": 0.21332894265651703,
+      "margin": 0.008578941226005554
+    },
+    {
+      "sample_index": 1980,
+      "target": 8,
+      "prediction": 6,
+      "confidence": 0.2496451437473297,
+      "true_class_probability": 0.023349689319729805,
+      "margin": 0.22629545629024506
+    },
+    {
+      "sample_index": 9748,
+      "target": 0,
+      "prediction": 2,
+      "confidence": 0.2505860924720764,
+      "true_class_probability": 0.12080786377191544,
+      "margin": 0.12977823615074158
+    },
+    {
+      "sample_index": 4234,
+      "target": 2,
+      "prediction": 3,
+      "confidence": 0.2606513500213623,
+      "true_class_probability": 0.22322821617126465,
+      "margin": 0.037423133850097656
+    }
+  ],
+  "representative_correct": [
+    {
+      "sample_index": 2,
+      "target": 1,
+      "prediction": 1,
+      "confidence": 1.0,
+      "true_class_probability": 1.0,
+      "margin": 0.0
+    },
+    {
+      "sample_index": 5,
+      "target": 1,
+      "prediction": 1,
+      "confidence": 1.0,
+      "true_class_probability": 1.0,
+      "margin": 0.0
+    },
+    {
+      "sample_index": 41,
+      "target": 1,
+      "prediction": 1,
+      "confidence": 1.0,
+      "true_class_probability": 1.0,
+      "margin": 0.0
+    },
+    {
+      "sample_index": 64,
+      "target": 1,
+      "prediction": 1,
+      "confidence": 1.0,
+      "true_class_probability": 1.0,
+      "margin": 0.0
+    },
+    {
+      "sample_index": 137,
+      "target": 1,
+      "prediction": 1,
+      "confidence": 1.0,
+      "true_class_probability": 1.0,
+      "margin": 0.0
+    }
+  ]
+}

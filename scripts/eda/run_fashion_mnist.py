@@ -1,12 +1,6 @@
 """Run the required Fashion-MNIST exploratory analysis."""
 
-import sys
 from pathlib import Path
-
-# This project is not pip-installed (see pyproject.toml: package = false), so
-# running this file directly (`python scripts/eda/run_fashion_mnist.py`) does not
-# put the repo root on sys.path by default. Add it so `from src...` resolves.
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 import matplotlib.pyplot as plt
 import numpy as np

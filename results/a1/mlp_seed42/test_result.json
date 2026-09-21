@@ -1,0 +1,73 @@
+{
+  "name": "mlp_seed42",
+  "model": "mlp",
+  "dataset": "fashion_mnist",
+  "split": "test",
+  "seed": 42,
+  "config": {
+    "name": "mlp_seed42",
+    "model": "mlp",
+    "model_config": {
+      "input_dim": 784,
+      "hidden_dims": [
+        256,
+        128
+      ],
+      "dropout": 0.2
+    },
+    "dataset": "fashion_mnist",
+    "seed": 42,
+    "batch_size": 128,
+    "learning_rate": 0.001,
+    "epochs": 5,
+    "num_workers": 0,
+    "val_fraction": 0.1,
+    "data_dir": "data",
+    "checkpoint_dir": "checkpoints",
+    "results_dir": "results"
+  },
+  "checkpoint": {
+    "path": "checkpoints/mlp_seed42/best.pt",
+    "selection_rule": "lowest validation loss",
+    "epoch": 5,
+    "global_step": 2110,
+    "best_validation_loss": 0.4752279356320699,
+    "config": {
+      "name": "mlp_seed42",
+      "model": "mlp",
+      "model_config": {
+        "input_dim": 784,
+        "hidden_dims": [
+          256,
+          128
+        ],
+        "dropout": 0.2
+      },
+      "dataset": "fashion_mnist",
+      "seed": 42,
+      "batch_size": 128,
+      "learning_rate": 0.001,
+      "epochs": 5,
+      "num_workers": 0,
+      "val_fraction": 0.1,
+      "data_dir": "data",
+      "checkpoint_dir": "checkpoints",
+      "results_dir": "results"
+    }
+  },
+  "metrics": {
+    "accuracy": 0.8198000192642212,
+    "macro_f1": 0.8153915175467589
+  },
+  "parameter_count": 235146,
+  "training_seconds": 56.68221783400077,
+  "inference_seconds": 0.016692958986823214,
+  "sample_count": 10000,
+  "git_commit": "c130fea1e66792612f4370b79bb0bc72104ac1c5-dirty",
+  "environment": {
+    "python": "3.13.5",
+    "torch": "2.14.0",
+    "platform": "macOS-27.0-arm64-arm-64bit-Mach-O",
+    "device_name": "arm"
+  }
+}
