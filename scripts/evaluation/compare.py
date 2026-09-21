@@ -1,15 +1,10 @@
 """Build the common comparison table and figures for all A1 models."""
 
-import sys
-from pathlib import Path
-
-# src/ is not installed as a package, so the repository root must be importable.
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-
 import argparse
 import json
 import statistics
 from collections import defaultdict
+from pathlib import Path
 from typing import Any
 
 from loguru import logger

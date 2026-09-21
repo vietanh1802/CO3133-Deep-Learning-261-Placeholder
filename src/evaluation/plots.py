@@ -107,3 +107,48 @@ def plot_confusion_matrix(
     figure.tight_layout()
     figure.savefig(path, dpi=150)
     plt.close(figure)
+
+
+def plot_prediction_examples(
+    images: Sequence[np.ndarray],
+    targets: Sequence[int],
+    predictions: Sequence[int],
+    confidences: Sequence[float],
+    class_names: Sequence[str],
+    output_path: str | Path,
+    *,
+    title: str,
+) -> None:
+    """Save labeled examples selected by classification error analysis."""
+    count = len(images)
+    if count == 0:
+        return
+    if not (len(targets) == len(predictions) == len(confidences) == count):
+        raise ValueError("images and prediction metadata must have the same length")
+
+    path = _prepare_output_path(output_path)
+    figure, axes = plt.subplots(1, count, figsize=(3.0 * count, 3.2), squeeze=False)
+    for axis, image, target, prediction, confidence in zip(
+        axes[0], images, targets, predictions, confidences, strict=True
+    ):
+        pixels = np.asarray(image)
+        if pixels.ndim != 3 or pixels.shape[0] not in (1, 3):
+            raise ValueError("each image must have shape [1, height, width] or [3, height, width]")
+        pixels = np.moveaxis(pixels, 0, -1)
+        minimum = float(pixels.min())
+        maximum = float(pixels.max())
+        pixels = (pixels - minimum) / (maximum - minimum) if maximum > minimum else pixels
+        if pixels.shape[-1] == 1:
+            axis.imshow(pixels[..., 0], cmap="gray", vmin=0.0, vmax=1.0)
+        else:
+            axis.imshow(pixels)
+        axis.set_title(
+            f"true: {class_names[target]}\npred: {class_names[prediction]} ({confidence:.2f})",
+            fontsize=9,
+        )
+        axis.axis("off")
+
+    figure.suptitle(title)
+    figure.tight_layout()
+    figure.savefig(path, dpi=150)
+    plt.close(figure)

@@ -9,6 +9,7 @@ from src.error import (
     select_bottom_k,
     select_top_k,
 )
+from src.evaluation import ClassificationMetrics, EvaluationResult
 
 
 @register_error_analyzer("test-task")
@@ -46,6 +47,66 @@ def test_classification_error_analyzer_is_registered() -> None:
     analyzer = build_error_analyzer("classification")
 
     assert isinstance(analyzer, ClassificationErrorAnalyzer)
+
+
+def test_classification_error_analyzer_builds_required_evidence() -> None:
+    targets = torch.tensor([0, 0, 1, 1, 2])
+    predictions = torch.tensor([0, 1, 1, 2, 1])
+    probabilities = torch.tensor(
+        [
+            [0.8, 0.1, 0.1],
+            [0.2, 0.7, 0.1],
+            [0.2, 0.6, 0.2],
+            [0.2, 0.25, 0.55],
+            [0.1, 0.8, 0.1],
+        ]
+    )
+    evaluation = EvaluationResult(
+        metrics=ClassificationMetrics(
+            accuracy=0.4,
+            macro_f1=0.3,
+            confusion_matrix=torch.tensor([[1, 1, 0], [0, 1, 1], [0, 1, 0]]),
+        ),
+        sample_indices=torch.tensor([10, 11, 12, 13, 14]),
+        targets=targets,
+        predictions=predictions,
+        probabilities=probabilities,
+        parameter_count=10,
+        inference_seconds=0.1,
+    )
+
+    report = ClassificationErrorAnalyzer(num_examples=2, num_confusions=2).analyze(evaluation)
+
+    assert torch.allclose(
+        report.per_class_accuracy, torch.tensor([0.5, 0.5, 0.0], dtype=torch.float64)
+    )
+    assert report.per_class_support.tolist() == [2, 2, 1]
+    assert [(pair.target, pair.prediction) for pair in report.most_confused_pairs] == [
+        (0, 1),
+        (1, 2),
+    ]
+    assert [example.sample_index for example in report.confident_errors] == [14, 11]
+    assert [example.sample_index for example in report.uncertain_errors] == [13, 11]
+    assert [example.sample_index for example in report.representative_correct] == [10, 12]
+
+
+def test_classification_error_analyzer_rejects_invalid_probabilities() -> None:
+    evaluation = EvaluationResult(
+        metrics=ClassificationMetrics(
+            accuracy=1.0,
+            macro_f1=1.0,
+            confusion_matrix=torch.tensor([[1, 0], [0, 0]]),
+        ),
+        sample_indices=torch.tensor([0]),
+        targets=torch.tensor([0]),
+        predictions=torch.tensor([0]),
+        probabilities=torch.tensor([[0.8, 0.1]]),
+        parameter_count=1,
+        inference_seconds=0.1,
+    )
+
+    with pytest.raises(ValueError, match="sum to one"):
+        ClassificationErrorAnalyzer().analyze(evaluation)
 
 
 def test_select_top_k_returns_ranked_source_indices() -> None:

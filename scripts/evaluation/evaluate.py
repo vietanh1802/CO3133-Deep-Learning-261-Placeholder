@@ -1,24 +1,20 @@
 """Evaluate a selected checkpoint on the held-out test split."""
 
-import sys
-from pathlib import Path
-
-# src/ is not installed as a package, so the repository root must be importable.
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-
 import argparse
 import json
 import platform
 import subprocess
-from dataclasses import asdict
+from dataclasses import asdict, replace
+from pathlib import Path
 from typing import Any
 
 import torch
 from loguru import logger
 
-from src.data import build_dataloaders
+from src.data import build_dataloaders, class_names
+from src.error import ClassificationError, ClassificationErrorAnalyzer
 from src.evaluation import evaluate_model
-from src.evaluation.plots import plot_confusion_matrix
+from src.evaluation.plots import plot_confusion_matrix, plot_prediction_examples
 from src.models import ImageClassifier, build_model
 from src.training.checkpoint import load_checkpoint
 from src.utils import ExperimentState, load_config, seed_everything, setup_logging
@@ -62,9 +58,35 @@ def _environment() -> dict[str, Any]:
     }
 
 
+def _plot_examples(
+    examples: tuple[ClassificationError, ...],
+    dataset: Any,
+    names: tuple[str, ...],
+    output_path: Path,
+    title: str,
+) -> None:
+    """Load selected dataset samples and write one qualitative-analysis figure."""
+    images = [dataset[example.sample_index][0].detach().cpu().numpy() for example in examples]
+    plot_prediction_examples(
+        images,
+        [example.target for example in examples],
+        [example.prediction for example in examples],
+        [example.confidence for example in examples],
+        names,
+        output_path,
+        title=title,
+    )
+
+
 def parse_args() -> argparse.Namespace:
     """Parse evaluation command-line arguments."""
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--data",
+        required=True,
+        choices=("fashion_mnist", "mnist", "cifar10"),
+        help="dataset to evaluate",
+    )
     parser.add_argument("--config", required=True, help="experiment configuration YAML")
     parser.add_argument(
         "--checkpoint",
@@ -83,7 +105,7 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     """Wire checkpoint loading, evaluation, and result persistence."""
     args = parse_args()
-    config = load_config(args.config)
+    config = replace(load_config(args.config), dataset=args.data)
 
     run_directory = Path(config.results_dir) / "a1" / config.name
     run_directory.mkdir(parents=True, exist_ok=True)
@@ -101,14 +123,14 @@ def main() -> None:
         {
             "data_dir": config.data_dir,
             "batch_size": config.batch_size,
-            "val_fraction": 0.1,
+            "val_fraction": config.val_fraction,
             "seed": config.seed,
             "num_workers": config.num_workers,
         },
     )
     dataloader = getattr(dataloaders, args.split)
 
-    encoder = build_model(config.model, {})
+    encoder = build_model(config.model, config.model_config)
     model = ImageClassifier(encoder)
 
     checkpoint_path = (
@@ -144,6 +166,12 @@ def main() -> None:
 
     logger.info(ExperimentState.SAVING)
 
+    training_summary_path = run_directory / "training_summary.json"
+    training_seconds = None
+    if training_summary_path.exists():
+        training_summary = json.loads(training_summary_path.read_text(encoding="utf-8"))
+        training_seconds = training_summary.get("training_seconds")
+
     record: dict[str, Any] = {
         "name": config.name,
         "model": config.model,
@@ -161,6 +189,7 @@ def main() -> None:
             "macro_f1": metrics.macro_f1,
         },
         "parameter_count": result.parameter_count,
+        "training_seconds": training_seconds,
         "inference_seconds": result.inference_seconds,
         "sample_count": int(result.targets.numel()),
         "git_commit": _git_commit(),
@@ -183,12 +212,50 @@ def main() -> None:
     )
     logger.info("Wrote {}", evidence_path)
 
-    class_names = [str(index) for index in range(metrics.confusion_matrix.shape[0])]
+    names = class_names(config.dataset)
     plot_confusion_matrix(
         metrics.confusion_matrix.numpy(),
-        class_names,
+        names,
         run_directory / f"{args.split}_confusion_matrix.png",
     )
+
+    error_report = ClassificationErrorAnalyzer().analyze(result)
+    error_record = {
+        "per_class_accuracy": {
+            name: float(accuracy)
+            for name, accuracy in zip(names, error_report.per_class_accuracy, strict=True)
+        },
+        "per_class_support": {
+            name: int(support)
+            for name, support in zip(names, error_report.per_class_support, strict=True)
+        },
+        "most_confused_pairs": [asdict(pair) for pair in error_report.most_confused_pairs],
+        "confident_errors": [asdict(example) for example in error_report.confident_errors],
+        "uncertain_errors": [asdict(example) for example in error_report.uncertain_errors],
+        "representative_correct": [
+            asdict(example) for example in error_report.representative_correct
+        ],
+    }
+    error_path = run_directory / f"{args.split}_error_analysis.json"
+    error_path.write_text(json.dumps(error_record, indent=2), encoding="utf-8")
+    logger.info("Wrote {}", error_path)
+
+    for examples, filename, title in (
+        (
+            error_report.representative_correct,
+            "representative_correct.png",
+            "Representative correct predictions",
+        ),
+        (error_report.confident_errors, "confident_errors.png", "Confident errors"),
+        (error_report.uncertain_errors, "uncertain_errors.png", "Uncertain errors"),
+    ):
+        _plot_examples(
+            examples,
+            dataloader.dataset,
+            names,
+            run_directory / f"{args.split}_{filename}",
+            title,
+        )
     logger.success(ExperimentState.COMPLETED)
 
 
