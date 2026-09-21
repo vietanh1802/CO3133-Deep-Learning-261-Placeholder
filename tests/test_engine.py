@@ -7,7 +7,7 @@ from torch import nn
 from torch.utils.data import DataLoader, TensorDataset
 
 from src.training.checkpoint import CheckpointMetadata, load_checkpoint, save_checkpoint
-from src.training.engine import EpochResult, eval_one_epoch, train_one_epoch
+from src.training.engine import EpochResult, FitResult, eval_one_epoch, fit, train_one_epoch
 from src.utils.seed import seed_everything
 
 DEVICE = torch.device("cpu")
@@ -133,3 +133,35 @@ def test_empty_dataloader_is_rejected() -> None:
 
     with pytest.raises(ValueError, match="no samples"):
         eval_one_epoch(nn.Linear(4, 3), empty, nn.CrossEntropyLoss(), DEVICE)
+
+
+def test_fit_runs_training_validation_and_saves_best_checkpoint(tmp_path) -> None:
+    seed_everything(0)
+    model = nn.Linear(4, 3)
+    optimizer = torch.optim.SGD(model.parameters(), lr=0.1)
+    train_dataloader = build_dataloader(6, 2)
+    validation_dataloader = build_dataloader(5, 2)
+    checkpoint_path = tmp_path / "best.pt"
+
+    result = fit(
+        model,
+        train_dataloader,
+        validation_dataloader,
+        optimizer,
+        nn.CrossEntropyLoss(),
+        DEVICE,
+        epochs=2,
+        checkpoint_path=checkpoint_path,
+        checkpoint_config={"model": "linear"},
+    )
+
+    assert isinstance(result, FitResult)
+    assert len(result.training) == 2
+    assert len(result.validation) == 2
+    assert result.best_validation_loss == min(epoch.loss for epoch in result.validation)
+    assert result.global_step == 2 * len(train_dataloader)
+    assert result.duration_seconds > 0.0
+
+    metadata = load_checkpoint(checkpoint_path, model, optimizer, restore_rng=False)
+    assert metadata.epoch == result.best_epoch
+    assert metadata.best_validation_loss == result.best_validation_loss
