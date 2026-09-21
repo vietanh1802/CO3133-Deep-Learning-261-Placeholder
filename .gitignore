@@ -14,6 +14,8 @@ data/*
 !data/.gitkeep
 checkpoints/*
 !checkpoints/.gitkeep
+results/**/*.log
+results/**/*_evidence.pt
 results/figures/*
 !results/figures/.gitkeep
 results/metrics/*
