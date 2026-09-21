@@ -34,37 +34,46 @@ def compute_classification_metrics(
 
     target_values = targets.to(torch.long)
     prediction_values = predictions.to(torch.long)
+
     for name, values in (("targets", target_values), ("predictions", prediction_values)):
         if values.numel() and (int(values.min()) < 0 or int(values.max()) >= num_classes):
             raise ValueError(f"{name} must contain labels in [0, {num_classes})")
 
-    flat_index = target_values * num_classes + prediction_values
-    confusion_matrix = torch.bincount(
-        flat_index,
-        minlength=num_classes * num_classes,
-    ).reshape(num_classes, num_classes)
+    confusion = _confusion_matrix(target_values, prediction_values, num_classes)
+    accuracy = (prediction_values == target_values).float().mean().item()
+    macro_f1 = _macro_f1(confusion)
 
-    total = int(confusion_matrix.sum())
-    correct = int(confusion_matrix.diagonal().sum())
-    accuracy = correct / total
+    return ClassificationMetrics(
+        accuracy=accuracy,
+        macro_f1=macro_f1,
+        confusion_matrix=confusion,
+    )
 
-    true_positives = confusion_matrix.diagonal().to(torch.float64)
-    predicted_per_class = confusion_matrix.sum(dim=0).to(torch.float64)
-    actual_per_class = confusion_matrix.sum(dim=1).to(torch.float64)
 
+def _confusion_matrix(
+    targets: torch.Tensor, predictions: torch.Tensor, num_classes: int
+) -> torch.Tensor:
+    """Build a [num_classes, num_classes] matrix; rows = true label, cols = predicted."""
+    flat_indices = targets * num_classes + predictions
+    counts = torch.bincount(flat_indices, minlength=num_classes * num_classes)
+    return counts.reshape(num_classes, num_classes)
+
+
+def _macro_f1(confusion: torch.Tensor) -> float:
+    """Compute macro-averaged F1 score from a confusion matrix."""
+    true_positives = confusion.diagonal().to(torch.float64)
+    predicted_per_class = confusion.sum(dim=0).to(torch.float64)
+    actual_per_class = confusion.sum(dim=1).to(torch.float64)
+
+    # 2*TP / (actual + predicted) is algebraically identical to harmonic mean of P and R,
+    # but avoids intermediate division-by-zero when precision or recall is undefined.
     denominator = predicted_per_class + actual_per_class
     per_class_f1 = torch.where(
         denominator > 0,
         2.0 * true_positives / denominator,
         torch.zeros_like(denominator),
     )
-    macro_f1 = float(per_class_f1.mean())
-
-    return ClassificationMetrics(
-        accuracy=accuracy,
-        macro_f1=macro_f1,
-        confusion_matrix=confusion_matrix,
-    )
+    return float(per_class_f1.mean().item())
 
 
 def count_trainable_parameters(model: torch.nn.Module) -> int:
