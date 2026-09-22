@@ -1,10 +1,11 @@
 name: Deploy website
 
-# Deploys only from main, the branch shown to the instructor.
+# Deploys from main and from dev/a1, the integration branch for Assignment 1.
 # Can also be triggered by hand from the Actions tab (workflow_dispatch).
+# Add [no ci] to a commit message to skip a rebuild.
 on:
   push:
-    branches: [main]
+    branches: [main, dev/a1]
   workflow_dispatch:
 
 permissions:
