@@ -15,10 +15,30 @@ Training inputs are converted to float tensors, randomly transformed by at most 
 and 10% translation, and normalized with mean 0.5 and standard deviation 0.5. Validation
 and test inputs use the same conversion and normalization without random augmentation.
 
+The training and test splits carry identical class proportions, so the test set measures
+generalization rather than a shift in class mix. Pixel intensities are strongly bimodal:
+53.0% of all pixels fall in the darkest bin, while the rest spread across the bright range
+and produce an overall mean of 72.9 and standard deviation of 90.0 on the 0-255 scale.
+Foreground coverage separates the categories further, from 24.5% of the frame
+for Sandal to 59.8% for Pullover.
+
+Comparing the per-class average images before any training already predicts the failure
+modes reported later. Measured as cosine similarity between mean-centred class prototypes,
+the closest pairs are Pullover-Coat (0.86), Sandal-Sneaker (0.82), Pullover-Shirt (0.82)
+and Coat-Shirt (0.81) — the same upper-body-garment cluster that dominates the error
+analysis below. The overlap is therefore a property of the data, not an artifact of any
+particular architecture.
+
 Generated EDA evidence:
 
 - [Class distribution](../results/a1/eda/fashion_mnist/class_distribution.png)
 - [Representative samples](../results/a1/eda/fashion_mnist/representative_samples.png)
+- [Train vs test class proportions](../results/a1/eda/fashion_mnist/split_class_distribution.png)
+- [Pixel intensity distribution](../results/a1/eda/fashion_mnist/pixel_intensity_distribution.png)
+- [Average image per class](../results/a1/eda/fashion_mnist/class_mean_images.png)
+- [Class prototype similarity](../results/a1/eda/fashion_mnist/class_similarity.png)
+- [Foreground coverage per class](../results/a1/eda/fashion_mnist/foreground_coverage.png)
+- [Machine-readable EDA summary](../results/a1/eda/fashion_mnist/summary.json)
 
 ## Methodology
 

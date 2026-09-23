@@ -17,11 +17,29 @@ uv run pre-commit install
 
 Fashion-MNIST, MNIST, and CIFAR-10 are downloaded and integrity-checked automatically.
 Fashion-MNIST remains the Assignment 1 evaluation dataset; MNIST and CIFAR-10 are available
-for development and later experiments. Generate the required A1 EDA figures with:
+for development and later experiments. Generate the A1 EDA figures with:
 
 ```bash
 uv run python -m scripts.eda.run_fashion_mnist
+uv run python -m scripts.eda.run_mnist
 ```
+
+Each command writes the following to `results/a1/eda/<dataset>/`:
+
+| Output | What it answers |
+| --- | --- |
+| `class_distribution.png` | How many samples per class, and how imbalanced the set is |
+| `representative_samples.png` | What the raw inputs look like, three per class |
+| `split_class_distribution.png` | Whether the train and test splits share the same class mix |
+| `pixel_intensity_distribution.png` | How intensities are spread, which justifies the normalization constants |
+| `class_mean_images.png` | The average image of each class |
+| `class_similarity.png` | Which classes look alike before any training, i.e. the confusions to expect |
+| `foreground_coverage.png` | How much of the frame each class occupies |
+| `summary.json` | Every number above, machine-readable, for the report to cite |
+
+The analysis itself lives in `src/data/eda.py` (statistics), `src/data/eda_plots.py`
+(figures), and `src/data/eda_report.py` (one shared run), so the entry points only have
+to name a dataset.
 
 ## Training
 
