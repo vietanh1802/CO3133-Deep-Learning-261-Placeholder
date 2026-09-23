@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Assignment 1 - Foundations of Deep Learning Pipelines and Architectures | CO3133</title>
+<meta name="description" content="Assignment 1 - From linear models to modern sequence models: a comparative study for image classification.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&amp;family=IBM+Plex+Sans:wght@400;600&amp;display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="banner compact">
+  <a class="back-link" href="index.html">&larr; Back to home</a>
+  <h1>Assignment 1 - Foundations of Deep Learning Pipelines and Architectures</h1>
+  <p class="course-code">From Linear Models to Modern Sequence Models: A Comparative Study for Image Classification</p>
+  <div class="badges">
+    <span class="badge">40% of course project</span>
+    <span class="badge">Instructor: Le Thanh Sach</span>
+  </div>
+</div>
+
+<main>
+
+  <section id="members">
+    <h2>Group Members</h2>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>Full name</th><th>Student ID</th><th>Role in Assignment 1</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Vu Duc Viet Anh</td><td>2352074</td><td>Website and UI &middot; Training pipeline &middot; LSTM model</td></tr>
+          <tr><td>Tran Lam Anh</td><td>2352067</td><td>Data loader, preprocessing and EDA &middot; Transformer model &middot; Metrics</td></tr>
+          <tr><td>Le Nguyen Khang</td><td>2352470</td><td>Error analysis &middot; GRU model &middot; Shared utilities &middot; Review</td></tr>
+          <tr><td>Tran Nguyen Giap</td><td>2352284</td><td>Linear, Recurrent and CNN models &middot; Evaluation pipeline</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="problem">
+    <h2>Problem Statement</h2>
+    <p>We classify each 28-by-28 grayscale Fashion-MNIST image into one of ten clothing
+    categories. The draft establishes a shared PyTorch pipeline and compares a linear
+    classifier with a multilayer perceptron under the same split and evaluation protocol.</p>
+  </section>
+
+  <section id="dataset">
+    <h2>Dataset Description and EDA</h2>
+    <p>Fashion-MNIST contains 60,000 official training images and 10,000 official test
+    images. Every class has exactly 6,000 training examples, giving a maximum-to-minimum
+    class ratio of 1.00. We reserve 6,000 training examples for validation using seed 42;
+    the remaining 54,000 are used for training. Images are converted to float tensors,
+    normalized to approximately [-1, 1], and training images receive a small random affine
+    augmentation. The EDA figures below show the class distribution and image characteristics.</p>
+    <div class="gallery">
+      <figure>
+        <img src="images/eda/fashion_mnist/class_distribution.png" alt="Fashion-MNIST class distribution bar chart" loading="lazy">
+        <figcaption><strong>Class distribution.</strong> All ten classes contain exactly
+        6,000 training images (imbalance ratio 1.00), so no class weighting or resampling
+        is needed and accuracy is not biased toward a majority class.</figcaption>
+      </figure>
+      <figure>
+        <img src="images/eda/fashion_mnist/split_class_distribution.png" alt="Class distribution across the train, validation and test splits" loading="lazy">
+        <figcaption><strong>Train / validation / test split distribution.</strong> The 10%
+        per-class proportion is preserved in both the train and test splits, so test
+        accuracy is a fair, unweighted estimate of per-class performance.</figcaption>
+      </figure>
+      <figure>
+        <img src="images/eda/fashion_mnist/representative_samples.png" alt="Representative sample images per class" loading="lazy">
+        <figcaption><strong>Representative samples.</strong> Within-class shape variation is
+        substantial - e.g. T-shirt/top spans short-sleeve tees and sleeveless tops, and
+        Sandal spans strappy heels to flat slides - which adds intra-class noise on top
+        of any inter-class confusion.</figcaption>
+      </figure>
+      <figure>
+        <img src="images/eda/fashion_mnist/class_mean_images.png" alt="Per-class average (mean) image" loading="lazy">
+        <figcaption><strong>Per-class average image.</strong> Averaging within class shows
+        that T-shirt/top, Pullover, Coat and Shirt collapse to nearly the same blurred
+        rectangular torso silhouette, while Trouser, Sandal, Sneaker, Bag and Ankle boot
+        keep distinct shapes - a strong visual explanation for why flattened-pixel
+        models confuse the four upper-body garments.</figcaption>
+      </figure>
+      <figure>
+        <img src="images/eda/fashion_mnist/class_similarity.png" alt="Class-prototype similarity matrix" loading="lazy">
+        <figcaption><strong>Class-prototype similarity.</strong> Cosine similarity confirms
+        the visual clustering: Pullover-Coat (0.86), Pullover-Shirt (0.82) and
+        Coat-Shirt (0.81) form a tight upper-body-garment cluster, while
+        Sandal-Sneaker (0.82) forms a separate footwear cluster that is strongly
+        anti-correlated with the garment cluster (e.g. Coat-Sandal = -0.80). This
+        lines up exactly with the confusion pairs reported in the error analysis
+        below.</figcaption>
+      </figure>
+      <figure>
+        <img src="images/eda/fashion_mnist/pixel_intensity_distribution.png" alt="Pixel intensity distribution histogram" loading="lazy">
+        <figcaption><strong>Pixel intensity distribution.</strong> The histogram is strongly
+        bimodal: the vast majority of pixels sit near 0 (a flat black background) while
+        foreground pixels span roughly 150-255, with a clear valley in between. The
+        intensity-32 cut-off used to separate foreground from background (see the coverage
+        figure below) is a fixed heuristic rather than a value fitted to this data, but it
+        happens to fall inside that valley, so it still splits the two modes cleanly. The
+        large standard deviation (90.0 vs. a mean of 72.9) reflects this sharp
+        background/foreground contrast rather than smooth mid-tones.</figcaption>
+      </figure>
+      <figure>
+        <img src="images/eda/fashion_mnist/foreground_coverage.png" alt="Per-class foreground pixel coverage" loading="lazy">
+        <figcaption><strong>Per-class foreground coverage.</strong> For each image, this is
+        the share of its 784 pixels above the intensity-32 threshold, averaged per class.
+        Pullover, Shirt and Coat have the highest foreground share (56-60%) since loose
+        garments fill most of the frame, while Sandal and Sneaker have the lowest (24-28%)
+        as slim footwear leaves most of the frame black. This single scalar feature
+        separates footwear from garments well but cannot on its own resolve the
+        Pullover/Coat/Shirt confusion, which needs shape information.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section id="methodology">
+    <h2>Methodology</h2>
+    <p>The current draft compares two flattened-pixel models. Linear maps 784 input values
+    directly to ten logits. MLP uses hidden dimensions 256 and 128 with ReLU and dropout
+    0.2 before the shared ten-class head. Both optimize cross-entropy directly from logits.
+    CNN, GRU, and Transformer results will be added for the final submission.</p>
+  </section>
+
+  <section id="setup">
+    <h2>Experimental Setup</h2>
+    <p>Both draft models use Adam, learning rate 0.001, batch size 128, five epochs, and
+    seed 42. Training ran on Apple MPS; reported inference timings were measured on CPU.
+    The selected checkpoint is the epoch with the lowest validation loss. These are
+    preliminary single-seed runs.</p>
+  </section>
+
+  <section id="results">
+    <h2>Results</h2>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Model</th><th>Accuracy</th><th>Macro-F1</th><th>Parameters</th><th>Training</th><th>Inference</th></tr></thead>
+        <tbody>
+          <tr><td>Linear</td><td>0.7612</td><td>0.7591</td><td>7,850</td><td>50.5 s</td><td>0.005 s</td></tr>
+          <tr><td>MLP</td><td>0.8198</td><td>0.8154</td><td>235,146</td><td>56.7 s</td><td>0.019 s</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Metrics use the untouched 10,000-image test split. Learning curves, confusion
+    matrices, serialized prediction evidence, and exact JSON records are stored under
+    <code>results/a1/</code>.</p>
+  </section>
+
+  <section id="comparison">
+    <h2>Comparison and Discussion</h2>
+    <p>The MLP improves test accuracy by 5.86 percentage points and macro-F1 by 0.0563,
+    indicating that nonlinear combinations of flattened pixels are useful. It requires
+    roughly thirty times as many parameters and has slower inference. Neither model uses
+    spatial locality, so this draft does not yet establish the benefit of convolutional or
+    sequence-oriented inductive biases.</p>
+  </section>
+
+  <section id="error-analysis">
+    <h2>Error Analysis</h2>
+    <p>Both preliminary models struggle most with visually similar upper-body garments.
+    Shirt has the lowest test accuracy: 35.3% for the linear model and 41.8% for the MLP.
+    The linear model most often maps Shirt to Coat or Pullover; the MLP most often maps it
+    to T-shirt/top or Pullover. Pullover and Coat are also confused in both directions.
+    This is consistent with both encoders flattening away explicit spatial locality.</p>
+    <p>The saved qualitative evidence separates representative correct predictions,
+    confident errors, and uncertain errors. Some mistakes exceed 99% confidence, so the
+    current models' confidence should not be treated as calibrated.</p>
+    <div class="gallery">
+      <figure>
+        <img src="images/error/linear_seed42/test_confident_errors.png" alt="Confident incorrect predictions from the linear classifier" loading="lazy">
+        <figcaption>Linear: confident errors.</figcaption>
+      </figure>
+      <figure>
+        <img src="images/error/linear_seed42/test_uncertain_errors.png" alt="Uncertain incorrect predictions from the linear classifier" loading="lazy">
+        <figcaption>Linear: uncertain errors.</figcaption>
+      </figure>
+      <figure>
+        <img src="images/error/mlp_seed42/test_confident_errors.png" alt="Confident incorrect predictions from the MLP" loading="lazy">
+        <figcaption>MLP: confident errors.</figcaption>
+      </figure>
+      <figure>
+        <img src="images/error/mlp_seed42/test_uncertain_errors.png" alt="Uncertain incorrect predictions from the MLP" loading="lazy">
+        <figcaption>MLP: uncertain errors.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section id="limitations">
+    <h2>Limitations and Conclusion</h2>
+    <p>These are five-epoch, single-seed draft results and should not be interpreted as the
+    final architecture comparison. The final study must add CNN, GRU, and Transformer
+    runs, repeated seeds where feasible, and a complete inductive-bias discussion.</p>
+  </section>
+
+  <section id="links">
+    <h2>Links</h2>
+    <ul class="links">
+      <li><strong>Source code:</strong> <a href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder">GitHub repository</a></li>
+      <li><strong>Checkpoint reconstruction:</strong> <a href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder/blob/dev/a1/README.md">Reproduction commands</a></li>
+      <li><strong>Draft report:</strong> <a href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder/blob/dev/a1/reports/assignment1-draft.md">Assignment 1 draft</a></li>
+      <li><strong>Slides:</strong> <span class="pending">(Required for final)</span></li>
+      <li><strong>YouTube presentation:</strong> <span class="pending">(To be added)</span></li>
+    </ul>
+  </section>
+
+  <section id="ai-usage">
+    <h2>AI Usage Disclosure</h2>
+    <p class="pending">(To be added - see the detailed log in <a href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder/blob/main/AI_USAGE.md">AI_USAGE.md</a>.)</p>
+  </section>
+
+</main>
+
+<footer>
+  CO3133 - Deep Learning and Its Applications &middot; Semester 261 &middot; Group Placeholder
+</footer>
+
+</body>
+</html>

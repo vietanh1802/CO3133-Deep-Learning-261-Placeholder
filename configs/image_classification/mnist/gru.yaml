@@ -1,0 +1,16 @@
+name: mnist_gru_seed42
+model: gru
+model_config:
+  input_size: 28
+  hidden_size: 128
+  num_layers: 1
+  dropout: 0.0
+seed: 42
+batch_size: 128
+learning_rate: 0.001
+epochs: 50
+num_workers: 0
+val_fraction: 0.1
+data_dir: data
+checkpoint_dir: checkpoints
+results_dir: results

@@ -1,0 +1,371 @@
+/* Scales every rem-based size at once while still respecting the reader's
+   own browser font-size setting. 106.25% of a 16px default gives 17px. */
+:root {
+  font-size: 106.25%;
+
+  /* IBM Plex was drawn for engineering documentation and ships matching sans
+     and mono cuts. The system stack behind it keeps the page readable if the
+     webfont is blocked or still loading. */
+  --font-sans: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", "Cascadia Code", Consolas, "Liberation Mono", Menlo, monospace;
+
+  --bg: #ffffff;
+  --surface: #f6f8fa;
+  --border: #d8dee4;
+  --text: #1f2328;
+  --muted: #59636e;
+  --accent: #0969da;
+  --accent-soft: #ddf4ff;
+  --code-text: #0550ae;
+  --shadow: 0 1px 3px rgba(31, 35, 40, .08);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --border: #30363d;
+    --text: #e6edf3;
+    --muted: #9198a1;
+    --accent: #4493f8;
+    --accent-soft: #121d2f;
+    --code-text: #79c0ff;
+    --shadow: none;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+/* ---------- Letterhead ---------- */
+
+.letterhead {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.15rem;
+  max-width: 54rem;
+  margin: 0 auto;
+  padding: 1.75rem 1.25rem 1.5rem;
+}
+
+.crest {
+  width: 4.5rem;
+  height: 4.5rem;
+  flex-shrink: 0;
+}
+
+/* The emblem is dark blue and was drawn for white paper, so it needs a light
+   tile to stay legible once the page switches to the dark theme. */
+@media (prefers-color-scheme: dark) {
+  .crest {
+    background: #fff;
+    border-radius: 12px;
+    padding: .3rem;
+  }
+}
+
+.letterhead .institution p { margin: 0; }
+
+.letterhead .line-vnu {
+  font-size: .82rem;
+  color: var(--muted);
+  letter-spacing: .02em;
+}
+
+.letterhead .line-university {
+  font-size: 1.08rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.letterhead .line-faculty {
+  font-size: .92rem;
+  color: var(--muted);
+}
+
+/* ---------- Banner ---------- */
+
+.banner {
+  background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8c 100%);
+  color: #fff;
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+}
+
+.banner.compact { padding: 2rem 1.5rem 1.75rem; }
+
+.banner h1 {
+  margin: 0 0 .5rem;
+  font-size: clamp(1.4rem, 3.4vw, 2.1rem);
+  line-height: 1.25;
+  letter-spacing: -.01em;
+}
+
+.banner .course-code {
+  font-size: .95rem;
+  opacity: .9;
+  margin: 0;
+}
+
+.badges {
+  margin-top: 1.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  justify-content: center;
+}
+
+.badge {
+  background: rgba(255, 255, 255, .15);
+  border: 1px solid rgba(255, 255, 255, .25);
+  border-radius: 999px;
+  padding: .25rem .85rem;
+  font-size: .82rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 1rem;
+  color: rgba(255, 255, 255, .85);
+  text-decoration: none;
+  font-size: .88rem;
+}
+
+.back-link:hover { color: #fff; text-decoration: underline; }
+
+/* ---------- Layout ---------- */
+
+main {
+  max-width: 54rem;
+  margin: 0 auto;
+  padding: 2.5rem 1.25rem 4rem;
+}
+
+section { margin-bottom: 3rem; }
+
+h2 {
+  font-size: 1.3rem;
+  line-height: 1.35;
+  margin: 0 0 1rem;
+  padding-bottom: .5rem;
+  border-bottom: 1px solid var(--border);
+  letter-spacing: -.005em;
+}
+
+h3 {
+  font-size: 1.02rem;
+  margin: 1.5rem 0 .5rem;
+}
+
+a { color: var(--accent); }
+
+/* ---------- Code and technical identifiers ---------- */
+
+code, kbd, samp, pre {
+  font-family: var(--font-mono);
+  font-variant-ligatures: none;
+}
+
+code {
+  font-size: .875em;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: .1em .4em;
+  color: var(--code-text);
+  white-space: nowrap;
+}
+
+pre {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: .9rem 1.1rem;
+  overflow-x: auto;
+  font-size: .85rem;
+  line-height: 1.55;
+}
+
+/* A code block must not inherit the inline chip styling. */
+pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+  white-space: pre;
+}
+
+/* ---------- Definition lists ---------- */
+
+dl.meta {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: .5rem 1.5rem;
+  margin: 0;
+}
+
+dl.meta dt { color: var(--muted); }
+dl.meta dd { margin: 0; }
+
+/* ---------- Tables ---------- */
+
+.table-scroll { overflow-x: auto; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .9rem;
+  /* Digits share one advance width, so metric columns line up for comparison. */
+  font-variant-numeric: tabular-nums;
+}
+
+th, td {
+  text-align: left;
+  padding: .7rem .8rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+th {
+  background: var(--surface);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Right-align numeric columns so decimal points stack. */
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* ---------- Cards ---------- */
+
+.assignments {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+}
+
+.card {
+  display: block;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.1rem 1.25rem;
+  text-decoration: none;
+  color: inherit;
+  box-shadow: var(--shadow);
+  transition: border-color .15s, transform .15s;
+}
+
+.card:hover { border-color: var(--accent); transform: translateY(-2px); }
+
+.card .tag {
+  display: inline-block;
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-radius: 999px;
+  padding: .1rem .6rem;
+  font-size: .74rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  margin-bottom: .5rem;
+}
+
+.card strong { display: block; margin-bottom: .3rem; line-height: 1.4; }
+.card span { color: var(--muted); font-size: .86rem; }
+
+/* ---------- Misc ---------- */
+
+.note {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+  padding: .9rem 1.1rem;
+  color: var(--muted);
+  font-size: .9rem;
+}
+
+.pending {
+  color: var(--muted);
+  font-style: italic;
+}
+
+.status {
+  display: inline-block;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: .1rem .7rem;
+  font-size: .8rem;
+  color: var(--muted);
+}
+
+ul.links { list-style: none; padding: 0; margin: 0; }
+ul.links li { padding: .45rem 0; border-bottom: 1px solid var(--border); }
+ul.links li:last-child { border-bottom: none; }
+
+/* ---------- Image gallery ---------- */
+
+.gallery {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  margin: 1rem 0 0;
+}
+
+.gallery figure {
+  margin: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: .75rem;
+  box-shadow: var(--shadow);
+}
+
+.gallery img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+
+.gallery figcaption {
+  margin-top: .6rem;
+  font-size: .85rem;
+  color: var(--muted);
+}
+
+footer {
+  border-top: 1px solid var(--border);
+  padding: 1.5rem 1.25rem 2.5rem;
+  text-align: center;
+  color: var(--muted);
+  font-size: .82rem;
+}
+
+@media (max-width: 35rem) {
+  dl.meta { grid-template-columns: 1fr; gap: .15rem; }
+  dl.meta dd { margin-bottom: .6rem; }
+  code { white-space: normal; }
+
+  .letterhead {
+    flex-direction: column;
+    gap: .75rem;
+    text-align: center;
+    padding-bottom: 1.25rem;
+  }
+
+  .crest { width: 3.75rem; height: 3.75rem; }
+  .letterhead .line-university { font-size: 1rem; }
+}
