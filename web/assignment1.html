@@ -55,29 +55,29 @@
     class ratio of 1.00. We reserve 6,000 training examples for validation using seed 42;
     the remaining 54,000 are used for training. Images are converted to float tensors,
     normalized to approximately [-1, 1], and training images receive a small random affine
-    augmentation. The generated EDA figures are retained with the experiment artifacts:</p>
+    augmentation. The EDA figures below show the class distribution and image characteristics.</p>
     <div class="gallery">
       <figure>
-        <img src="../results/a1/eda/fashion_mnist/class_distribution.png" alt="Fashion-MNIST class distribution bar chart">
+        <img src="images/eda/fashion_mnist/class_distribution.png" alt="Fashion-MNIST class distribution bar chart" loading="lazy">
         <figcaption><strong>Class distribution.</strong> All ten classes contain exactly
         6,000 training images (imbalance ratio 1.00), so no class weighting or resampling
         is needed and accuracy is not biased toward a majority class.</figcaption>
       </figure>
       <figure>
-        <img src="../results/a1/eda/fashion_mnist/split_class_distribution.png" alt="Class distribution across the train, validation and test splits">
+        <img src="images/eda/fashion_mnist/split_class_distribution.png" alt="Class distribution across the train, validation and test splits" loading="lazy">
         <figcaption><strong>Train / validation / test split distribution.</strong> The 10%
         per-class proportion is preserved in both the train and test splits, so test
         accuracy is a fair, unweighted estimate of per-class performance.</figcaption>
       </figure>
       <figure>
-        <img src="../results/a1/eda/fashion_mnist/representative_samples.png" alt="Representative sample images per class">
+        <img src="images/eda/fashion_mnist/representative_samples.png" alt="Representative sample images per class" loading="lazy">
         <figcaption><strong>Representative samples.</strong> Within-class shape variation is
         substantial - e.g. T-shirt/top spans short-sleeve tees and sleeveless tops, and
         Sandal spans strappy heels to flat slides - which adds intra-class noise on top
         of any inter-class confusion.</figcaption>
       </figure>
       <figure>
-        <img src="../results/a1/eda/fashion_mnist/class_mean_images.png" alt="Per-class average (mean) image">
+        <img src="images/eda/fashion_mnist/class_mean_images.png" alt="Per-class average (mean) image" loading="lazy">
         <figcaption><strong>Per-class average image.</strong> Averaging within class shows
         that T-shirt/top, Pullover, Coat and Shirt collapse to nearly the same blurred
         rectangular torso silhouette, while Trouser, Sandal, Sneaker, Bag and Ankle boot
@@ -85,7 +85,7 @@
         models confuse the four upper-body garments.</figcaption>
       </figure>
       <figure>
-        <img src="../results/a1/eda/fashion_mnist/class_similarity.png" alt="Class-prototype similarity matrix">
+        <img src="images/eda/fashion_mnist/class_similarity.png" alt="Class-prototype similarity matrix" loading="lazy">
         <figcaption><strong>Class-prototype similarity.</strong> Cosine similarity confirms
         the visual clustering: Pullover-Coat (0.86), Pullover-Shirt (0.82) and
         Coat-Shirt (0.81) form a tight upper-body-garment cluster, while
@@ -95,7 +95,7 @@
         below.</figcaption>
       </figure>
       <figure>
-        <img src="../results/a1/eda/fashion_mnist/pixel_intensity_distribution.png" alt="Pixel intensity distribution histogram">
+        <img src="images/eda/fashion_mnist/pixel_intensity_distribution.png" alt="Pixel intensity distribution histogram" loading="lazy">
         <figcaption><strong>Pixel intensity distribution.</strong> The histogram is strongly
         bimodal: the vast majority of pixels sit near 0 (a flat black background) while
         foreground pixels span roughly 150-255, with a clear valley in between. The
@@ -106,7 +106,7 @@
         background/foreground contrast rather than smooth mid-tones.</figcaption>
       </figure>
       <figure>
-        <img src="../results/a1/eda/fashion_mnist/foreground_coverage.png" alt="Per-class foreground pixel coverage">
+        <img src="images/eda/fashion_mnist/foreground_coverage.png" alt="Per-class foreground pixel coverage" loading="lazy">
         <figcaption><strong>Per-class foreground coverage.</strong> For each image, this is
         the share of its 784 pixels above the intensity-32 threshold, averaged per class.
         Pullover, Shirt and Coat have the highest foreground share (56-60%) since loose
@@ -169,12 +169,24 @@
     <p>The saved qualitative evidence separates representative correct predictions,
     confident errors, and uncertain errors. Some mistakes exceed 99% confidence, so the
     current models' confidence should not be treated as calibrated.</p>
-    <ul class="links">
-      <li><a href="../results/a1/linear_seed42/test_confident_errors.png">Linear confident errors</a></li>
-      <li><a href="../results/a1/linear_seed42/test_uncertain_errors.png">Linear uncertain errors</a></li>
-      <li><a href="../results/a1/mlp_seed42/test_confident_errors.png">MLP confident errors</a></li>
-      <li><a href="../results/a1/mlp_seed42/test_uncertain_errors.png">MLP uncertain errors</a></li>
-    </ul>
+    <div class="gallery">
+      <figure>
+        <img src="images/error/linear_seed42/test_confident_errors.png" alt="Confident incorrect predictions from the linear classifier" loading="lazy">
+        <figcaption>Linear: confident errors.</figcaption>
+      </figure>
+      <figure>
+        <img src="images/error/linear_seed42/test_uncertain_errors.png" alt="Uncertain incorrect predictions from the linear classifier" loading="lazy">
+        <figcaption>Linear: uncertain errors.</figcaption>
+      </figure>
+      <figure>
+        <img src="images/error/mlp_seed42/test_confident_errors.png" alt="Confident incorrect predictions from the MLP" loading="lazy">
+        <figcaption>MLP: confident errors.</figcaption>
+      </figure>
+      <figure>
+        <img src="images/error/mlp_seed42/test_uncertain_errors.png" alt="Uncertain incorrect predictions from the MLP" loading="lazy">
+        <figcaption>MLP: uncertain errors.</figcaption>
+      </figure>
+    </div>
   </section>
 
   <section id="limitations">
