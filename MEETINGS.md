@@ -8,3 +8,15 @@
   - 2352284 -> Model implementation (Linear, Recurrent, CNN); Utilities. Evaluation Pipeline.
   - 2352074 -> Maintain web, update web and ui; Training pipeline; Model Implementation (LSTM)
 - Next meeting: 2026-09-20
+
+## 2026-09-26 (week-03) - 20:43, Google Meet
+- Attendance: Le Nguyen Khang (2352470), Tran Lam Anh (2352067), Tran Nguyen Giap (2352284), Vu Duc Viet Anh (2352074)
+- Decisions: 
+  - D-01: Select dataset and task A2.M1 and A3.M1
+  - D-02: Write reports for A1.M2. 
+- Task split for the coming week (who does what across all four modules):
+  - 2352470 -> Setup Overleaf; Write Reports for Error Analysis and Evaluation Protocol (A1.M2); 
+  - 2352067 -> Write Reports for EDA and Metrics (A1.M2); 
+  - 2352284 -> Write Reports for Models (A1.M2); 
+  - 2352074 -> Write Reports for Training(A1.M2); Write Proposals for A2.M1; 
+- Next meeting: 2026-10-03
