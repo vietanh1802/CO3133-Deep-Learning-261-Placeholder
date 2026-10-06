@@ -45,28 +45,23 @@ to name a dataset.
 
 ### Assignment 2: SUIM
 
-SUIM is not downloaded automatically and is not in the repository. Unpack it so that
-`data/suim/train_val/` and `data/suim/TEST/` exist, each with an `images/` and a `masks/`
-folder, then run:
+SUIM is not downloaded automatically and is not in the repository. Unpack it so that `data/suim/train_val/` and `data/suim/TEST/` exist, each with an `images/` and a `masks/` folder, then run:
 
 ```bash
 uv run python -m scripts.eda.run_suim
 ```
 
-One run produces every number quoted in the A2 dataset proposal. It takes a few minutes,
-most of it the near-duplicate search over all 1,635 pairs.
+One run produces every number quoted in the A2 dataset proposal. It takes a few minutes, most of it the near-duplicate search over all 1,635 pairs.
 
-| Output | What it answers |
-| --- | --- |
-| `results/a2/eda/suim/summary.json` | Pairs on disk, decode and size faults, per-class pixel and image counts for both splits, the resolution histogram, and every duplicate group listed by filename |
-| `results/a2/eda/suim/class_distribution.png` | Image count beside pixel share, which rank the classes differently |
-| `results/a2/eda/suim/region_area_distribution.png` | How much of a frame a class covers when present, separating rare-and-large from common-and-small |
-| `results/a2/eda/suim/resolution_distribution.png` | The eleven resolutions on a log scale |
-| `results/a2/splits/suim/train.txt`, `val.txt` | The fixed 1,143 / 287 split, one filename stem per line |
+| Output                                             | What it answers                                                                                                                                                 |
+| -------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `results/a2/eda/suim/summary.json`                 | Pairs on disk, decode and size faults, per-class pixel and image counts for both splits, the resolution histogram, and every duplicate group listed by filename |
+| `results/a2/eda/suim/class_distribution.png`       | Image count beside pixel share, which rank the classes differently                                                                                              |
+| `results/a2/eda/suim/region_area_distribution.png` | How much of a frame a class covers when present, separating rare-and-large from common-and-small                                                                |
+| `results/a2/eda/suim/resolution_distribution.png`  | The eleven resolutions on a log scale                                                                                                                           |
+| `results/a2/splits/suim/train.txt`, `val.txt`      | The fixed 1,143 / 287 split, one filename stem per line                                                                                                         |
 
-The two split files are committed on purpose. Training reads them rather than re-deriving
-the split, so a later change to the code cannot silently move an image between sides.
-The statistics live in `src/data/suim.py`; the script only orchestrates and writes.
+The two split files are committed on purpose. Training reads them rather than re-deriving the split, so a later change to the code cannot silently move an image between sides. The statistics live in `src/data/suim.py`; the script only orchestrates and writes.
 
 ## Training
 
