@@ -15,7 +15,19 @@
 - **Task track:** Semantic segmentation.
 - **Problem statement:** The task assigns each pixel in an underwater RGB image to one of eight categories. This output could help an autonomous underwater vehicle distinguish divers, robots, reefs, wrecks, plants, fish, sea floor and open water.
 - **Input:** An underwater RGB photograph.
-- **Output and labels:** One dense mask with eight mutually exclusive classes: background waterbody (BW), human divers (HD), plants and sea-grass (PF), wrecks or ruins (WR), robots and instruments (RO), reefs and invertebrates (RI), fish and vertebrates (FV), and sand, sea-floor and rocks (SR). Class codes are given in Appendix A.
+- **Output and labels:** One dense mask with eight mutually exclusive classes. The label definitions and RGB colour codes follow the [official SUIM dataset page](https://irvlab.cs.umn.edu/resources/suim-dataset):
+
+| Object category | Symbol | RGB color code |
+| --- | --- | --- |
+| Background (waterbody) | BW | 000 (black) |
+| Human divers | HD | 001 (blue) |
+| Aquatic plants and sea-grass | PF | 010 (green) |
+| Wrecks and ruins | WR | 011 (sky) |
+| Robots (AUVs/ROVs/instruments) | RO | 100 (red) |
+| Reefs and invertebrates | RI | 101 (pink) |
+| Fish and vertebrates | FV | 110 (yellow) |
+| Sea-floor and rocks | SR | 111 (white) |
+
 - **Suitability:** The dataset contains 1,540 usable image and mask pairs and seven foreground classes. It therefore exceeds the handbook's default segmentation thresholds. Its class imbalance and underwater image degradation also make the planned comparison between a model trained from scratch and a pretrained model relevant.
 
 ## 2. Dataset identity and access
