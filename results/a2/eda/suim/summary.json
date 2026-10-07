@@ -1,0 +1,763 @@
+{
+  "splits": {
+    "train_val": {
+      "pairs_on_disk": 1525,
+      "images_without_mask": [],
+      "masks_without_image": [],
+      "decode_errors": 0,
+      "size_mismatches": 37,
+      "off_code_masks": 85,
+      "usable_pairs": 1430,
+      "labelled_pixels": 519599104,
+      "resolutions": {
+        "640x480": 1198,
+        "960x540": 119,
+        "1280x720": 39,
+        "1906x1080": 16,
+        "640x360": 15,
+        "480x448": 14,
+        "800x600": 13,
+        "1152x720": 6,
+        "584x480": 5,
+        "416x416": 4,
+        "1280x960": 1
+      },
+      "classes": [
+        {
+          "name": "BW",
+          "images": 1185,
+          "pixels": 161011757,
+          "pixel_share": 0.309877,
+          "median_area_when_present": 0.335677
+        },
+        {
+          "name": "HD",
+          "images": 359,
+          "pixels": 12180671,
+          "pixel_share": 0.023442,
+          "median_area_when_present": 0.048932
+        },
+        {
+          "name": "PF",
+          "images": 218,
+          "pixels": 11882808,
+          "pixel_share": 0.022869,
+          "median_area_when_present": 0.073931
+        },
+        {
+          "name": "WR",
+          "images": 245,
+          "pixels": 35179038,
+          "pixel_share": 0.067704,
+          "median_area_when_present": 0.431895
+        },
+        {
+          "name": "RO",
+          "images": 86,
+          "pixels": 2901166,
+          "pixel_share": 0.005583,
+          "median_area_when_present": 0.037953
+        },
+        {
+          "name": "RI",
+          "images": 964,
+          "pixels": 185182487,
+          "pixel_share": 0.356395,
+          "median_area_when_present": 0.560607
+        },
+        {
+          "name": "FV",
+          "images": 958,
+          "pixels": 37724432,
+          "pixel_share": 0.072603,
+          "median_area_when_present": 0.072456
+        },
+        {
+          "name": "SR",
+          "images": 571,
+          "pixels": 73536745,
+          "pixel_share": 0.141526,
+          "median_area_when_present": 0.294564
+        }
+      ],
+      "classes_per_image": {
+        "2": 269,
+        "3": 700,
+        "4": 364,
+        "5": 90,
+        "6": 7
+      },
+      "co_occurrence": {
+        "BW": {
+          "BW": 1185,
+          "HD": 344,
+          "PF": 182,
+          "WR": 228,
+          "RO": 79,
+          "RI": 776,
+          "FV": 754,
+          "SR": 402
+        },
+        "HD": {
+          "BW": 344,
+          "HD": 359,
+          "PF": 21,
+          "WR": 146,
+          "RO": 54,
+          "RI": 126,
+          "FV": 80,
+          "SR": 161
+        },
+        "PF": {
+          "BW": 182,
+          "HD": 21,
+          "PF": 218,
+          "WR": 24,
+          "RO": 5,
+          "RI": 174,
+          "FV": 163,
+          "SR": 111
+        },
+        "WR": {
+          "BW": 228,
+          "HD": 146,
+          "PF": 24,
+          "WR": 245,
+          "RO": 4,
+          "RI": 41,
+          "FV": 43,
+          "SR": 113
+        },
+        "RO": {
+          "BW": 79,
+          "HD": 54,
+          "PF": 5,
+          "WR": 4,
+          "RO": 86,
+          "RI": 34,
+          "FV": 6,
+          "SR": 31
+        },
+        "RI": {
+          "BW": 776,
+          "HD": 126,
+          "PF": 174,
+          "WR": 41,
+          "RO": 34,
+          "RI": 964,
+          "FV": 746,
+          "SR": 339
+        },
+        "FV": {
+          "BW": 754,
+          "HD": 80,
+          "PF": 163,
+          "WR": 43,
+          "RO": 6,
+          "RI": 746,
+          "FV": 958,
+          "SR": 371
+        },
+        "SR": {
+          "BW": 402,
+          "HD": 161,
+          "PF": 111,
+          "WR": 113,
+          "RO": 31,
+          "RI": 339,
+          "FV": 371,
+          "SR": 571
+        }
+      }
+    },
+    "TEST": {
+      "pairs_on_disk": 110,
+      "images_without_mask": [],
+      "masks_without_image": [],
+      "decode_errors": 0,
+      "size_mismatches": 0,
+      "off_code_masks": 0,
+      "usable_pairs": 110,
+      "labelled_pixels": 39414256,
+      "resolutions": {
+        "640x480": 92,
+        "960x540": 9,
+        "1280x720": 3,
+        "480x448": 2,
+        "1906x1080": 1,
+        "416x416": 1,
+        "1152x720": 1,
+        "640x360": 1
+      },
+      "classes": [
+        {
+          "name": "BW",
+          "images": 95,
+          "pixels": 16478278,
+          "pixel_share": 0.418079,
+          "median_area_when_present": 0.433652
+        },
+        {
+          "name": "HD",
+          "images": 42,
+          "pixels": 1454049,
+          "pixel_share": 0.036891,
+          "median_area_when_present": 0.062342
+        },
+        {
+          "name": "PF",
+          "images": 20,
+          "pixels": 1215617,
+          "pixel_share": 0.030842,
+          "median_area_when_present": 0.132054
+        },
+        {
+          "name": "WR",
+          "images": 27,
+          "pixels": 2871016,
+          "pixel_share": 0.072842,
+          "median_area_when_present": 0.322959
+        },
+        {
+          "name": "RO",
+          "images": 12,
+          "pixels": 354299,
+          "pixel_share": 0.008989,
+          "median_area_when_present": 0.021604
+        },
+        {
+          "name": "RI",
+          "images": 58,
+          "pixels": 7674390,
+          "pixel_share": 0.194711,
+          "median_area_when_present": 0.325519
+        },
+        {
+          "name": "FV",
+          "images": 66,
+          "pixels": 2666704,
+          "pixel_share": 0.067658,
+          "median_area_when_present": 0.099744
+        },
+        {
+          "name": "SR",
+          "images": 60,
+          "pixels": 6699903,
+          "pixel_share": 0.169987,
+          "median_area_when_present": 0.270773
+        }
+      ],
+      "classes_per_image": {
+        "2": 17,
+        "3": 42,
+        "4": 38,
+        "5": 10,
+        "6": 3
+      },
+      "co_occurrence": {
+        "BW": {
+          "BW": 95,
+          "HD": 42,
+          "PF": 16,
+          "WR": 24,
+          "RO": 12,
+          "RI": 51,
+          "FV": 53,
+          "SR": 47
+        },
+        "HD": {
+          "BW": 42,
+          "HD": 42,
+          "PF": 5,
+          "WR": 15,
+          "RO": 9,
+          "RI": 24,
+          "FV": 10,
+          "SR": 23
+        },
+        "PF": {
+          "BW": 16,
+          "HD": 5,
+          "PF": 20,
+          "WR": 7,
+          "RO": 0,
+          "RI": 9,
+          "FV": 14,
+          "SR": 12
+        },
+        "WR": {
+          "BW": 24,
+          "HD": 15,
+          "PF": 7,
+          "WR": 27,
+          "RO": 0,
+          "RI": 10,
+          "FV": 7,
+          "SR": 20
+        },
+        "RO": {
+          "BW": 12,
+          "HD": 9,
+          "PF": 0,
+          "WR": 0,
+          "RO": 12,
+          "RI": 4,
+          "FV": 0,
+          "SR": 5
+        },
+        "RI": {
+          "BW": 51,
+          "HD": 24,
+          "PF": 9,
+          "WR": 10,
+          "RO": 4,
+          "RI": 58,
+          "FV": 38,
+          "SR": 25
+        },
+        "FV": {
+          "BW": 53,
+          "HD": 10,
+          "PF": 14,
+          "WR": 7,
+          "RO": 0,
+          "RI": 38,
+          "FV": 66,
+          "SR": 34
+        },
+        "SR": {
+          "BW": 47,
+          "HD": 23,
+          "PF": 12,
+          "WR": 20,
+          "RO": 5,
+          "RI": 25,
+          "FV": 34,
+          "SR": 60
+        }
+      }
+    }
+  },
+  "duplicates": {
+    "hash_distance": 12,
+    "pixel_tolerance": 5.0,
+    "candidates_from_hash": 2035,
+    "confirmed_by_pixels": 76,
+    "groups": [
+      [
+        "train_val/d_r_105_",
+        "train_val/w_r_9_"
+      ],
+      [
+        "train_val/d_r_185_",
+        "train_val/n_l_74_"
+      ],
+      [
+        "train_val/d_r_198_",
+        "train_val/d_r_542_"
+      ],
+      [
+        "train_val/d_r_316_",
+        "train_val/f_r_1196_",
+        "train_val/f_r_1647_"
+      ],
+      [
+        "train_val/d_r_319_",
+        "train_val/d_r_656_",
+        "train_val/d_r_675_"
+      ],
+      [
+        "train_val/d_r_385_",
+        "train_val/w_r_8_"
+      ],
+      [
+        "train_val/d_r_516_",
+        "train_val/f_r_2004_"
+      ],
+      [
+        "train_val/d_r_527_",
+        "train_val/n_l_27_"
+      ],
+      [
+        "TEST/n_l_29_",
+        "train_val/d_r_587_"
+      ],
+      [
+        "train_val/d_r_622_",
+        "train_val/n_l_55_"
+      ],
+      [
+        "train_val/d_r_624_",
+        "train_val/n_l_23_"
+      ],
+      [
+        "train_val/d_r_668_",
+        "train_val/w_r_2_"
+      ],
+      [
+        "train_val/d_r_723_",
+        "train_val/f_r_1525_",
+        "train_val/f_r_816_",
+        "train_val/n_l_13_"
+      ],
+      [
+        "train_val/d_r_87_",
+        "train_val/n_l_42_"
+      ],
+      [
+        "train_val/f_r_103_",
+        "train_val/n_l_22_"
+      ],
+      [
+        "train_val/f_r_1041_",
+        "train_val/f_r_63_"
+      ],
+      [
+        "train_val/f_r_1048_",
+        "train_val/n_l_71_"
+      ],
+      [
+        "train_val/f_r_1112_",
+        "train_val/f_r_2074_"
+      ],
+      [
+        "train_val/f_r_1155_",
+        "train_val/f_r_1271_"
+      ],
+      [
+        "train_val/f_r_1198_",
+        "train_val/n_l_73_"
+      ],
+      [
+        "train_val/f_r_1221_",
+        "train_val/f_r_381_"
+      ],
+      [
+        "train_val/f_r_1305_",
+        "train_val/n_l_56_"
+      ],
+      [
+        "train_val/f_r_1417_",
+        "train_val/n_l_110_"
+      ],
+      [
+        "train_val/f_r_1464_",
+        "train_val/f_r_707_"
+      ],
+      [
+        "TEST/n_l_0_",
+        "train_val/f_r_1500_"
+      ],
+      [
+        "train_val/f_r_1507_",
+        "train_val/n_l_2_"
+      ],
+      [
+        "train_val/f_r_1534_",
+        "train_val/n_l_83_"
+      ],
+      [
+        "train_val/f_r_1583_",
+        "train_val/n_l_89_"
+      ],
+      [
+        "train_val/f_r_1618_",
+        "train_val/n_l_78_"
+      ],
+      [
+        "train_val/f_r_1649_",
+        "train_val/n_l_11_"
+      ],
+      [
+        "train_val/f_r_1672_",
+        "train_val/f_r_1995_"
+      ],
+      [
+        "train_val/f_r_1678_",
+        "train_val/f_r_754_"
+      ],
+      [
+        "train_val/f_r_1765_",
+        "train_val/n_l_69_",
+        "train_val/n_l_98_"
+      ],
+      [
+        "train_val/f_r_1783_",
+        "train_val/f_r_922_"
+      ],
+      [
+        "train_val/f_r_1804_",
+        "train_val/n_l_45_"
+      ],
+      [
+        "TEST/f_r_1892_",
+        "train_val/f_r_1827_"
+      ],
+      [
+        "train_val/f_r_1828_",
+        "train_val/f_r_67_"
+      ],
+      [
+        "train_val/f_r_1840_",
+        "train_val/n_l_103_"
+      ],
+      [
+        "train_val/f_r_1856_",
+        "train_val/n_l_72_"
+      ],
+      [
+        "train_val/f_r_1908_",
+        "train_val/n_l_68_"
+      ],
+      [
+        "train_val/f_r_1913_",
+        "train_val/f_r_691_"
+      ],
+      [
+        "train_val/f_r_192_",
+        "train_val/n_l_86_"
+      ],
+      [
+        "train_val/f_r_1971_",
+        "train_val/f_r_564_"
+      ],
+      [
+        "train_val/f_r_1973_",
+        "train_val/n_l_85_"
+      ],
+      [
+        "train_val/f_r_2001_",
+        "train_val/n_l_96_"
+      ],
+      [
+        "train_val/f_r_2005_",
+        "train_val/n_l_41_"
+      ],
+      [
+        "train_val/f_r_2020_",
+        "train_val/f_r_320_"
+      ],
+      [
+        "TEST/n_l_102_",
+        "train_val/f_r_2033_"
+      ],
+      [
+        "train_val/f_r_210_",
+        "train_val/n_l_57_"
+      ],
+      [
+        "train_val/f_r_26_",
+        "train_val/n_l_108_"
+      ],
+      [
+        "train_val/f_r_495_",
+        "train_val/n_l_90_"
+      ],
+      [
+        "TEST/n_l_79_",
+        "train_val/f_r_615_"
+      ],
+      [
+        "train_val/f_r_692_",
+        "train_val/n_l_5_"
+      ],
+      [
+        "train_val/f_r_725_",
+        "train_val/n_l_75_"
+      ],
+      [
+        "train_val/f_r_760_",
+        "train_val/n_l_33_"
+      ],
+      [
+        "train_val/f_r_785_",
+        "train_val/n_l_97_"
+      ],
+      [
+        "train_val/f_r_870_",
+        "train_val/n_l_6_"
+      ],
+      [
+        "train_val/f_r_914_",
+        "train_val/n_l_112_"
+      ],
+      [
+        "train_val/f_r_923_",
+        "train_val/n_l_82_"
+      ],
+      [
+        "TEST/n_l_100_",
+        "train_val/f_r_953_"
+      ],
+      [
+        "TEST/d_r_386_",
+        "train_val/n_l_106_"
+      ],
+      [
+        "TEST/f_r_403_",
+        "train_val/n_l_80_"
+      ],
+      [
+        "TEST/n_l_87_",
+        "train_val/w_r_11_"
+      ],
+      [
+        "TEST/n_l_26_",
+        "train_val/w_r_32_"
+      ],
+      [
+        "train_val/w_r_41_",
+        "train_val/w_r_44_"
+      ]
+    ],
+    "groups_crossing_splits": [
+      [
+        "TEST/n_l_29_",
+        "train_val/d_r_587_"
+      ],
+      [
+        "TEST/n_l_0_",
+        "train_val/f_r_1500_"
+      ],
+      [
+        "TEST/f_r_1892_",
+        "train_val/f_r_1827_"
+      ],
+      [
+        "TEST/n_l_102_",
+        "train_val/f_r_2033_"
+      ],
+      [
+        "TEST/n_l_79_",
+        "train_val/f_r_615_"
+      ],
+      [
+        "TEST/n_l_100_",
+        "train_val/f_r_953_"
+      ],
+      [
+        "TEST/d_r_386_",
+        "train_val/n_l_106_"
+      ],
+      [
+        "TEST/f_r_403_",
+        "train_val/n_l_80_"
+      ],
+      [
+        "TEST/n_l_87_",
+        "train_val/w_r_11_"
+      ],
+      [
+        "TEST/n_l_26_",
+        "train_val/w_r_32_"
+      ]
+    ],
+    "dropped_from_train_val": [
+      "d_r_587_",
+      "f_r_1500_",
+      "f_r_1827_",
+      "f_r_2033_",
+      "f_r_615_",
+      "f_r_953_",
+      "n_l_106_",
+      "n_l_80_",
+      "w_r_11_",
+      "w_r_32_"
+    ]
+  },
+  "split": {
+    "seed": 42,
+    "val_fold_of": 5,
+    "group_count": 1370,
+    "stratum_sizes": {
+      "HD": 151,
+      "PF": 213,
+      "WR": 217,
+      "RO": 86,
+      "RI": 47,
+      "FV": 452,
+      "SR": 264
+    },
+    "sha256_prefix": {
+      "train": "5341b993d7f8d87d",
+      "val": "0e59e81b28a0548e"
+    },
+    "halves": {
+      "train": {
+        "images": 1143,
+        "classes": {
+          "BW": {
+            "images": 949,
+            "pixel_share": 0.3139
+          },
+          "HD": {
+            "images": 287,
+            "pixel_share": 0.024
+          },
+          "PF": {
+            "images": 175,
+            "pixel_share": 0.0225
+          },
+          "WR": {
+            "images": 197,
+            "pixel_share": 0.067
+          },
+          "RO": {
+            "images": 69,
+            "pixel_share": 0.0052
+          },
+          "RI": {
+            "images": 761,
+            "pixel_share": 0.3505
+          },
+          "FV": {
+            "images": 760,
+            "pixel_share": 0.0728
+          },
+          "SR": {
+            "images": 458,
+            "pixel_share": 0.1441
+          }
+        }
+      },
+      "val": {
+        "images": 287,
+        "classes": {
+          "BW": {
+            "images": 236,
+            "pixel_share": 0.2943
+          },
+          "HD": {
+            "images": 72,
+            "pixel_share": 0.0212
+          },
+          "PF": {
+            "images": 43,
+            "pixel_share": 0.0242
+          },
+          "WR": {
+            "images": 48,
+            "pixel_share": 0.0705
+          },
+          "RO": {
+            "images": 17,
+            "pixel_share": 0.007
+          },
+          "RI": {
+            "images": 203,
+            "pixel_share": 0.379
+          },
+          "FV": {
+            "images": 198,
+            "pixel_share": 0.072
+          },
+          "SR": {
+            "images": 113,
+            "pixel_share": 0.1318
+          }
+        }
+      }
+    }
+  },
+  "usable_pairs_total": 1540
+}
