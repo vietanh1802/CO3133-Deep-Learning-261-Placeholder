@@ -1,0 +1,3 @@
+# A2 simple baseline placeholder; not a runnable configuration.
+# TODO: dataset/splits, class mapping, model, transforms, optimizer,
+# training settings, seed, checkpoint rule, and output paths.

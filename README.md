@@ -118,3 +118,30 @@ figures under `results/a1/<run-name>/`.
 - [Assignment 1 draft report](reports/assignment1-draft.md)
 - [Assignment 2 M1 dataset proposal](reports/a2_proposal.md)
 - [AI Usage Disclosure](AI_USAGE.md)
+
+## Assignment 2 — segmentation scaffold
+
+<<<<<<< Updated upstream
+SUIM semantic segmentation proposal is approved. Data analysis and fixed split files
+are available above. Remaining implementation placeholders:
+
+- Baseline and pretrained model: `src/models/segmentation.py`
+- Training and evaluation: `src/training/segmentation.py`, `src/evaluation/segmentation.py`
+- Entry points: `scripts/training/train_segmentation.py`,
+=======
+SUIM semantic segmentation proposal is approved. Implementation placeholders:
+
+- Data and EDA: `src/data/suim.py`, `src/data/suim_eda.py`
+- Baseline and pretrained model: `src/models/segmentation.py`
+- Training and evaluation: `src/training/segmentation.py`, `src/evaluation/segmentation.py`
+- Entry points: `scripts/eda/run_suim.py`, `scripts/training/train_segmentation.py`,
+>>>>>>> Stashed changes
+  `scripts/evaluation/evaluate_segmentation.py`
+- Configuration placeholders: `configs/segmentation/suim/`
+- Draft: [Assignment 2 M2 outline](reports/assignment2-draft.md)
+- Results: `results/a2/`
+
+These remaining files are blank scaffolds, not runnable experiments. Implement the
+U-Net baseline and pretrained DeepLabV3 using the proposal and committed split files.
+These files are blank scaffolds, not runnable experiments. Select model architectures
+and complete the data/split protocol before implementing them.

@@ -159,3 +159,8 @@ Short CPU benchmarks at 320x240 and batch size four imply 286 training steps per
 | DeepLabV3 exceeds 4 GB | Reduce physical batch from four to two and increase accumulation from four to eight. If needed, reduce input size to 256x192, then use pretrained LR-ASPP. |
 | CUDA cannot run on the local GPU | Use the same code and split files on a free Colab or Kaggle T4. |
 | Forty epochs exceed the M2 deadline | Reduce every compared run to 25 epochs and rescale the schedule, keeping the loss comparison controlled. |
+
+## Approval record
+
+- **Instructor decision:** Approved (confirmed by group member).
+- **Approval date and conditions:** To be recorded.

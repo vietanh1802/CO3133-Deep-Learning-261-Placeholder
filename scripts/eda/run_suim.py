@@ -98,8 +98,12 @@ def plot_class_distribution(stats, image_total: int, path: Path) -> None:
     """Show that counting by image and counting by pixel rank the classes differently."""
     figure, axes = plt.subplots(figsize=(9, 4))
     position = np.arange(NUM_CLASSES)
-    axes.bar(position - 0.2, [s.image_count / image_total for s in stats], 0.4,
-             label="images containing the class")
+    axes.bar(
+        position - 0.2,
+        [s.image_count / image_total for s in stats],
+        0.4,
+        label="images containing the class",
+    )
     axes.bar(position + 0.2, [s.pixel_share for s in stats], 0.4, label="share of all pixels")
     axes.set_xticks(position, CLASS_NAMES)
     axes.set_ylabel("share of train_val")
@@ -127,7 +131,7 @@ def plot_region_area(checks: list[PairCheck], path: Path) -> None:
 
 def plot_resolutions(checks: list[PairCheck], path: Path) -> None:
     """Show how far the data departs from the four resolutions the paper names."""
-    counts = Counter(c.image_size for c in checks).most_common()
+    counts = Counter(c.image_size for c in checks if c.image_size is not None).most_common()
     figure, axes = plt.subplots(figsize=(9, 4))
     axes.barh([f"{w}x{h}" for (w, h), _ in counts][::-1], [n for _, n in counts][::-1])
     axes.set_xscale("log")
@@ -190,12 +194,20 @@ def main() -> None:
                 "off_code_masks": sum(1 for c in checked[split] if c.off_code_pixels > 0),
                 "usable_pairs": len(kept[split]),
                 "labelled_pixels": sum(c.total_pixels for c in kept[split]),
-                "resolutions": {f"{w}x{h}": n for (w, h), n in
-                                Counter(c.image_size for c in kept[split]).most_common()},
+                "resolutions": {
+                    f"{w}x{h}": n
+                    for (w, h), n in Counter(
+                        c.image_size for c in kept[split] if c.image_size is not None
+                    ).most_common()
+                },
                 "classes": [
-                    {"name": s.name, "images": s.image_count, "pixels": s.pixel_count,
-                     "pixel_share": round(s.pixel_share, 6),
-                     "median_area_when_present": round(s.median_area_when_present, 6)}
+                    {
+                        "name": s.name,
+                        "images": s.image_count,
+                        "pixels": s.pixel_count,
+                        "pixel_share": round(s.pixel_share, 6),
+                        "median_area_when_present": round(s.median_area_when_present, 6),
+                    }
                     for s in class_summary(kept[split])
                 ],
                 **label_structure(kept[split]),

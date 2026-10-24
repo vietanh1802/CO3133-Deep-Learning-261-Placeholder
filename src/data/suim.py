@@ -198,7 +198,7 @@ def image_fingerprint(path: Path, split: str) -> Fingerprint:
     raw = path.read_bytes()
     with Image.open(io.BytesIO(raw)) as handle:
         thumb = np.asarray(
-            handle.convert("L").resize((DHASH_SIDE + 1, DHASH_SIDE), Image.BILINEAR),
+            handle.convert("L").resize((DHASH_SIDE + 1, DHASH_SIDE), Image.Resampling.BILINEAR),
             dtype=np.int16,
         )
     bits = (thumb[:, 1:] > thumb[:, :-1]).ravel()
@@ -235,7 +235,8 @@ def pixel_difference(path_a: Path, path_b: Path, side: int = 64) -> float:
     def load(path: Path) -> np.ndarray:
         with Image.open(path) as handle:
             return np.asarray(
-                handle.convert("RGB").resize((side, side), Image.BILINEAR), dtype=np.int16
+                handle.convert("RGB").resize((side, side), Image.Resampling.BILINEAR),
+                dtype=np.int16,
             )
 
     return float(np.abs(load(path_a) - load(path_b)).mean())
