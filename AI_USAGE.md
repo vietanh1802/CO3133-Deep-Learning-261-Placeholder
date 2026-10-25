@@ -44,6 +44,17 @@ Behavioral requirements: Use uv, ruff, and ty check for blazing fast development
 - **AI contribution:** The student set the goal, the scope and the target branch, and decided which of the proposed analyses to keep and what to report. The model proposed the candidate analyses, explained what each one shows, and wrote the implementation, the unit tests and the accompanying text.
 - **How the output was edited and verified:** Ruff lint and format and the full test suite (57 tests) were run, including 17 new unit tests that check every statistic against a six-image toy dataset with hand-computed expected values. Both EDA entry points were executed end to end on the real datasets and every generated figure was inspected. One figure drafted for the report (the share of pixels in the darkest intensity bin) was wrong and was corrected against `summary.json` before committing. The similarity matrix was cross-checked against the confusion pairs already reported in the draft error analysis, and the MNIST run against the well-known 4/9 and 7/9 confusions.
 
+### Entry 4
+
+- **Tool / model:** Codex (GPT-6)
+- **Used by:** Vu Duc Viet Anh (2352074)
+- **Date / development stage:** 2026-10-25 - Assignment 1 LSTM review and integration
+- **Purpose:** Review the existing custom LSTM on local branch `dev/a1-lstm` and integrate it into the current A1 training and evaluation pipeline.
+- **Affected sections / files:** `src/models/lstm.py`, `configs/image_classification/fashion_mnist/lstm.yaml`, `tests/test_lstm.py`, `train.sh`, `README.md`, and this disclosure.
+- **Representative prompt:** "Help me integrate the LSTM code into the current pipeline and tell me which files change."
+- **AI contribution:** Inspected the existing implementation and gate equations, compared outputs and gradients with `torch.nn.LSTM`, copied the reviewed model from commit `d03efff` without changing its equations, and added the Fashion-MNIST configuration, integration tests, and run instructions.
+- **How the output was edited and verified:** The isolated review passed 100 combined tests on CPU. After integration, all 72 project tests passed, including 15 new LSTM cases; those 15 were rerun successfully after adding explicit type narrowing in the tests. Full-project Ruff lint, format checks, and ty passed. The integration test exercised the real training and evaluation entry points using small synthetic loaders, including checkpoint selection/reload, metrics, JSON records, evidence tensors, and figures. No full Fashion-MNIST training or final test results are claimed.
+
 ## Assignment 2
 
 ## Assignment 3
