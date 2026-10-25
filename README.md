@@ -46,7 +46,12 @@ to name a dataset.
 ```bash
 uv run python -m scripts.training.train_image_classification --data fashion_mnist --config configs/image_classification/fashion_mnist/linear.yaml
 uv run python -m scripts.training.train_image_classification --data fashion_mnist --config configs/image_classification/fashion_mnist/mlp.yaml
+uv run python -m scripts.training.train_image_classification --data fashion_mnist --config configs/image_classification/fashion_mnist/lstm.yaml
 ```
+
+The Fashion-MNIST LSTM reads each image as 28 row timesteps with 28 input features,
+then passes the final hidden state to the shared classification head. Its config uses
+the same seed, split, batch size, learning rate, and 50 epochs as the GRU run.
 
 Development dataset runs use their matching entry points and shape-compatible configs:
 
@@ -74,6 +79,7 @@ Release assets; they are not downloaded when cloning the repository.
 ```bash
 uv run python -m scripts.evaluation.evaluate --data fashion_mnist --config configs/image_classification/fashion_mnist/linear.yaml
 uv run python -m scripts.evaluation.evaluate --data fashion_mnist --config configs/image_classification/fashion_mnist/mlp.yaml
+uv run python -m scripts.evaluation.evaluate --data fashion_mnist --config configs/image_classification/fashion_mnist/lstm.yaml
 uv run python -m scripts.evaluation.compare --results-dir results/a1
 ```
 
