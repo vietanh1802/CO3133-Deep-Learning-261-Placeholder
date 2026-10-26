@@ -24,3 +24,4 @@ results/metrics/*
 # Local environment and editor files
 .DS_Store
 .vscode/
+logs/
