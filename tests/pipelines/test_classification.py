@@ -6,6 +6,8 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader, TensorDataset
 
+from src.evaluation.classification import evaluate_model
+from src.plots.classification import plot_learning_curves
 from src.training.checkpoint import CheckpointMetadata, load_checkpoint, save_checkpoint
 from src.training.classification import (
     EpochResult,
@@ -171,3 +173,20 @@ def test_fit_runs_training_validation_and_saves_best_checkpoint(tmp_path) -> Non
     metadata = load_checkpoint(checkpoint_path, model, optimizer, restore_rng=False)
     assert metadata.epoch == result.best_epoch
     assert metadata.best_validation_loss == result.best_validation_loss
+
+    selected = nn.Linear(4, 3)
+    load_checkpoint(checkpoint_path, selected, restore_rng=False)
+    held_out = build_dataloader(7, 3)
+    expected = evaluate_model(model, held_out, DEVICE)
+    actual = evaluate_model(selected, held_out, DEVICE)
+    torch.testing.assert_close(actual.probabilities, expected.probabilities, rtol=0, atol=0)
+    assert actual.metrics.confusion_matrix.sum().item() == 7
+    assert torch.isfinite(actual.probabilities).all()
+    output = tmp_path / "curves.png"
+    plot_learning_curves(
+        [epoch.loss for epoch in result.training],
+        [epoch.loss for epoch in result.validation],
+        output,
+    )
+    assert output.stat().st_size > 0
+    assert output.with_suffix(".pdf").read_bytes().startswith(b"%PDF-")

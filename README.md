@@ -112,6 +112,19 @@ Call `src.plots.format.apply()` before creating a figure. Save with
 `src.plots.common.save_figure(figure, output_path)` for 400-dpi PNG and PDF exports.
 The shared style uses DejaVu Sans and requires no LaTeX installation.
 
+## Checks
+
+```bash
+uv run --locked python -m scripts.check
+```
+
+Runs lint, formatting, types, and the CPU test suite. GitHub Actions runs the same
+command on pushes and pull requests. Tests use synthetic data without dataset downloads.
+
+- `tests/contracts`: configuration, imports, data, and package boundaries.
+- `tests/components`: models, metrics, analysis, plots, and shared training behavior.
+- `tests/pipelines`: training, checkpoint reload, resume, evaluation, export, and release packaging.
+
 ## Documents
 
 - [Assignment 1 draft](reports/assignment1-draft.md)

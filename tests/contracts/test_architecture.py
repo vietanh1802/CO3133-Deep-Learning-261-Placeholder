@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-SOURCE = Path(__file__).resolve().parents[1] / "src"
+SOURCE = Path(__file__).resolve().parents[2] / "src"
 
 
 @pytest.mark.parametrize(

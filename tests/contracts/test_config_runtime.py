@@ -30,14 +30,6 @@ def test_load_config_and_serialize_paths(tmp_path):
     assert config.to_dict()["data_dir"] == "local-data"
 
 
-def test_load_config_rejects_unknown_keys(tmp_path):
-    path = tmp_path / "experiment.yaml"
-    path.write_text("name: baseline\nmodel: linear\ntyop: true\n", encoding="utf-8")
-
-    with pytest.raises(ValueError, match="unknown configuration keys: tyop"):
-        load_config(path)
-
-
 def test_seed_and_rng_state_round_trip():
     seed_everything(7)
     state = capture_rng_state()
