@@ -69,15 +69,15 @@ parameters and higher inference time.
 
 Run evidence:
 
-- [Linear learning curves](../results/a1/archive/linear_seed42/learning_curves.png)
-- [Linear confusion matrix](../results/a1/archive/linear_seed42/test_confusion_matrix.png)
-- [MLP learning curves](../results/a1/archive/mlp_seed42/learning_curves.png)
-- [MLP confusion matrix](../results/a1/archive/mlp_seed42/test_confusion_matrix.png)
-- [Linear confident errors](../results/a1/archive/linear_seed42/test_confident_errors.png)
-- [Linear uncertain errors](../results/a1/archive/linear_seed42/test_uncertain_errors.png)
-- [MLP confident errors](../results/a1/archive/mlp_seed42/test_confident_errors.png)
-- [MLP uncertain errors](../results/a1/archive/mlp_seed42/test_uncertain_errors.png)
-- [Machine-readable comparison](../results/a1/archive/comparison_test.csv)
+- [Linear learning curves](../results/a1/linear_seed42/learning_curves.png)
+- [Linear confusion matrix](../results/a1/linear_seed42/test_confusion_matrix.png)
+- [MLP learning curves](../results/a1/mlp_seed42/learning_curves.png)
+- [MLP confusion matrix](../results/a1/mlp_seed42/test_confusion_matrix.png)
+- [Linear confident errors](../results/a1/linear_seed42/test_confident_errors.png)
+- [Linear uncertain errors](../results/a1/linear_seed42/test_uncertain_errors.png)
+- [MLP confident errors](../results/a1/mlp_seed42/test_confident_errors.png)
+- [MLP uncertain errors](../results/a1/mlp_seed42/test_uncertain_errors.png)
+- [Machine-readable comparison](../results/a1/comparison_test.csv)
 
 ## Error analysis
 

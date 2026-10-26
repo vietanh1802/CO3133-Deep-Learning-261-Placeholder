@@ -1,151 +1,133 @@
 # CO3133 - Deep Learning and Its Applications (Semester 261)
 
-Course project repository. Group: Placeholder
+Course project by Placeholder.
 
-**Project website:** https://vietanh1802.github.io/CO3133-Deep-Learning-261-Placeholder/
+[Website](https://vietanh1802.github.io/CO3133-Deep-Learning-261-Placeholder/) · [Assignment 1](web/assignment1.html) · [Assignment 2](web/assignment2.html) · [Assignment 3](web/assignment3.html)
 
-**Assignment pages:** [Assignment 1](web/assignment1.html) · [Assignment 2](web/assignment2.html) · [Assignment 3](web/assignment3.html)
-
-## Installation
+## Setup
 
 ```bash
 uv sync --dev
 uv run pre-commit install
 ```
 
-## Dataset Preparation
+## Datasets
 
-Fashion-MNIST, MNIST, and CIFAR-10 are downloaded and integrity-checked automatically.
-Fashion-MNIST remains the Assignment 1 evaluation dataset; MNIST and CIFAR-10 are available
-for development and later experiments. Generate the A1 EDA figures with:
+Fashion-MNIST, MNIST, and CIFAR-10 download automatically. Assignment 1 uses Fashion-MNIST.
+
+For SUIM, extract the dataset into:
+
+```text
+data/suim/
+  train_val/
+    images/
+    masks/
+  TEST/
+    images/
+    masks/
+```
+
+Generate dataset summaries and figures:
 
 ```bash
 uv run python -m scripts.eda.run_fashion_mnist
 uv run python -m scripts.eda.run_mnist
+uv run python -m scripts.eda.run_suim
 ```
 
-Each command writes the following to `results/a1/eda/<dataset>/`:
+EDA outputs go to `results/a1/eda/<dataset>/` or `results/a2/eda/suim/`.
+SUIM training reads the committed splits in `results/a2/splits/suim/`.
 
-| Output | What it answers |
-| --- | --- |
-| `class_distribution.png` | How many samples per class, and how imbalanced the set is |
-| `representative_samples.png` | What the raw inputs look like, three per class |
-| `split_class_distribution.png` | Whether the train and test splits share the same class mix |
-| `pixel_intensity_distribution.png` | How intensities are spread, which justifies the normalization constants |
-| `class_mean_images.png` | The average image of each class |
-| `class_similarity.png` | Which classes look alike before any training, i.e. the confusions to expect |
-| `foreground_coverage.png` | How much of the frame each class occupies |
-| `summary.json` | Every number above, machine-readable, for the report to cite |
-
-The analysis itself lives in `src/data/eda.py` (statistics), `src/data/eda_plots.py`
-(figures), and `src/data/eda_report.py` (one shared run), so the entry points only have
-to name a dataset.
-
-## Training
+## Classification
 
 ```bash
 uv run python -m scripts.training.train_image_classification --data fashion_mnist --config configs/image_classification/fashion_mnist/linear.yaml
-uv run python -m scripts.training.train_image_classification --data fashion_mnist --config configs/image_classification/fashion_mnist/mlp.yaml
-uv run python -m scripts.training.train_image_classification --data fashion_mnist --config configs/image_classification/fashion_mnist/lstm.yaml
-```
-
-The Fashion-MNIST LSTM reads each image as 28 row timesteps with 28 input features,
-then passes the final hidden state to the shared classification head. Its config uses
-the same seed, split, batch size, learning rate, and 50 epochs as the GRU run.
-
-Development dataset runs use their matching entry points and shape-compatible configs:
-
-```bash
-uv run python -m scripts.training.train_image_classification --data mnist --config configs/image_classification/mnist/linear.yaml
-uv run python -m scripts.training.train_image_classification --data cifar10 --config configs/image_classification/cifar10/cnn.yaml
-```
-
-The best-validation checkpoints are stored together in `checkpoints/a1.zip`, with
-`checkpoints/<run-name>/best.pt` inside the ZIP. Each completed training run updates
-only its own checkpoint in the archive. Evaluation reads that member directly; no
-manual extraction is needed. Training logs, curves, and summaries are written to
-`results/a1/<run-name>/`. ZIP packaging occurs after the timed training loop.
-
-The repository keeps results and checkpoint archives separate:
-
-```text
-results/a1/<run-name>/
-results/a1/eda/
-results/a1/archive/            # Earlier draft runs, excluded from comparisons
-checkpoints/a1.zip
-```
-
-A2 and A3 can use `results/a2/`, `results/a3/`, `checkpoints/a2.zip`,
-and `checkpoints/a3.zip`. This change only implements the A1 pipeline.
-Checkpoint ZIPs, logs, and evidence tensors remain ignored by Git.
-
-To package an existing folder of downloaded `<run-name>/best.pt` files:
-
-```bash
-uv run python -m scripts.release.package_checkpoints --checkpoint-dir .tmp/drive-a1/checkpoints --output-dir checkpoints
-```
-
-This creates `checkpoints/a1.zip`. Running the command without arguments can
-repackage the existing local archive. Optional `--data fashion_mnist` produces
-a dataset-only ZIP for sharing.
-
-## Copy existing Colab results back to local
-
-The running Colab notebook can finish using its current Drive path:
-`MyDrive/BTL_DL_Result/VanhResult/a1_v1/`. No retraining is required for this
-layout change. Wait until all six models finish training and testing, then run the
-comparison/ZIP cell so that `a1_cuda_outputs.zip` contains the final outputs.
-
-1. Download and extract `a1_cuda_outputs.zip` into `.tmp/drive-a1/`. Locate the
-   extracted folder that contains `checkpoints/` and `results/`.
-2. Copy the **contents** of that extracted `results/` folder into local
-   `results/a1/`. Replace matching files in the six Fashion-MNIST run folders;
-   copy the new `comparison_test.md` and `comparison_test.csv` too. Do not create
-   `results/a1/results/`. Existing EDA, MNIST, and CIFAR-10 results can remain.
-3. In File Explorer, compress only the extracted `checkpoints/` folder into a
-   ZIP, rename it `a1.zip`, and paste it into local `checkpoints/`, replacing
-   the previous `a1.zip`. Both `checkpoints/<run-name>/best.pt` and
-   `<run-name>/best.pt` member layouts are supported. Alternatively, use the
-   packaging command above. Do not rename the full `a1_cuda_outputs.zip` as a
-   checkpoint-only archive.
-4. Optionally copy each extracted `console/<run-name>/train.log` and
-   `evaluate.log` into `results/a1/<run-name>/`. The Colab `configs/` folder
-   records its own absolute runtime paths; do not overwrite the source YAML files
-   under the repository's `configs/image_classification/` with those copies.
-5. Run `uv run python -m scripts.evaluation.compare --results-dir results/a1`
-   to regenerate the comparison table. If testing already finished on Colab, do
-   not rerun local evaluation just to import the results; that would replace the
-   recorded inference timings with timings from the local device.
-
-Saved JSON/checkpoint metadata retains its original runtime paths as provenance.
-Current commands use the repository YAML paths and the run name to locate the
-imported artifacts. Files from earlier experiments should be backed up before
-replacement; the local files moved during this layout correction are preserved
-under `.tmp/before-separate-a1-folders/`.
-
-## Evaluation
-
-```bash
 uv run python -m scripts.evaluation.evaluate --data fashion_mnist --config configs/image_classification/fashion_mnist/linear.yaml
-uv run python -m scripts.evaluation.evaluate --data fashion_mnist --config configs/image_classification/fashion_mnist/mlp.yaml
-uv run python -m scripts.evaluation.evaluate --data fashion_mnist --config configs/image_classification/fashion_mnist/lstm.yaml
 uv run python -m scripts.evaluation.compare --results-dir results/a1
 ```
 
-Each evaluation writes the required confusion matrix, per-class accuracy and support,
-most-confused class pairs, and representative correct, confident-error, and uncertain-error
-figures under `results/a1/<run-name>/`.
+Use matching dataset and configuration paths for MNIST or CIFAR-10.
+Configurations live in `configs/image_classification/<dataset>/`.
 
-## Reproducibility
+## Segmentation
 
-- Configuration files: `configs/image_classification/<dataset>/`
-- Draft random seed: 42
-- Dependency versions: locked in `uv.lock`
-- Draft hardware: Apple Silicon MPS for training; CPU for reported inference timing
-- Checkpoint selection: lowest validation loss
-- Checkpoint reconstruction: run the training commands above
+Train the U-Net baseline or resume its latest checkpoint:
+
+```bash
+uv run python -m scripts.training.train_segmentation --config configs/segmentation/suim/baseline.yaml
+uv run python -m scripts.training.train_segmentation --config configs/segmentation/suim/baseline.yaml --resume
+```
+
+For two GPUs:
+
+```bash
+uv run torchrun --standalone --nproc-per-node=2 -m scripts.training.train_segmentation --config configs/segmentation/suim/baseline.yaml
+```
+
+`batch_size` and `num_workers` are per process. Effective batch size is
+`batch_size × accumulation_steps × process_count`. Resume with the same process count.
+Use separate run names for separate experiments.
+
+## Outputs
+
+| Path | Contents |
+| --- | --- |
+| `checkpoints/<run-name>/best.pt` | Selected model |
+| `checkpoints/<run-name>/last.pt` | Segmentation resume state |
+| `results/a1/<run-name>/` | Classification logs, metrics, and figures |
+| `results/a2/<run-name>/` | Segmentation logs, history, summary, curves, and validation evidence |
+
+Classification selects the lowest validation loss; segmentation selects the highest validation mIoU.
+Checkpoints are not committed. Dependencies are locked in `uv.lock`; experiment settings and seeds live in the configurations.
+
+Package classification checkpoints for release:
+
+```bash
+uv run python -m scripts.release.package_checkpoints --data fashion_mnist
+```
+
+This writes `artifacts/fashion_mnist-checkpoints.zip`. MNIST and CIFAR-10 use the same command with their dataset names.
+
+## Source layout
+
+| Package | Purpose |
+| --- | --- |
+| `src/config` | Configuration parsing and validation |
+| `src/data` | Dataset contracts, transforms, and loaders |
+| `src/eda` | Statistics, quality checks, duplicates, and splits |
+| `src/models` | Model architectures |
+| `src/training` | Training loops and checkpoints |
+| `src/evaluation` | Metrics and inference costs |
+| `src/error` | Prediction error analysis |
+| `src/plots` | Figure formatting and rendering |
+| `src/utils` | Logging, seeds, environment, and process helpers |
+| `scripts` | Command-line entry points |
+
+Shared contracts live in `base.py`; concrete modules name their dataset, task, or model.
+Data loading stays independent of EDA, plotting, training, and evaluation.
+
+## Plots
+
+Call `src.plots.format.apply()` before creating a figure. Save with
+`src.plots.common.save_figure(figure, output_path)` for 400-dpi PNG and PDF exports.
+The shared style uses DejaVu Sans and requires no LaTeX installation.
+
+## Checks
+
+```bash
+uv run --locked python -m scripts.check
+```
+
+Runs lint, formatting, types, and the CPU test suite. GitHub Actions runs the same
+command on pushes and pull requests. Tests use synthetic data without dataset downloads.
+
+- `tests/contracts`: configuration, imports, data, and package boundaries.
+- `tests/components`: models, metrics, analysis, plots, and shared training behavior.
+- `tests/pipelines`: training, checkpoint reload, resume, evaluation, export, and release packaging.
 
 ## Documents
 
-- [Assignment 1 draft report](reports/assignment1-draft.md)
-- [AI Usage Disclosure](AI_USAGE.md)
+- [Assignment 1 draft](reports/assignment1-draft.md)
+- [Assignment 2 proposal](reports/a2_proposal.md)
+- [Assignment 2 draft](reports/assignment2-draft.md)
+- [AI usage disclosure](AI_USAGE.md)

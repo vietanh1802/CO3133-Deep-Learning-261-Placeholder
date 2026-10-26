@@ -310,6 +310,32 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
   color: var(--muted);
 }
 
+.status-ready {
+  background: #dafbe1;
+  border-color: #4ac26b;
+  color: #116329;
+}
+
+.status-unapproved {
+  background: #ffebe9;
+  border-color: #ff8182;
+  color: #a40e26;
+}
+
+@media (prefers-color-scheme: dark) {
+  .status-ready {
+    background: #12261e;
+    border-color: #3fb950;
+    color: #7ee787;
+  }
+
+  .status-unapproved {
+    background: #321b20;
+    border-color: #f85149;
+    color: #ff7b72;
+  }
+}
+
 ul.links { list-style: none; padding: 0; margin: 0; }
 ul.links li { padding: .45rem 0; border-bottom: 1px solid var(--border); }
 ul.links li:last-child { border-bottom: none; }

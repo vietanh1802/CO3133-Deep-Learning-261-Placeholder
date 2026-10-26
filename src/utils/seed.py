@@ -33,7 +33,8 @@ def seed_worker(worker_id: int) -> None:
 
 def capture_rng_state() -> dict[str, Any]:
     """Capture RNG state for exact checkpoint resumption."""
-    numpy_state = np.random.get_state()
+    numpy_state = np.random.get_state(legacy=True)
+    assert isinstance(numpy_state, tuple), "Expected NumPy legacy RNG state"
     state: dict[str, Any] = {
         "python": random.getstate(),
         "numpy": {

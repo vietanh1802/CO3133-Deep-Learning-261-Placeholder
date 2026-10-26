@@ -10,11 +10,9 @@ __pycache__/
 .venv/
 
 # Local data and experiment artifacts
-.tmp/
 data/*
 !data/.gitkeep
-checkpoints/*
-!checkpoints/.gitkeep
+/checkpoints/
 artifacts/*.zip
 results/**/*.log
 results/**/*_evidence.pt
@@ -26,3 +24,4 @@ results/metrics/*
 # Local environment and editor files
 .DS_Store
 .vscode/
+logs/

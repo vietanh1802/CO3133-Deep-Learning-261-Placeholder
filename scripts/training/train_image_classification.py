@@ -9,12 +9,16 @@ import torch
 from loguru import logger
 from torch import nn
 
+from src.config.classification import load_config
 from src.data import build_dataloaders
-from src.evaluation.plots import plot_learning_curves
 from src.models import ImageClassifier, build_model
-from src.training.checkpoint import archive_checkpoints
-from src.training.engine import fit
-from src.utils import ExperimentState, load_config, seed_everything, setup_logging
+from src.plots.classification import (
+    plot_learning_curves,
+)
+from src.training.classification import (
+    fit,
+)
+from src.utils import ExperimentState, seed_everything, setup_logging
 from src.utils.logging import log_config
 
 
@@ -83,11 +87,6 @@ def main() -> None:
         checkpoint_path=checkpoint_path,
         checkpoint_config=config.to_dict(),
     )
-    checkpoint_archive = Path(config.checkpoint_dir) / "a1.zip"
-    archive_checkpoints(checkpoint_archive, {config.name: checkpoint_path})
-    checkpoint_path.unlink()
-    if not any(checkpoint_path.parent.iterdir()):
-        checkpoint_path.parent.rmdir()
     train_losses = [epoch.loss for epoch in result.training]
     validation_losses = [epoch.loss for epoch in result.validation]
     plot_learning_curves(
@@ -106,8 +105,7 @@ def main() -> None:
         "training_seconds": result.duration_seconds,
         "train_loss": train_losses,
         "validation_loss": validation_losses,
-        "checkpoint": str(checkpoint_archive),
-        "checkpoint_member": f"checkpoints/{config.name}/best.pt",
+        "checkpoint": str(checkpoint_path),
         "config": config.to_dict(),
     }
     (run_directory / "training_summary.json").write_text(

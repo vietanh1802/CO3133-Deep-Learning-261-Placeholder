@@ -11,13 +11,21 @@ from typing import Any
 import torch
 from loguru import logger
 
+from src.config.classification import load_config
 from src.data import build_dataloaders, class_names
 from src.error import ClassificationError, ClassificationErrorAnalyzer
-from src.evaluation import evaluate_model
-from src.evaluation.plots import plot_confusion_matrix, plot_prediction_examples
+from src.evaluation.classification import (
+    evaluate_model,
+)
 from src.models import ImageClassifier, build_model
+from src.plots.classification import (
+    plot_prediction_examples,
+)
+from src.plots.common import (
+    plot_confusion_matrix,
+)
 from src.training.checkpoint import load_checkpoint
-from src.utils import ExperimentState, load_config, seed_everything, setup_logging
+from src.utils import ExperimentState, seed_everything, setup_logging
 from src.utils.logging import log_config, log_timing
 
 
@@ -91,7 +99,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--checkpoint",
         default=None,
-        help="checkpoint .pt or assignment ZIP (default: <checkpoint_dir>/a1.zip)",
+        help="checkpoint to evaluate (default: <checkpoint_dir>/<name>/best.pt)",
     )
     parser.add_argument(
         "--split",
@@ -134,7 +142,9 @@ def main() -> None:
     model = ImageClassifier(encoder)
 
     checkpoint_path = (
-        Path(args.checkpoint) if args.checkpoint else Path(config.checkpoint_dir) / "a1.zip"
+        Path(args.checkpoint)
+        if args.checkpoint
+        else Path(config.checkpoint_dir) / config.name / "best.pt"
     )
     if not checkpoint_path.exists():
         raise FileNotFoundError(f"checkpoint not found: {checkpoint_path}")
@@ -144,7 +154,6 @@ def main() -> None:
         model,
         map_location=device,
         restore_rng=False,
-        run_name=config.name,
     )
     logger.info(
         "Loaded checkpoint: {} (epoch {}, val loss {:.4f})",

@@ -9,6 +9,7 @@ from src.models.lstm import LSTM
 from src.models.mlp import MLP
 from src.models.rnn import RNN
 from src.models.transformer import Transformer
+from src.models.unet import UNet
 
 __all__ = [
     "CNN",
@@ -20,6 +21,7 @@ __all__ = [
     "Model",
     "RNN",
     "Transformer",
+    "UNet",
     "build_model",
     "register_model",
 ]
