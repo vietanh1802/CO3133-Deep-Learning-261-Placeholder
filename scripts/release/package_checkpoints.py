@@ -16,8 +16,8 @@ def parse_args() -> argparse.Namespace:
     """Parse checkpoint packaging arguments."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--data", required=True, choices=DATASETS)
-    parser.add_argument("--checkpoint-dir", type=Path, default=Path("checkpoints"))
-    parser.add_argument("--output-dir", type=Path, default=Path("artifacts"))
+    parser.add_argument("--checkpoint-dir", type=Path, default=Path("outputs/a1_v1/checkpoints"))
+    parser.add_argument("--output-dir", type=Path, default=Path("outputs/a1_v1"))
     return parser.parse_args()
 
 

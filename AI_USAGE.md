@@ -55,6 +55,17 @@ Behavioral requirements: Use uv, ruff, and ty check for blazing fast development
 - **AI contribution:** Inspected the existing implementation and gate equations, compared outputs and gradients with `torch.nn.LSTM`, copied the reviewed model from commit `d03efff` without changing its equations, and added the Fashion-MNIST configuration, integration tests, and run instructions.
 - **How the output was edited and verified:** The isolated review passed 100 combined tests on CPU. After integration, all 72 project tests passed, including 15 new LSTM cases; those 15 were rerun successfully after adding explicit type narrowing in the tests. Full-project Ruff lint, format checks, and ty passed. The integration test exercised the real training and evaluation entry points using small synthetic loaders, including checkpoint selection/reload, metrics, JSON records, evidence tensors, and figures. No full Fashion-MNIST training or final test results are claimed.
 
+### Entry 5
+
+- **Tool / model:** Codex (GPT-6)
+- **Used by:** Vu Duc Viet Anh (2352074)
+- **Date / development stage:** 2026-10-26 - Assignment 1 output layout
+- **Purpose:** Make local and Colab outputs use the same assignment/version bundle, with checkpoints, results, resolved configs, and logs under `outputs/a1_v1/` locally and `MyDrive/BTL_DL_Result/VanhResult/a1_v1/` on Drive.
+- **Affected sections / files:** A1 source YAML configs; configuration serialization; training, evaluation, comparison, EDA, and release entry points; artifact migration utility; Colab notebook; output paths and documentation; regression tests; this disclosure.
+- **Representative prompt:** "Update the local folder structure; I will create a branch and pull request to merge into a1/m2."
+- **AI contribution:** Updated artifact paths and config/log persistence, moved existing artifacts without changing their contents, added a repeatable migration command for other checkouts, and brought the progress notebook into version control. Model definitions, optimizer settings, and training hyperparameters were unchanged.
+- **How the output was edited and verified:** SHA-256 matched for all 104 migrated files, including 16 checkpoints. The full 75-test project suite passed, including migration collision/idempotence tests and real training/evaluation entry points with small synthetic loaders. Eight notebook checks exercised progress, subprocess failure/interruption, backup paths, and ZIP layout. Full Fashion-MNIST retraining was not performed for this folder change.
+
 ## Assignment 2
 
 ## Assignment 3

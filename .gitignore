@@ -16,6 +16,11 @@ data/*
 checkpoints/*
 !checkpoints/.gitkeep
 artifacts/*.zip
+outputs/*/checkpoints/*
+!outputs/*/checkpoints/.gitkeep
+outputs/**/*.log
+outputs/**/*_evidence.pt
+outputs/**/*.zip
 results/**/*.log
 results/**/*_evidence.pt
 results/figures/*

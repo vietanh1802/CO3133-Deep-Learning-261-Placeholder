@@ -143,9 +143,13 @@ def test_lstm_train_and_evaluate_entry_points(tmp_path, monkeypatch):
     )
     train_image_classification.main()
 
-    run_dir = config.results_dir / "a1" / config.name
+    run_dir = config.results_dir / config.name
     checkpoint = config.checkpoint_dir / config.name / "best.pt"
     summary = json.loads((run_dir / "training_summary.json").read_text(encoding="utf-8"))
+    snapshot_path = config.results_dir.parent / "configs" / f"{config.name}.yaml"
+    assert load_config(snapshot_path) == config
+    assert (config.results_dir.parent / "console" / config.name / "train.log").is_file()
+    assert not (config.results_dir / "a1").exists()
     assert len(summary["train_loss"]) == len(summary["validation_loss"]) == 2
     restored = ImageClassifier(build_model(config.model, config.model_config))
     metadata = load_checkpoint(checkpoint, restored, restore_rng=False)
@@ -158,6 +162,9 @@ def test_lstm_train_and_evaluate_entry_points(tmp_path, monkeypatch):
     evaluate.main()
 
     record = json.loads((run_dir / "test_result.json").read_text(encoding="utf-8"))
+    assert (config.results_dir.parent / "console" / config.name / "evaluate.log").is_file()
+    evaluation_config = config.results_dir.parent / "configs" / f"{config.name}_test.yaml"
+    assert load_config(evaluation_config) == config
     assert record["model"] == "lstm"
     assert record["sample_count"] == 10
     assert record["checkpoint"]["epoch"] == summary["best_epoch"]
