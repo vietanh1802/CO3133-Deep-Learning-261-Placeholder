@@ -31,10 +31,14 @@ import zipfile
 staging, target = map(pathlib.Path, sys.argv[1:])
 extracted = staging / "extracted"
 with zipfile.ZipFile(staging / "SUIM.zip") as archive:
-    for name in archive.namelist():
-        if not (extracted / name).resolve().is_relative_to(extracted.resolve()):
-            raise ValueError(f"Unsafe archive path: {name}")
-    archive.extractall(extracted)
+    members = [
+        item for item in archive.infolist()
+        if not (item.filename == "/" and item.is_dir() and item.file_size == 0)
+    ]
+    for item in members:
+        if not (extracted / item.filename).resolve().is_relative_to(extracted.resolve()):
+            raise ValueError(f"Unsafe archive path: {item.filename}")
+    archive.extractall(extracted, members=members)
 roots = [path.parent for path in extracted.rglob("train_val") if path.is_dir()]
 roots = [path for path in roots if (path / "TEST").is_dir()]
 if len(roots) != 1:
