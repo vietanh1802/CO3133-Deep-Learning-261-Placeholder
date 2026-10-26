@@ -1,0 +1,57 @@
+\begin{titlepage}
+\begin{center}
+HO CHI MINH CITY UNIVERSITY OF TECHNOLOGY, VNU-HCM\\
+FACULTY OF COMPUTER SCIENCE AND ENGINEERING
+\end{center}
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=4cm]{Images/bachkhoa_logo.png}
+\end{center}
+\end{figure}
+
+\begin{center}
+\begin{tabular}{c}
+\multicolumn{1}{c}{\textbf{{\LARGE Deep Learning (CO3133)}}}\\
+~~\\
+\\
+\hline
+\\
+\multicolumn{1}{c}{\textbf{{\Large Report \textit{Placeholder}}}}\\
+\\
+\textbf{{\Huge \emph{Title}}}\\
+\\
+\hline
+\end{tabular}
+\end{center}
+
+\vspace{2cm}
+
+\begin{table}[h]
+\begin{tabular}{rrll}
+
+\hspace{5 cm} & Instructor: & Assoc. Prof. Le Thanh Sach &\\
+
+& Students: &  
+ 	
+    Tran Lam Anh & 2352067 \\
+& & Vu Duc Viet Anh & 2352074 \\
+& & Tran Nguyen Giap & 2352284 \\
+& & Le Nguyen Khang  & 2352470 \\
+
+\end{tabular}
+\end{table}
+
+\vspace{3cm}
+
+\begin{center}
+{\footnotesize Ho Chi Minh City, October, 2026}
+\end{center}
+
+\end{titlepage}
+
+
+%\thispagestyle{empty}
+
+\newpage
+\tableofcontents

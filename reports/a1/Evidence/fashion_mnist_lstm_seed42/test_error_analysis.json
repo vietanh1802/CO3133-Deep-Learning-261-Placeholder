@@ -1,0 +1,179 @@
+{
+  "per_class_accuracy": {
+    "T-shirt/top": 0.868,
+    "Trouser": 0.984,
+    "Pullover": 0.854,
+    "Dress": 0.918,
+    "Coat": 0.813,
+    "Sandal": 0.962,
+    "Shirt": 0.68,
+    "Sneaker": 0.966,
+    "Bag": 0.977,
+    "Ankle boot": 0.96
+  },
+  "per_class_support": {
+    "T-shirt/top": 1000,
+    "Trouser": 1000,
+    "Pullover": 1000,
+    "Dress": 1000,
+    "Coat": 1000,
+    "Sandal": 1000,
+    "Shirt": 1000,
+    "Sneaker": 1000,
+    "Bag": 1000,
+    "Ankle boot": 1000
+  },
+  "most_confused_pairs": [
+    {
+      "target": 6,
+      "prediction": 0,
+      "count": 130
+    },
+    {
+      "target": 4,
+      "prediction": 2,
+      "count": 89
+    },
+    {
+      "target": 6,
+      "prediction": 2,
+      "count": 81
+    },
+    {
+      "target": 0,
+      "prediction": 6,
+      "count": 76
+    },
+    {
+      "target": 2,
+      "prediction": 4,
+      "count": 72
+    }
+  ],
+  "confident_errors": [
+    {
+      "sample_index": 23,
+      "target": 9,
+      "prediction": 5,
+      "confidence": 0.9997225403785706,
+      "true_class_probability": 0.00020571470668073744,
+      "margin": 0.9995168447494507
+    },
+    {
+      "sample_index": 2914,
+      "target": 7,
+      "prediction": 9,
+      "confidence": 0.9991816878318787,
+      "true_class_probability": 0.0008077313541434705,
+      "margin": 0.9983739852905273
+    },
+    {
+      "sample_index": 2599,
+      "target": 0,
+      "prediction": 8,
+      "confidence": 0.9989388585090637,
+      "true_class_probability": 0.00028475848375819623,
+      "margin": 0.9986541271209717
+    },
+    {
+      "sample_index": 5946,
+      "target": 9,
+      "prediction": 5,
+      "confidence": 0.9973918199539185,
+      "true_class_probability": 0.002012687735259533,
+      "margin": 0.9953791499137878
+    },
+    {
+      "sample_index": 5938,
+      "target": 9,
+      "prediction": 7,
+      "confidence": 0.9960938096046448,
+      "true_class_probability": 0.002892864402383566,
+      "margin": 0.993200957775116
+    }
+  ],
+  "uncertain_errors": [
+    {
+      "sample_index": 5966,
+      "target": 0,
+      "prediction": 4,
+      "confidence": 0.2589187026023865,
+      "true_class_probability": 0.0956118255853653,
+      "margin": 0.16330687701702118
+    },
+    {
+      "sample_index": 678,
+      "target": 8,
+      "prediction": 0,
+      "confidence": 0.2909224033355713,
+      "true_class_probability": 0.240767240524292,
+      "margin": 0.0501551628112793
+    },
+    {
+      "sample_index": 42,
+      "target": 3,
+      "prediction": 6,
+      "confidence": 0.30844929814338684,
+      "true_class_probability": 0.11849382519721985,
+      "margin": 0.189955472946167
+    },
+    {
+      "sample_index": 3313,
+      "target": 3,
+      "prediction": 6,
+      "confidence": 0.315326988697052,
+      "true_class_probability": 0.12825912237167358,
+      "margin": 0.18706786632537842
+    },
+    {
+      "sample_index": 9251,
+      "target": 0,
+      "prediction": 4,
+      "confidence": 0.32425883412361145,
+      "true_class_probability": 0.03182888776063919,
+      "margin": 0.29242995381355286
+    }
+  ],
+  "representative_correct": [
+    {
+      "sample_index": 7477,
+      "target": 1,
+      "prediction": 1,
+      "confidence": 0.9999996423721313,
+      "true_class_probability": 0.9999996423721313,
+      "margin": 0.0
+    },
+    {
+      "sample_index": 2866,
+      "target": 1,
+      "prediction": 1,
+      "confidence": 0.9999992847442627,
+      "true_class_probability": 0.9999992847442627,
+      "margin": 0.0
+    },
+    {
+      "sample_index": 6189,
+      "target": 1,
+      "prediction": 1,
+      "confidence": 0.9999992847442627,
+      "true_class_probability": 0.9999992847442627,
+      "margin": 0.0
+    },
+    {
+      "sample_index": 9482,
+      "target": 1,
+      "prediction": 1,
+      "confidence": 0.9999992847442627,
+      "true_class_probability": 0.9999992847442627,
+      "margin": 0.0
+    },
+    {
+      "sample_index": 3910,
+      "target": 1,
+      "prediction": 1,
+      "confidence": 0.9999990463256836,
+      "true_class_probability": 0.9999990463256836,
+      "margin": 0.0
+    }
+  ]
+}

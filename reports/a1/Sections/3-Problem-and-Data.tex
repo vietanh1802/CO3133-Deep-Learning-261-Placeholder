@@ -1,0 +1,96 @@
+% Handbook 3.1, 10, 13. Part 1 owns data definitions.
+\section{Problem and Data Description}
+\label{sec:data}
+
+\subsection{Problem formulation and research questions}
+Given a grayscale image $x\in\mathbb{R}^{1\times28\times28}$, predict a label
+$y\in\{0,\ldots,9\}$ identifying its clothing category. The prediction unit is one
+image. A model $f_\theta$ produces ten logits, with prediction
+$\hat y=\operatorname*{arg\,max}_{k} f_\theta(x)_k$.
+\reporttodo{Explain a realistic motivation and the main difficulties, including
+visually similar garment classes and the loss of spatial structure when flattening.
+State research questions about predictive quality, representation/inductive bias,
+and quality--compute trade-offs. Avoid promising a winning architecture in advance.}
+
+\subsection{Dataset description and scope}
+Fashion-MNIST is the mandatory primary evaluation dataset. MNIST is reserved for
+development/debugging, and CIFAR-10 is an optional extension. Extension results
+must be reported separately from the main Fashion-MNIST comparison.
+\begin{table}[htbp]
+\centering\small
+\caption{Dataset documentation to verify against the dataset source.}
+\label{tab:dataset}
+\begin{tabularx}{\linewidth}{lY}
+\toprule
+Field & Description\\\midrule
+Task / labels & Ten-class clothing image classification\\
+Input / format & $28\times28$ grayscale; document original storage and loaded tensor dtype\\
+Official sample counts & 60,000 training images; 10,000 test images\\
+Source / version / license & \pending; add verified source and bibliographic entry\\
+Collection / annotations & \pending; describe known collection and labeling process\\
+Storage footprint & \pending; distinguish compressed download and local extracted size\\
+Bias / limitations & \pending; discuss representativeness and real-world generalization\\
+\bottomrule
+\end{tabularx}
+\end{table}
+\reporttodo{List all ten label names in ID order. Cite the official dataset source.
+Explain why MNIST and CIFAR-10 do not replace Fashion-MNIST in the core study.}
+
+\subsection{Exploratory data analysis}
+\label{sec:eda}
+At minimum, report class distribution, input dimensions, imbalance analysis,
+and representative samples. State the split used to compute each statistic.
+\reportfigure{Images/eda/class_distribution.png}{Fashion-MNIST class distribution.
+Source: the repository EDA export; identify the split and counts in the discussion.}{fig:class-distribution}
+\reportfigure{Images/eda/representative_samples.png}{Representative raw Fashion-MNIST
+samples. Source: the repository EDA export.}{fig:raw-samples}
+\reporttodo{Quantify class balance with counts and an imbalance ratio; interpret
+within-class variation and between-class similarities. Add other exported EDA
+figures only when they support a specific decision or hypothesis. Check every
+number against the EDA summary, rather than estimating it from a chart.}
+
+\subsection{Data splitting and leakage prevention}
+\label{sec:splits}
+\begin{table}[htbp]
+\centering
+\caption{Split protocol. Counts below are the repository draft plan; verify the
+actual loader and split indices before treating them as final.}
+\label{tab:splits}
+\begin{tabularx}{\linewidth}{l r Y}
+\toprule
+Split & Images & Role\\\midrule
+Training & 54,000 & Model parameter fitting\\
+Validation & 6,000 & Hyperparameter and checkpoint selection\\
+Test & 10,000 & Final evaluation under a fixed protocol\\
+\bottomrule
+\end{tabularx}
+\end{table}
+\reporttodo{Document official versus custom partitioning, seed 42, split unit,
+actual stratification policy and class counts for every split. Confirm that all
+main models use identical indices. Explain leakage prevention, handling of
+duplicates if checked, and subset rules if any. Distinguish the official
+train/test distribution from the custom train/validation distribution.}
+
+\subsection{Preprocessing, augmentation, and example batch}
+\label{sec:preprocessing}
+\reporttodo{Describe cleaning, invalid data/label handling, tensor conversion,
+normalization constants and their rationale, and augmentation parameters.
+Distinguish training transforms from deterministic validation/test transforms.
+State whether resizing is needed and how labels are encoded.}
+\begin{table}[htbp]
+\centering\small
+\caption{Expected representation shapes; verify against an actual batch.}
+\label{tab:representations}
+\begin{tabularx}{\linewidth}{l l Y}
+\toprule
+Representation & Shape & Models / interpretation\\\midrule
+Image tensor & $B\times1\times28\times28$ & CNN; original grayscale geometry\\
+Flattened pixels & $B\times784$ & Linear and MLP\\
+Row sequence & $B\times28\times28$ & Recurrent models; 28 steps with 28 features\\
+Tokens & $B\times T\times d$ & Transformer; define $T$, projection, and positions\\
+\bottomrule
+\end{tabularx}
+\end{table}
+\reportfigure{Images/eda/preprocessed_batch.png}{An actual training batch after
+preprocessing; annotate tensor shape, dtype, label IDs, and intensity range.
+This figure must be supplied from the loader.}{fig:processed-batch}

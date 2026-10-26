@@ -1,0 +1,84 @@
+% Handbook 3.3, 12, 14. Observed evidence and interpretation belong here.
+\section{Implementation Results}
+\label{sec:results}
+
+\subsection{Training behavior and checkpoint selection}
+\input{Tables/checkpoint_summary}
+\reporttodo{Compare convergence, train--validation gaps, underfitting/overfitting,
+and the chosen checkpoints using the curves in Appendix~\ref{app:evidence}.
+Report encountered implementation issues and fixes, if any. Explain why a
+validation-selected epoch can differ from the final training epoch.}
+
+\subsection{Quantitative comparison}
+\label{sec:quantitative}
+\input{Tables/comparison}
+The imported snapshot contains one seed per model. A zero standard deviation
+field for a single run is not evidence of stability; no multi-seed uncertainty
+estimate or statistical superiority claim is made here.
+\reporttodo{Verify all values against each saved result JSON. State test size,
+metric aggregation, training/inference environments and timing protocol before
+comparing costs. Report mean and standard deviation across repeated runs when
+feasible. Keep MNIST debug and CIFAR-10 extension results in separate tables.}
+
+\subsection{Qualitative evaluation}
+\label{sec:qualitative}
+\reportfigure{Images/results/transformer/test_representative_correct.png}{Representative
+correct predictions from the saved Transformer test evaluation. Document how
+examples were selected and annotate ground truth, prediction and confidence.}{fig:correct}
+\reportfigure{Images/results/transformer/test_confident_errors.png}{Confident mistakes
+from the saved Transformer test evaluation. Confidence does not establish correctness.}{fig:confident-errors}
+\reportfigure{Images/results/transformer/test_uncertain_errors.png}{Uncertain mistakes
+from the saved Transformer test evaluation. Compare these with confident errors.}{fig:uncertain-errors}
+\reporttodo{Include difficult-but-correct examples and compare predictions across
+models on the same images. State the selection rule to avoid presenting isolated
+examples as representative statistics. Add figures for other models when needed
+to support the comparison; these three imported panels alone do not establish it.}
+
+\subsection{Comparison, representation, and inductive bias}
+\label{sec:discussion}
+\reporttodo{Answer the research questions with measured differences. Compare
+flattened-pixel models, local spatial features, recurrent ordering and attention.
+Discuss accuracy/macro-F1 alongside parameter count and both timing measures.
+Relate observed strengths and weaknesses to data properties and inductive bias,
+while distinguishing a plausible mechanism from a causally tested explanation.
+Explain whether the hypotheses in Table~\ref{tab:experiments} are supported and
+what the experiment cannot establish. Accuracy alone is insufficient.}
+
+\subsection{Error analysis}
+\label{sec:errors}
+Use all models' confusion matrices in Appendix~\ref{app:evidence} and the saved
+per-class metrics/confusion-pair records. Distinguish class support, counts and rates.
+\begin{table}[htbp]
+\centering\small
+\caption{Error taxonomy to fill from measured predictions. Add rows as needed.}
+\label{tab:error-taxonomy}
+\begin{tabularx}{\linewidth}{YYYYY}
+\toprule
+Error group & Count / rate & Examples & Hypothesized cause & Improvement / test\\\midrule
+Similar garments & \pending & \pending & \pending & \pending\\
+Confident mistakes & \pending & \pending & \pending & \pending\\
+Other recurring pattern & \pending & \pending & \pending & \pending\\
+\bottomrule
+\end{tabularx}
+\end{table}
+\reporttodo{For each important group, report frequency, example IDs, affected
+models, a proposed explanation and an improvement idea. Discuss whether
+confidence is calibrated only if a calibration analysis was actually performed.}
+
+\subsection{Optional ablation and extensions}
+\reporttodo{State what was actually run. For an ablation, identify the one changed
+factor, fixed settings, hypothesis, result and interpretation. Comparing LSTM and
+GRU can be an extension; it is a controlled ablation only if the stated controls
+justify that description. Mark unperformed studies as not conducted. A1 does
+not require an ablation.}
+
+\subsection{Limitations}
+\reporttodo{Discuss data representativeness, single-seed uncertainty, unequal
+parameter/compute budgets, tuning limitations, hardware/timing comparability and
+source-provenance gaps where applicable. State which claims remain unsupported.
+Do not infer real-world deployment performance from Fashion-MNIST alone.}
+
+\subsection{Conclusion and future work}
+\reporttodo{Give a short evidence-backed answer to each research question.
+Summarize the quality--cost trade-offs without declaring a universal winner.
+Separate conclusions supported by completed experiments from proposed future work.}

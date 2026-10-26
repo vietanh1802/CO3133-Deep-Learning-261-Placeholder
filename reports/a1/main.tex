@@ -1,14 +1,35 @@
-\documentclass{article}
-\usepackage{graphicx} % Required for inserting images
+\documentclass[a4paper,11pt]{article}
 
-\title{Placeholder_A1_Report}
-\author{Anh Vu}
-\date{October 2026}
+% Compile this file from the project directory (pdfLaTeX, twice).
+% Edit shared course/group information only in metadata.tex.
+\input{preamble}
+\input{metadata}
 
 \begin{document}
+\input{Sections/1-Title}
 
-\maketitle
+\pagenumbering{roman}
+\input{Sections/2-Abstract}
+\clearpage
+\tableofcontents
+\clearpage
+\listoffigures
+\listoftables
+\clearpage
 
-\section{Introduction}
+\pagenumbering{arabic}
+% The three main parts required by Handbook Section 3.
+\input{Sections/3-Problem-and-Data}
+\clearpage
+\input{Sections/4-Methodology}
+\clearpage
+\input{Sections/5-Implementation-Results}
+\clearpage
 
+\input{Sections/6-References}
+\clearpage
+\appendix
+\input{Sections/7-Reproducibility}
+\clearpage
+\input{Sections/8-AI-Usage}
 \end{document}

@@ -1,0 +1,136 @@
+% Handbook 3.2, 11, 12.2. Methods and experimental protocol.
+\section{Methodology}
+\label{sec:methods}
+
+\subsection{End-to-end pipeline}
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+ node distance=5mm and 5mm,
+ stage/.style={draw,rounded corners,align=center,font=\small,
+ text width=30mm,minimum height=10mm},
+ flow/.style={-{Stealth[length=2mm]},thick}]
+\node[stage] (raw) {Raw images};
+\node[stage,right=of raw] (prep) {Preprocessing};
+\node[stage,right=of prep] (loader) {DataLoader};
+\node[stage,below=of loader] (model) {Model / logits};
+\node[stage,left=of model] (loss) {Loss};
+\node[stage,left=of loss] (opt) {Optimization};
+\node[stage,below=of opt] (pred) {Prediction};
+\node[stage,right=of pred] (post) {Post-processing};
+\node[stage,right=of post] (eval) {Evaluation};
+\draw[flow] (raw)--(prep);\draw[flow] (prep)--(loader);
+\draw[flow] (loader)--(model);\draw[flow] (model)--(loss);
+\draw[flow] (loss)--(opt);\draw[flow] (opt)--(pred);
+\draw[flow] (pred)--(post);\draw[flow] (post)--(eval);
+\end{tikzpicture}
+\caption{Pipeline overview. Optimization updates model parameters; final
+prediction uses the checkpoint selected on validation data.}
+\label{fig:pipeline}
+\end{figure}
+\reporttodo{Explain train/eval mode, gradient handling, sample-weighted metric
+aggregation, checkpoint saving/reloading, and where the training loop differs
+from validation/test. Define post-processing (e.g., argmax) explicitly.}
+
+\subsection{Mandatory architecture families}
+\label{sec:architectures}
+All five required families must be implemented, trained, and evaluated.
+Pretrained backbones are optional extensions and cannot replace the core models.
+For each architecture, describe input, layers and dimensions, output, loss,
+parameter count, strengths, limitations, and self-written versus library components.
+
+\subsubsection{Linear / softmax classifier}
+Flatten the image to $x_{\rm flat}\in\mathbb{R}^{784}$ and compute
+$z=Wx_{\rm flat}+b\in\mathbb{R}^{10}$. Optimize cross-entropy from logits;
+do not apply softmax before \texttt{CrossEntropyLoss}.
+\reporttodo{Give layer dimensions and parameter calculation; explain the linear
+decision boundary and the absence of an explicit spatial inductive bias.}
+
+\subsubsection{Multilayer perceptron}
+\reporttodo{Describe at least one hidden layer. Check the implemented widths,
+activation, dropout/other regularization and output head against source/config.
+Explain what nonlinear feature combinations add over the linear baseline.}
+
+\subsubsection{Self-designed convolutional neural network}
+\reporttodo{Provide a layer/shape table or architecture diagram. Explain kernels,
+channels, strides, padding, convolution, pooling, feature maps, and the head.
+Discuss local connectivity and parameter sharing; identify your own design.}
+
+\subsubsection{Recurrent family: LSTM or GRU}
+\reporttodo{Select and identify the core recurrent model. Explain row/column/patch
+ordering, timestep definition, input size, hidden size, number of layers,
+recurrent update, final hidden representation and classifier. If reporting both
+LSTM and GRU, distinguish the required family from the additional comparison
+and state whether their parameter/compute budgets are matched.}
+
+\subsubsection{Transformer}
+\reporttodo{Define token construction, input projection/embedding, positional
+encoding, number of heads/layers, feed-forward block, pooling and classifier.
+Give the shapes and roles of queries, keys, values and attention outputs.
+Explain how tokenization retains or changes image structure.}
+For attention, define all dimensions in
+\[
+ \operatorname{Attention}(Q,K,V)=
+ \operatorname{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}\right)V.
+\]
+
+\subsection{Loss, prediction, and evaluation metrics}
+\label{sec:metrics}
+For logits $z_i$ and target $y_i$, use
+\[
+ \mathcal{L}_{\rm CE}=-\frac{1}{N}\sum_{i=1}^N
+ \log\frac{\exp(z_{i,y_i})}{\sum_{k=0}^9\exp(z_{i,k})}.
+\]
+Report accuracy and macro-F1, where macro-F1 averages the per-class F1 scores
+equally over all ten classes. State the precision/recall definition and the
+zero-division policy used by the implementation.
+\reporttodo{Define parameter counting and both timing protocols: hardware/device,
+batch size, data transfer inclusion, warm-up, repetitions, synchronization when
+needed, timing boundaries, units, and number of timed samples. State how
+confusion matrices and qualitative samples are constructed.}
+
+\subsection{Training setup and implementation ownership}
+\label{sec:training-setup}
+\begin{table}[htbp]
+\centering\small
+\caption{Planned configuration fields. Verify against each run's saved metadata.}
+\label{tab:training-setup}
+\begin{tabularx}{\linewidth}{lY}
+\toprule
+Setting & Value / required explanation\\\midrule
+Seed / batch / epochs & Current YAMLs: 42 / 128 / 50\\
+Learning rate & Current YAMLs: 0.001; document tuning procedure\\
+Optimizer / scheduler & \pending; include optimizer parameters and scheduler or none\\
+Regularization & Per-model dropout, weight decay, augmentation; record none where applicable\\
+Early stopping & \pending; distinguish it from saving the best checkpoint\\
+Checkpoint selection & Lowest validation loss; verify implementation and tie handling\\
+Hardware / software & \pending; separate training and inference environments\\
+Precision & \pending; full/mixed precision and relevant settings\\
+Implementation ownership & Map custom modules and imported library functions to each model/pipeline stage\\
+\bottomrule
+\end{tabularx}
+\end{table}
+\reporttodo{Add model-specific settings and exact dependency versions. Distinguish
+configuration values from observed execution. Record how hyperparameters were
+chosen without tuning on the test set. Reference the source and run manifest in
+Appendix~\ref{app:reproducibility}.}
+
+\subsection{Experimental design and comparison fairness}
+\label{sec:experiment-design}
+\begin{table}[htbp]
+\centering\small
+\caption{Experiment plan; complete before interpreting the results.}
+\label{tab:experiments}
+\begin{tabularx}{\linewidth}{p{19mm}YYYY}
+\toprule
+Study & Hypothesis & Changed factor & Fixed factors & Metrics / decision rule\\\midrule
+Core families & \pending & Architecture and its representation & Same split/seed and evaluation protocol & Quality and cost; state trade-off criterion\\
+LSTM vs. GRU (optional) & \pending & Recurrent cell & State ordering, training budget and other controls & Accuracy, F1, parameters and cost\\
+Ablation (recommended) & \pending & One representation or regularizer & All other stated settings & State criterion before interpretation\\
+\bottomrule
+\end{tabularx}
+\end{table}
+\reporttodo{Explain which settings are genuinely shared and which vary between
+models. The same number of epochs does not imply equal compute. State limitations
+of unequal parameter counts or tuning budgets. For A1, ablation is recommended,
+not mandatory; mark an unperformed ablation as not conducted rather than inventing results.}

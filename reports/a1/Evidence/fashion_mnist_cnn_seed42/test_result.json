@@ -1,0 +1,63 @@
+{
+  "name": "fashion_mnist_cnn_seed42",
+  "model": "cnn",
+  "dataset": "fashion_mnist",
+  "split": "test",
+  "seed": 42,
+  "config": {
+    "name": "fashion_mnist_cnn_seed42",
+    "model": "cnn",
+    "model_config": {
+      "in_channels": 1
+    },
+    "dataset": "fashion_mnist",
+    "seed": 42,
+    "batch_size": 128,
+    "learning_rate": 0.001,
+    "epochs": 50,
+    "num_workers": 0,
+    "val_fraction": 0.1,
+    "data_dir": "data",
+    "checkpoint_dir": "checkpoints",
+    "results_dir": "results"
+  },
+  "checkpoint": {
+    "path": "checkpoints\\fashion_mnist_cnn_seed42\\best.pt",
+    "selection_rule": "lowest validation loss",
+    "epoch": 48,
+    "global_step": 20256,
+    "best_validation_loss": 0.35972775729497275,
+    "config": {
+      "name": "fashion_mnist_cnn_seed42",
+      "model": "cnn",
+      "model_config": {
+        "in_channels": 1
+      },
+      "dataset": "fashion_mnist",
+      "seed": 42,
+      "batch_size": 128,
+      "learning_rate": 0.001,
+      "epochs": 50,
+      "num_workers": 0,
+      "val_fraction": 0.1,
+      "data_dir": "data",
+      "checkpoint_dir": "checkpoints",
+      "results_dir": "results"
+    }
+  },
+  "metrics": {
+    "accuracy": 0.8621000051498413,
+    "macro_f1": 0.861533553326265
+  },
+  "parameter_count": 19562,
+  "training_seconds": 562.8121767460007,
+  "inference_seconds": 1.5917145006824285,
+  "sample_count": 10000,
+  "git_commit": "27e7c0c98ad6bd93cd412fd06a370bf87f4c6101-dirty",
+  "environment": {
+    "python": "3.12.7",
+    "torch": "2.14.0+cpu",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "device_name": "Intel64 Family 6 Model 186 Stepping 2, GenuineIntel"
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "name": "fashion_mnist_lstm_seed42",
+  "model": "lstm",
+  "dataset": "fashion_mnist",
+  "split": "test",
+  "seed": 42,
+  "config": {
+    "name": "fashion_mnist_lstm_seed42",
+    "model": "lstm",
+    "model_config": {
+      "input_size": 28,
+      "hidden_size": 128,
+      "num_layers": 1,
+      "dropout": 0.0
+    },
+    "dataset": "fashion_mnist",
+    "seed": 42,
+    "batch_size": 128,
+    "learning_rate": 0.001,
+    "epochs": 50,
+    "num_workers": 0,
+    "val_fraction": 0.1,
+    "data_dir": "data",
+    "checkpoint_dir": "checkpoints",
+    "results_dir": "results"
+  },
+  "checkpoint": {
+    "path": "checkpoints\\fashion_mnist_lstm_seed42\\best.pt",
+    "selection_rule": "lowest validation loss",
+    "epoch": 50,
+    "global_step": 21100,
+    "best_validation_loss": 0.2733980689048767,
+    "config": {
+      "name": "fashion_mnist_lstm_seed42",
+      "model": "lstm",
+      "model_config": {
+        "input_size": 28,
+        "hidden_size": 128,
+        "num_layers": 1,
+        "dropout": 0.0
+      },
+      "dataset": "fashion_mnist",
+      "seed": 42,
+      "batch_size": 128,
+      "learning_rate": 0.001,
+      "epochs": 50,
+      "num_workers": 0,
+      "val_fraction": 0.1,
+      "data_dir": "data",
+      "checkpoint_dir": "checkpoints",
+      "results_dir": "results"
+    }
+  },
+  "metrics": {
+    "accuracy": 0.8981999754905701,
+    "macro_f1": 0.8974562455590943
+  },
+  "parameter_count": 82186,
+  "training_seconds": 3919.3351115999976,
+  "inference_seconds": 1.0319401995511726,
+  "sample_count": 10000,
+  "git_commit": "27e7c0c98ad6bd93cd412fd06a370bf87f4c6101-dirty",
+  "environment": {
+    "python": "3.12.7",
+    "torch": "2.14.0+cpu",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "device_name": "Intel64 Family 6 Model 186 Stepping 2, GenuineIntel"
+  }
+}
