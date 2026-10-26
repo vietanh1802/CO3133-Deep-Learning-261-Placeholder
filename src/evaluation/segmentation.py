@@ -1,8 +1,9 @@
-"""Pixel metrics and bounded qualitative evidence for semantic segmentation.
+"""Compute pixel metrics and select segmentation examples.
 
-Confusion matrices use target rows and prediction columns. Metrics aggregate pixels
-across the complete split, include background, and assign zero to classes absent
-from both targets and predictions. No smoothing changes the reported scores.
+Notes:
+    Confusion matrices use target rows and prediction columns.
+    Metrics pool pixels across the split, include background, and use no smoothing.
+    Classes absent from both targets and predictions receive zero scores.
 """
 
 from collections.abc import Iterable
@@ -29,19 +30,19 @@ def confusion_matrix(
     *,
     num_classes: int = 8,
 ) -> Tensor:
-    """Count valid integer label pairs without silently casting invalid inputs.
+    """Count valid integer label pairs.
 
     Args:
-        targets: Integer labels of any shape, with values in [0, num_classes).
-        predictions: Integer labels matching targets exactly in shape.
-        num_classes: Number of classes, including background.
+        targets: Integer labels in [0, num_classes), of any shape.
+        predictions: Integer labels with the same shape as targets.
+        num_classes: Class count including background.
 
     Returns:
-        CPU int64 matrix with target rows and prediction columns. Empty regions
-        return an all-zero matrix so boundary/interior counts remain additive.
+        CPU int64 matrix with target rows and prediction columns.
+        Empty inputs produce zero counts.
 
     Raises:
-        ValueError: Shapes, class count, label types, or label ranges are invalid.
+        ValueError: Invalid shapes, class count, label types, or label ranges.
     """
     if num_classes <= 0 or targets.shape != predictions.shape:
         raise ValueError("positive num_classes and matching label shapes are required")
@@ -59,13 +60,14 @@ def confusion_matrix(
 
 
 def metrics_from_confusion(counts: Tensor) -> SegmentationMetrics:
-    """Compute IoU and Dice from additive counts, including absent classes as zero.
+    """Compute IoU and Dice from pooled counts.
 
     Args:
-        counts: Nonnegative square integer matrix, target rows/prediction columns.
+        counts: Nonnegative square integer matrix, with target rows.
 
     Returns:
-        Per-class scores and unweighted means over every class, including background.
+        Per-class scores and unweighted means, including background.
+        Absent classes receive zero scores.
 
     Raises:
         ValueError: Counts are malformed, negative, or not integers.
@@ -121,17 +123,19 @@ def evaluate_predictions(
     *,
     num_classes: int = 8,
 ) -> dict[str, SegmentationMetrics]:
-    """Evaluate full masks and ground-truth boundary/interior regions.
+    """Evaluate full masks, boundaries, and interiors.
 
     Args:
-        targets: Integer masks shaped (N, H, W); empty splits are rejected.
-        predictions: Integer masks of the same shape. Convert model logits with
-            logits.argmax(dim=1) before calling; resizing belongs to the data pipeline.
-        num_classes: Number of dataset classes, including background.
+        targets: Nonempty integer masks shaped (N, H, W).
+        predictions: Integer masks matching targets. Convert logits with argmax(dim=1).
+        num_classes: Class count including background.
 
     Returns:
-        Metrics keyed by all, boundary, and interior. Region confusion matrices add
-        to the full matrix. Empty regions have zero scores and zero pixel counts.
+        Metrics keyed by all, boundary, and interior. Region counts sum to full counts.
+        Empty regions have zero scores and pixel counts.
+
+    Notes:
+        Resize masks in the data pipeline before evaluation.
     """
     if targets.ndim != 3 or targets.numel() == 0:
         raise ValueError("targets must be a nonempty (N, H, W) tensor")
@@ -164,11 +168,11 @@ def select_examples(
     num_classes: int = 8,
     robot_class: int = 4,
 ) -> dict[str, int]:
-    """Select best, worst, and best RO-containing examples deterministically.
+    """Select best, worst, and best RO-containing examples.
 
-    Ranking uses image mIoU over classes present in either target or prediction,
-    avoiding an absent-class penalty in qualitative selection. Ties select the
-    first sample. RO selection is omitted if no target contains that class.
+    Notes:
+        Ranks by image mIoU over classes present in either target or prediction.
+        Ties select the first sample. Omits RO selection when no target contains RO.
     """
     evaluate_predictions(targets, predictions, num_classes=num_classes)
     if not 0 <= robot_class < num_classes:
@@ -196,21 +200,23 @@ def evaluate_model(
     *,
     num_classes: int = 8,
 ) -> dict[str, SegmentationMetrics]:
-    """Evaluate model batches with pooled counts and bounded memory.
+    """Evaluate batches with pooled counts and bounded memory.
 
     Args:
-        model: Returns logits (N,C,H,W), or a torchvision-style dictionary with
-            logits under "out". Logit resolution must match the supplied masks.
-        batches: Pairs of model-ready images and integer target masks (N,H,W).
-        device: Model execution device; confusion counts accumulate on CPU.
-        num_classes: Expected output channels, including background.
+        model: Returns (N, C, H, W) logits or a dictionary with an "out" tensor.
+            Spatial dimensions must match the masks.
+        batches: Model-ready image and integer mask pairs; masks have shape (N, H, W).
+        device: Execution device. Counts accumulate on CPU.
+        num_classes: Output channel count including background.
 
     Returns:
-        Full, boundary, and interior metrics pooled across all batches. The model
-        is moved to device; its previous training/evaluation mode is restored.
+        Pooled full-mask, boundary, and interior metrics.
+
+    Notes:
+        Moves the model to device and restores its previous training mode.
 
     Raises:
-        ValueError: Batches are empty or model outputs have incompatible shapes.
+        ValueError: Empty batches or incompatible output shapes.
     """
     counts = {
         name: torch.zeros(num_classes, num_classes, dtype=torch.int64)

@@ -1,8 +1,4 @@
-"""Figures for the Assignment 1 exploratory data analysis.
-
-Every function here takes an already-computed summary from :mod:`src.eda.classification` and
-writes matching PNG and PDF figures, so a figure can never disagree with the JSON summary.
-"""
+"""Plot computed EDA summaries as matching PNG and PDF figures."""
 
 from collections.abc import Sequence
 from pathlib import Path
@@ -55,7 +51,7 @@ def plot_class_distribution(
     bars = axes.bar(names, counts, color=BLUE)
     axes.bar_label(bars, fmt="%d", fontsize=8, padding=2)
 
-    # A flat line at the perfectly balanced count makes any skew obvious at a glance.
+    # Show the balanced-count reference.
     axes.axhline(
         counts.mean(),
         color="grey",
@@ -83,10 +79,7 @@ def plot_split_class_distribution(
     *,
     title: str,
 ) -> None:
-    """Compare train and test class proportions to check for distribution shift.
-
-    Proportions rather than raw counts, because the two splits have different sizes.
-    """
+    """Compare train and test class proportions across unequal split sizes."""
     if train_balance.class_names != test_balance.class_names:
         raise ValueError("both splits must use the same class names")
 
@@ -140,8 +133,7 @@ def plot_intensity_histogram(
     figure, axes = plt.subplots(figsize=(7.5, 4.5))
     axes.bar(centers, counts, width=np.diff(edges), color=BLUE, align="center")
 
-    # Log scale: the background spike at 0 is orders of magnitude taller than the rest,
-    # and would otherwise flatten the entire foreground range into the axis.
+    # Log scale keeps the background spike from hiding foreground counts.
     axes.set_yscale("log")
     axes.axvline(
         intensity.mean,
@@ -177,8 +169,7 @@ def plot_class_mean_images(
     figure, axes = plt.subplots(
         rows,
         columns,
-        # The extra half inch of height leaves room for the suptitle, so the first row
-        # of images does not run into the second row's class labels.
+        # Reserve height for the title and row labels.
         figsize=(2.0 * columns, 2.4 * rows + 0.5),
         squeeze=False,
     )
@@ -275,11 +266,7 @@ def plot_representative_samples(
     title: str,
     samples_per_class: int = 3,
 ) -> None:
-    """Save a grid of real examples, one row per class.
-
-    Several examples per class rather than one, so the reader can see within-class
-    variation instead of judging a class by a single lucky image.
-    """
+    """Save several real examples per class, with one row per class."""
     if samples_per_class <= 0:
         raise ValueError("samples_per_class must be positive")
 
@@ -304,8 +291,7 @@ def plot_representative_samples(
                 continue
             _show_image(axis, batch[indices[column]])
             if column == 0:
-                # One label per row, written as a left-hand y-label so it does not
-                # collide with the images themselves.
+                # Place row labels outside the images.
                 axis.axis("on")
                 axis.set_xticks([])
                 axis.set_yticks([])

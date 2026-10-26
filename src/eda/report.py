@@ -1,9 +1,4 @@
-"""One reusable EDA run, shared by every dataset entry point in ``scripts/eda/``.
-
-Adding a dataset means calling :func:`run_dataset_eda` with its two splits and its
-class names; the set of figures and the summary file stay identical across datasets,
-which is what makes the report's dataset sections directly comparable.
-"""
+"""Run shared EDA and export comparable dataset summaries and figures."""
 
 from collections.abc import Sequence
 from pathlib import Path
@@ -30,12 +25,10 @@ from src.plots.eda import (
 
 
 def dataset_arrays(dataset: RawImageDataset) -> tuple[np.ndarray, np.ndarray]:
-    """Return ``(images, labels)`` as numpy arrays, without applying any transform.
+    """Read raw dataset arrays without transforms.
 
-    ``dataset.data`` is read directly instead of iterating ``dataset[i]``: EDA must
-    describe the *raw* data, not the augmented tensors the model sees, and reading the
-    backing array is roughly two orders of magnitude faster than decoding 60,000 PIL
-    images one at a time.
+    Returns:
+        (images, labels) NumPy arrays read directly from dataset storage.
     """
     images = np.asarray(dataset.data)
     labels = np.asarray(dataset.targets).astype(np.int64).ravel()
@@ -66,7 +59,7 @@ def run_dataset_eda(
         split="train",
     )
 
-    # Required by the assignment: class distribution, input size, imbalance, samples.
+    # Assignment EDA outputs.
     plot_class_distribution(
         profile.balance,
         output_path / "class_distribution.png",
@@ -80,7 +73,7 @@ def run_dataset_eda(
         title=f"{display_name} representative training samples",
     )
 
-    # Supporting analysis: evidence for the preprocessing and error-analysis sections.
+    # Preprocessing and error-analysis evidence.
     plot_split_class_distribution(
         profile.balance,
         summarize_class_balance(test_labels, class_names),

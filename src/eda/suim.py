@@ -34,8 +34,7 @@ def check_pair(image_path: Path, mask_path: Path) -> PairCheck:
     """Decode one image and its mask, reporting geometry and mask-code validity."""
     try:
         with Image.open(image_path) as handle:
-            # load() forces the full decode, which is what catches a truncated JPEG;
-            # reading only the header would report a size for a half-written file.
+            # Force full decoding to detect truncated images.
             handle.load()
             image_size = handle.size
         with Image.open(mask_path) as handle:
@@ -52,8 +51,7 @@ def check_pair(image_path: Path, mask_path: Path) -> PairCheck:
             error=f"{type(exc).__name__}: {exc}",
         )
 
-    # Exact corner test, not a tolerance band: a pixel is validly coded only when
-    # every channel is 0 or 255. Anything else means the 3-bit assumption is unsafe.
+    # Require exact 0 or 255 channels for valid 3-bit codes.
     on_code = ((mask == 0) | (mask == 255)).all(axis=2)
     labels = decode_mask(mask)
     return PairCheck(
@@ -69,15 +67,11 @@ def check_pair(image_path: Path, mask_path: Path) -> PairCheck:
 
 
 def usable_checks(checks: Iterable[PairCheck]) -> list[PairCheck]:
-    """Keep the pairs this project trains and evaluates on.
+    """Select pairs with valid images, matching sizes, and exact mask colors.
 
-    A pair is usable when it decodes, when image and mask agree on size, and when
-    every mask pixel sits exactly on one of the eight 3-bit colours. The last rule
-    is not pedantry: in a recompressed mask the blue channel of RI magenta dips
-    below the threshold along object edges, and the fringe decodes as RO. Measured
-    over train_val, RO pixels touch an RI pixel in 0 percent of a clean mask but in
-    97 percent of a recompressed one, so those masks carry phantom rare-class
-    regions. The definition lives here once rather than in each caller.
+    Notes:
+        Recompressed masks can introduce false rare-class pixels at object edges.
+        Only the eight exact 3-bit colors are accepted.
     """
     return [
         check
@@ -99,10 +93,10 @@ class ClassStat:
 
 
 def class_summary(checks: Iterable[PairCheck]) -> list[ClassStat]:
-    """Per-class image counts, pixel shares and typical area over the usable pairs.
+    """Summarize class frequencies over usable pairs.
 
-    Pixel share and image count can disagree: a class in many images that covers a
-    sliver of each is common by one count and rare by the other, so both are kept.
+    Returns:
+        Per-class image counts, pixel shares, and typical areas.
     """
     totals = np.zeros(NUM_CLASSES, dtype=np.int64)
     areas: list[list[float]] = [[] for _ in range(NUM_CLASSES)]
@@ -125,9 +119,7 @@ def class_summary(checks: Iterable[PairCheck]) -> list[ClassStat]:
     ]
 
 
-# A 9 by 8 grey thumbnail compared left to right gives 64 bits that describe where
-# an image is lighter than itself, not what colour it is, so the same scene stored
-# at two of this dataset's eleven resolutions still hashes to nearly the same bits.
+# A 9-by-8 grayscale thumbnail yields a 64-bit, resolution-tolerant difference hash.
 DHASH_SIDE = 8
 
 
@@ -163,11 +155,10 @@ def image_fingerprint(path: Path, split: str) -> Fingerprint:
 def find_duplicate_candidates(
     fingerprints: Sequence[Fingerprint], max_distance: int
 ) -> list[tuple[Fingerprint, Fingerprint, int]]:
-    """Every pair whose hashes differ in at most ``max_distance`` bits.
+    """Find pairs whose hashes differ by at most max_distance bits.
 
-    These are candidates only. A 64-bit hash collides on images that are merely
-    flat and similar in tone, which this dataset has many of, so each pair must be
-    confirmed against the pixels before it is called a duplicate.
+    Notes:
+        Hash matches are candidates; confirm duplicates against image pixels.
     """
     hashes = np.array([f.dhash for f in fingerprints], dtype=np.uint64)
     distance = np.bitwise_count(hashes[:, None] ^ hashes[None, :])
@@ -210,17 +201,11 @@ def grouped_stratified_split(
     n_splits: int = 5,
     seed: int = 42,
 ) -> SplitAssignment:
-    """Divide one split into train and validation by group, balancing the rare classes.
+    """Split groups without leaking duplicate photographs across splits.
 
-    Two constraints pull against each other. Confirmed copies of the same photograph
-    must land on the same side, or validation scores an image the model has trained
-    on. And RO appears in only 86 of 1,430 images, so an unconstrained draw can leave
-    validation with a handful of them and make its rare-class IoU meaningless. A
-    grouped stratified fold satisfies both at once, which a random draw does neither.
-
-    Each image is labelled with the rarest class it contains, measured on this data
-    rather than assumed, so it is the scarce classes that decide the balance. Fold 0
-    of ``n_splits`` becomes validation, making ``n_splits=5`` a 20 percent split.
+    Notes:
+        Stratification labels each image by its rarest class in this dataset.
+        Fold 0 is validation; n_splits=5 gives a 20 percent validation split.
     """
     stems = [check.stem for check in checks]
     position = {stem: index for index, stem in enumerate(stems)}
@@ -232,8 +217,7 @@ def grouped_stratified_split(
 
     present = np.array([[count > 0 for count in c.class_pixels] for c in checks])
     frequency = present.sum(axis=0)
-    # Masking absent classes with a count above every real one turns "rarest class in
-    # this image" into a single argmin, so every image gets exactly one stratum.
+    # Exclude absent classes so argmin selects a present class.
     stratum = np.where(present, frequency, frequency.max() + 1).argmin(axis=1)
 
     folds = StratifiedGroupKFold(n_splits=n_splits, shuffle=True, random_state=seed)

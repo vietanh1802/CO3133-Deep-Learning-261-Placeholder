@@ -46,8 +46,7 @@ def find_pairs(split_dir: str | Path) -> SplitPairs:
     )
 
 
-# The authors encode each class as a 3-bit RGB colour, so a channel is meant to be
-# exactly 0 or exactly 255 and the bit pattern read as binary is the class index.
+# SUIM class indices are 3-bit RGB codes with channels equal to 0 or 255.
 MASK_BIT_THRESHOLD = 128
 NUM_CLASSES = 8
 CLASS_NAMES = ("BW", "HD", "PF", "WR", "RO", "RI", "FV", "SR")

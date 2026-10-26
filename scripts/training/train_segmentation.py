@@ -83,7 +83,7 @@ def run() -> None:
     """Train, select by validation mIoU, re-evaluate the best checkpoint, and save results."""
     args = parse_args()
     config = load_segmentation_config(args.config)
-    # Read before this run writes its own logs, which would mark the tree dirty.
+    # Capture tree state before logs mark it dirty.
     revision = git_revision()
 
     run_directory = Path(config.results_dir) / "a2" / config.name
@@ -163,7 +163,7 @@ def run() -> None:
         resume=args.resume,
     )
 
-    # On resume this covers only the epochs run by this process.
+    # Resume timing covers only this process.
     peak_training_memory_mb = (
         torch.cuda.max_memory_allocated(device) / 2**20 if device.type == "cuda" else None
     )
@@ -203,7 +203,7 @@ def run() -> None:
         "checkpoint_selection": "highest validation mIoU",
         "best_epoch": result.best_epoch,
         "best_validation_miou": result.best_validation_miou,
-        # Per-epoch time includes that epoch's validation pass.
+        # Epoch time includes validation.
         "training_seconds": result.duration_seconds,
         "peak_training_memory_mb": peak_training_memory_mb,
         "validation_inference": asdict(inference),

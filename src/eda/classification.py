@@ -1,8 +1,7 @@
-"""Exploratory data analysis for image-classification datasets.
+"""Compute image-classification statistics.
 
-This module only *computes* statistics; rendering lives in :mod:`src.plots.eda`
-and orchestration lives in ``scripts/eda/``. Keeping the three apart means every number
-reported in the assignment can be unit-tested without touching matplotlib.
+Notes:
+    Rendering lives in src.plots.eda; scripts/eda orchestrates runs.
 """
 
 import json
@@ -12,12 +11,10 @@ from pathlib import Path
 
 import numpy as np
 
-# MNIST and Fashion-MNIST both draw a light object on a black background, so a single
-# uint8 cut-off separates "ink" from background well enough to compare classes.
+# Threshold light foreground pixels on the black background.
 FOREGROUND_THRESHOLD = 32
 
-# 32 bins over the uint8 range keeps the histogram readable while still showing the
-# background spike at 0 that motivates the mean=0.5 / std=0.5 normalization.
+# Use 32 bins to show the background spike without crowding the histogram.
 INTENSITY_BINS = 32
 
 
@@ -72,10 +69,10 @@ class DatasetProfile:
 
 
 def as_image_batch(images: np.ndarray) -> np.ndarray:
-    """Return images as [num_samples, height, width, channels].
+    """Return images shaped (N, H, W, C).
 
-    Grayscale datasets expose ``[N, H, W]`` while CIFAR-10 exposes ``[N, H, W, 3]``;
-    every statistic below is written against the four-dimensional form only.
+    Args:
+        images: Grayscale (N, H, W) or color (N, H, W, C) images.
     """
     batch = np.asarray(images)
     if batch.ndim == 3:
@@ -115,8 +112,7 @@ def summarize_class_balance(labels: np.ndarray, class_names: Sequence[str]) -> C
     counts = np.bincount(values, minlength=len(class_names))
     proportions = counts / values.size
 
-    # A ratio of 1.00 means perfectly balanced. The assignment asks us to state this
-    # explicitly rather than leave the reader to infer it from the bar chart.
+    # A ratio of 1 means balanced classes.
     smallest = int(np.min(counts))
     imbalance_ratio = int(np.max(counts)) / smallest if smallest > 0 else float("inf")
 
@@ -136,12 +132,7 @@ def summarize_intensity(
     *,
     num_classes: int,
 ) -> IntensitySummary:
-    """Summarize pixel intensities globally and per class.
-
-    The global histogram justifies the normalization constants used in
-    :mod:`src.data.transform`; the per-class numbers show how much of each image the
-    object actually occupies, which differs sharply between e.g. Bag and Sandal.
-    """
+    """Summarize pixel intensities globally and per class."""
     batch = as_image_batch(images)
     values = np.asarray(labels).astype(np.int64).ravel()
     if values.size != batch.shape[0]:
@@ -197,12 +188,13 @@ def compute_class_mean_images(
 
 
 def compute_class_similarity(class_mean_images: np.ndarray) -> np.ndarray:
-    """Return a [num_classes, num_classes] cosine similarity between class prototypes.
+    """Compute cosine similarities between centered class prototypes.
 
-    The average of all prototypes is subtracted first. Without that step every
-    prototype shares the same bright centre and all similarities collapse to roughly
-    0.9; after centring, the matrix measures what actually *distinguishes* one class
-    from another, which is what predicts the confusion pairs seen at test time.
+    Returns:
+        Matrix shaped (num_classes, num_classes).
+
+    Notes:
+        Subtracts the mean prototype before computing similarities.
     """
     means = np.asarray(class_mean_images, dtype=np.float64)
     if means.ndim < 2:
@@ -212,7 +204,7 @@ def compute_class_similarity(class_mean_images: np.ndarray) -> np.ndarray:
     flat = centered.reshape(means.shape[0], -1)
 
     norms = np.linalg.norm(flat, axis=1)
-    # Guard classes with no samples (an all-zero prototype) against division by zero.
+    # Avoid division by zero for empty classes.
     safe_norms = np.where(norms > 0.0, norms, 1.0)
     normalized = flat / safe_norms[:, np.newaxis]
     return normalized @ normalized.T
@@ -244,11 +236,7 @@ def most_similar_class_pairs(
     *,
     top_k: int = 5,
 ) -> list[tuple[str, str, float]]:
-    """Return the ``top_k`` most similar distinct class pairs, most similar first.
-
-    These are the pairs a model is expected to confuse, established before any
-    training has happened.
-    """
+    """Return the top_k distinct class pairs in descending similarity order."""
     if top_k <= 0:
         raise ValueError("top_k must be positive")
 
@@ -265,11 +253,7 @@ def most_similar_class_pairs(
 
 
 def summary_to_dict(profile: DatasetProfile) -> dict:
-    """Return a JSON-ready view of a profile, excluding the image-sized arrays.
-
-    The report cites this file instead of numbers retyped by hand, so a figure in the
-    report can never silently disagree with the run that produced it.
-    """
+    """Return a JSON-ready profile without image-sized arrays."""
     return {
         "dataset": profile.dataset,
         "split": profile.split,
@@ -335,8 +319,7 @@ def format_summary_lines(profile: DatasetProfile) -> list[str]:
             f"mean intensity {intensity.per_class_mean_intensity[class_id]:.1f}, "
             f"foreground {intensity.per_class_foreground_fraction[class_id]:.1%}"
         )
-    # With perfectly balanced counts argmin and argmax both land on class 0, so naming
-    # a "rarest" and "most common" class there would be misleading rather than informative.
+    # Do not name rarest or most common classes when counts are equal.
     if balance.rarest_class == balance.most_common_class:
         lines.append(
             f"Imbalance ratio (max/min): {balance.imbalance_ratio:.2f} "

@@ -40,15 +40,12 @@ OUTPUT_DIR = Path("results/a2/eda/suim")
 SPLIT_DIR = Path("results/a2/splits/suim")
 SPLITS = ("train_val", "TEST")
 
-# The split is a decision, not a measurement, so it is written to disk and committed.
-# Regenerating it from this seed must reproduce the files byte for byte.
+# Persist the split; regeneration must produce identical bytes.
 SPLIT_SEED = 42
 VAL_FOLDS = 5
 
-# Calibrated, not guessed: over all 1,200,475 pairs no duplicate confirmed against
-# the pixels differed in more than 9 of the 64 hash bits, so 12 searches past the
-# evidence. The hash alone is far too loose on water scenes, which is why every
-# candidate is then compared pixel by pixel.
+# Confirmed duplicates differed by at most 9 hash bits across 1,200,475 pairs.
+# Search up to 12 bits, then verify candidates against pixels.
 HASH_DISTANCE = 12
 PIXEL_TOLERANCE = 5.0
 
@@ -165,14 +162,13 @@ def main() -> None:
     ]
     candidates, confirmed, groups = duplicate_groups(fingerprints)
     crossing = [g for g in groups if len({m.split("/")[0] for m in g}) > 1]
-    # TEST is the published benchmark and stays whole, so the train_val twin goes.
+    # Preserve TEST; drop matching train_val images.
     contaminated = {m.split("/")[1] for g in crossing for m in g if m.startswith("train_val/")}
     kept["train_val"] = [c for c in kept["train_val"] if c.stem not in contaminated]
 
     assignment = grouped_stratified_split(
         kept["train_val"],
-        # Only groups wholly inside train_val are left to keep together; the ones that
-        # crossed into TEST were already resolved by dropping their train_val member.
+        # Cross-TEST duplicates are removed; group the remaining train_val images.
         [[m.split("/")[1] for m in g] for g in groups if not any(m.startswith("TEST/") for m in g)],
         n_splits=VAL_FOLDS,
         seed=SPLIT_SEED,
@@ -182,8 +178,7 @@ def main() -> None:
     halves, digests = {}, {}
     for name, members in (("train", assignment.train), ("val", assignment.val)):
         path = SPLIT_DIR / f"{name}.txt"
-        # newline= is explicit so a Windows run and a Linux run write the same bytes,
-        # which is what makes the digest below worth quoting.
+        # Fix newlines for reproducible cross-platform digests.
         path.write_text("\n".join(members) + "\n", encoding="utf-8", newline="\n")
         digests[name] = hashlib.sha256(path.read_bytes()).hexdigest()[:16]
         halves[name] = [by_stem[stem] for stem in members]

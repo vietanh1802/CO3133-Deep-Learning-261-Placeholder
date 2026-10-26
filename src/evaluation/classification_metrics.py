@@ -65,8 +65,7 @@ def _macro_f1(confusion: torch.Tensor) -> float:
     predicted_per_class = confusion.sum(dim=0).to(torch.float64)
     actual_per_class = confusion.sum(dim=1).to(torch.float64)
 
-    # 2*TP / (actual + predicted) is algebraically identical to harmonic mean of P and R,
-    # but avoids intermediate division-by-zero when precision or recall is undefined.
+    # Equivalent F1 formula avoids division by undefined precision or recall.
     denominator = predicted_per_class + actual_per_class
     per_class_f1 = torch.where(
         denominator > 0,

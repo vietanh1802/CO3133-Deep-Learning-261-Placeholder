@@ -164,10 +164,11 @@ def fit_segmentation(
     num_classes: int = 8,
     resume: bool = False,
 ) -> SegmentationFitResult:
-    """Train, keep the highest-validation-mIoU checkpoint, and save state every epoch.
+    """Train and select the checkpoint with the highest validation mIoU.
 
-    ``best.pt`` holds the selected model and ``last.pt`` the latest full training
-    state; ``history.json`` in ``run_dir`` is rewritten after every epoch.
+    Notes:
+        Saves best.pt for selection and last.pt for resume.
+        Rewrites history.json in run_dir after each epoch.
     """
     checkpoint_dir, run_dir = Path(checkpoint_dir), Path(run_dir)
     last_path, best_path = checkpoint_dir / "last.pt", checkpoint_dir / "best.pt"
@@ -181,7 +182,7 @@ def fit_segmentation(
     if resume:
         metadata = load_training_state(last_path, model, optimizer, scheduler, map_location=device)
         records = json.loads(history_path.read_text(encoding="utf-8"))
-        # History is written before last.pt, so it can hold one epoch the checkpoint lacks.
+        # History may be one epoch ahead of last.pt.
         history = [EpochRecord(**record) for record in records[: metadata.epoch]]
         if is_primary():
             logger.info("Resuming after epoch {}", metadata.epoch)

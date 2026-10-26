@@ -112,11 +112,11 @@ def train_one_epoch(
     loss_fn: nn.Module,
     device: torch.device,
 ) -> EpochResult:
-    """Train for one epoch and return sample-weighted aggregates.
+    """Train one epoch and return sample-weighted aggregates.
 
-    ``loss_fn`` must reduce a batch to its mean, which is the default for
-    :class:`~torch.nn.CrossEntropyLoss`. The caller is responsible for moving
-    ``model`` onto ``device`` before the first epoch.
+    Args:
+        loss_fn: Loss that reduces each batch to its mean.
+        model: Model already placed on device.
     """
     result = run_training_epoch(
         model,
