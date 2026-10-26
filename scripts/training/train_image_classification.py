@@ -14,6 +14,7 @@ from src.evaluation.plots import plot_learning_curves
 from src.models import ImageClassifier, build_model
 from src.training.engine import fit
 from src.utils import ExperimentState, load_config, seed_everything, setup_logging
+from src.utils.config import save_config
 from src.utils.logging import log_config
 
 
@@ -43,10 +44,12 @@ def main() -> None:
     args = parse_args()
     config = replace(load_config(args.config), dataset=args.data)
 
-    run_directory = Path(config.results_dir) / "a1" / config.name
+    run_directory = Path(config.results_dir) / config.name
     checkpoint_path = Path(config.checkpoint_dir) / config.name / "best.pt"
     run_directory.mkdir(parents=True, exist_ok=True)
-    setup_logging(log_file=run_directory / "train.log")
+    output_root = Path(config.results_dir).parent
+    setup_logging(log_file=output_root / "console" / config.name / "train.log")
+    save_config(config, output_root / "configs" / f"{config.name}.yaml")
     logger.info(ExperimentState.INITIALIZING)
     log_config(config.to_dict())
 

@@ -31,14 +31,14 @@ particular architecture.
 
 Generated EDA evidence:
 
-- [Class distribution](../results/a1/eda/fashion_mnist/class_distribution.png)
-- [Representative samples](../results/a1/eda/fashion_mnist/representative_samples.png)
-- [Train vs test class proportions](../results/a1/eda/fashion_mnist/split_class_distribution.png)
-- [Pixel intensity distribution](../results/a1/eda/fashion_mnist/pixel_intensity_distribution.png)
-- [Average image per class](../results/a1/eda/fashion_mnist/class_mean_images.png)
-- [Class prototype similarity](../results/a1/eda/fashion_mnist/class_similarity.png)
-- [Foreground coverage per class](../results/a1/eda/fashion_mnist/foreground_coverage.png)
-- [Machine-readable EDA summary](../results/a1/eda/fashion_mnist/summary.json)
+- [Class distribution](../outputs/a1_v1/results/eda/fashion_mnist/class_distribution.png)
+- [Representative samples](../outputs/a1_v1/results/eda/fashion_mnist/representative_samples.png)
+- [Train vs test class proportions](../outputs/a1_v1/results/eda/fashion_mnist/split_class_distribution.png)
+- [Pixel intensity distribution](../outputs/a1_v1/results/eda/fashion_mnist/pixel_intensity_distribution.png)
+- [Average image per class](../outputs/a1_v1/results/eda/fashion_mnist/class_mean_images.png)
+- [Class prototype similarity](../outputs/a1_v1/results/eda/fashion_mnist/class_similarity.png)
+- [Foreground coverage per class](../outputs/a1_v1/results/eda/fashion_mnist/foreground_coverage.png)
+- [Machine-readable EDA summary](../outputs/a1_v1/results/eda/fashion_mnist/summary.json)
 
 ## Methodology
 
@@ -69,15 +69,15 @@ parameters and higher inference time.
 
 Run evidence:
 
-- [Linear learning curves](../results/a1/linear_seed42/learning_curves.png)
-- [Linear confusion matrix](../results/a1/linear_seed42/test_confusion_matrix.png)
-- [MLP learning curves](../results/a1/mlp_seed42/learning_curves.png)
-- [MLP confusion matrix](../results/a1/mlp_seed42/test_confusion_matrix.png)
-- [Linear confident errors](../results/a1/linear_seed42/test_confident_errors.png)
-- [Linear uncertain errors](../results/a1/linear_seed42/test_uncertain_errors.png)
-- [MLP confident errors](../results/a1/mlp_seed42/test_confident_errors.png)
-- [MLP uncertain errors](../results/a1/mlp_seed42/test_uncertain_errors.png)
-- [Machine-readable comparison](../results/a1/comparison_test.csv)
+- [Linear learning curves](../outputs/a1_v1/results/linear_seed42/learning_curves.png)
+- [Linear confusion matrix](../outputs/a1_v1/results/linear_seed42/test_confusion_matrix.png)
+- [MLP learning curves](../outputs/a1_v1/results/mlp_seed42/learning_curves.png)
+- [MLP confusion matrix](../outputs/a1_v1/results/mlp_seed42/test_confusion_matrix.png)
+- [Linear confident errors](../outputs/a1_v1/results/linear_seed42/test_confident_errors.png)
+- [Linear uncertain errors](../outputs/a1_v1/results/linear_seed42/test_uncertain_errors.png)
+- [MLP confident errors](../outputs/a1_v1/results/mlp_seed42/test_confident_errors.png)
+- [MLP uncertain errors](../outputs/a1_v1/results/mlp_seed42/test_uncertain_errors.png)
+- [Machine-readable comparison](../outputs/a1_v1/results/comparison_test.csv)
 
 ## Error analysis
 

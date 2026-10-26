@@ -8,7 +8,7 @@ from src.data.eda_report import run_dataset_eda
 from src.data.fashion_mnist import class_names
 
 DATA_DIR = Path("data")
-OUTPUT_DIR = Path("results/a1/eda/fashion_mnist")
+OUTPUT_DIR = Path("outputs/a1_v1/results/eda/fashion_mnist")
 
 
 def main() -> None:

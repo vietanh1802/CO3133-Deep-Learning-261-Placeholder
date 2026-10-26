@@ -27,7 +27,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--results-dir",
-        default="results/a1",
+        default="outputs/a1_v1/results",
         help="directory containing one subdirectory per evaluated run",
     )
     parser.add_argument(

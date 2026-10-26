@@ -18,6 +18,7 @@ from src.evaluation.plots import plot_confusion_matrix, plot_prediction_examples
 from src.models import ImageClassifier, build_model
 from src.training.checkpoint import load_checkpoint
 from src.utils import ExperimentState, load_config, seed_everything, setup_logging
+from src.utils.config import save_config
 from src.utils.logging import log_config, log_timing
 
 
@@ -107,9 +108,11 @@ def main() -> None:
     args = parse_args()
     config = replace(load_config(args.config), dataset=args.data)
 
-    run_directory = Path(config.results_dir) / "a1" / config.name
+    run_directory = Path(config.results_dir) / config.name
     run_directory.mkdir(parents=True, exist_ok=True)
-    setup_logging(log_file=run_directory / "evaluate.log")
+    output_root = Path(config.results_dir).parent
+    setup_logging(log_file=output_root / "console" / config.name / "evaluate.log")
+    save_config(config, output_root / "configs" / f"{config.name}_{args.split}.yaml")
     logger.info(ExperimentState.INITIALIZING)
     log_config(config.to_dict())
 
