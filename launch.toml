@@ -1,0 +1,64 @@
+[repo]
+name = "co3133"
+git_url = "https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder"
+ref = "feat/multi-gpu-training"
+
+[resources]
+num_gpus = 2
+max_hourly = 0.15
+disk = 40
+min_vram = 8
+min_cuda = 12.6
+min_download = 500
+
+[tasks.segmentation-smoke]
+download_checkpoints = false
+output_dirs = ["checkpoints"]
+timeout_seconds = 3600
+command = ["bash", "-lc", '''
+set -euo pipefail
+export MPLBACKEND=Agg OMP_NUM_THREADS=1
+uv run --locked python -c 'import torch; print("PyTorch", torch.__version__, "CUDA build", torch.version.cuda, flush=True); assert torch.cuda.device_count() >= 2, "Two CUDA GPUs are required"; [print(i, torch.cuda.get_device_name(i), torch.ones(1, device=f"cuda:{i}")) for i in range(2)]'
+bash scripts/data/download_suim.sh
+uv run --locked python - <<'PY'
+import json
+import subprocess
+import sys
+from dataclasses import replace
+
+import yaml
+
+from src.config.segmentation import load_segmentation_config
+
+config_path = "configs/segmentation/suim/baseline.yaml"
+config = load_segmentation_config(config_path)
+config = replace(config, name=config.name + "_2gpu")
+run = config.results_dir / "a2" / config.name
+run.mkdir(parents=True, exist_ok=True)
+config_path = str(run / "launch-config.yaml")
+with open(config_path, "w") as output:
+    yaml.safe_dump(config.to_dict(), output)
+subprocess.run([
+    sys.executable, "-m", "torch.distributed.run", "--standalone", "--nproc-per-node=2",
+    "-m", "scripts.training.train_segmentation", "--config", config_path
+], check=True)
+subprocess.run([
+    sys.executable, "-m", "scripts.evaluation.eval_segmentation",
+    "--evidence", str(run / "val_evidence.pt"), "--output", str(run / "evaluation")
+], check=True)
+summary = json.loads((run / "training_summary.json").read_text())
+assert len(summary["history"]) == config.epochs
+assert summary["world_size"] == 2
+assert summary["effective_batch_size"] == config.batch_size * config.accumulation_steps * 2
+for name in (
+    "learning_curves.png", "learning_curves.pdf",
+    "val_evidence.pt", "evaluation/metrics.json",
+    "evaluation/confusion_matrix.png", "evaluation/confusion_matrix.pdf",
+    "evaluation/examples.png", "evaluation/examples.pdf",
+):
+    assert (run / name).stat().st_size > 0, name
+for name in ("best.pt", "last.pt"):
+    assert (config.checkpoint_dir / config.name / name).stat().st_size > 0, name
+print("Segmentation pipeline check passed")
+PY
+''']

@@ -1,7 +1,7 @@
 """Run the SUIM exploratory analysis that backs the A2 dataset proposal.
 
 Every number quoted in ``reports/a2_proposal.md`` comes from one run of this script.
-It adds no measurement of its own: it calls :mod:`src.data.suim`, applies the two
+It adds no measurement of its own: it calls :mod:`src.eda.suim`, applies the two
 exclusion rules, and writes the result to ``results/a2/eda/suim/``.
 """
 
@@ -19,32 +19,33 @@ import numpy as np  # noqa: E402
 from src.data.suim import (  # noqa: E402
     CLASS_NAMES,
     NUM_CLASSES,
+    find_pairs,
+)
+from src.eda.suim import (  # noqa: E402
     Fingerprint,
     PairCheck,
     check_pair,
     class_summary,
     find_duplicate_candidates,
-    find_pairs,
     grouped_stratified_split,
     image_fingerprint,
     pixel_difference,
     usable_checks,
 )
+from src.plots.common import save_figure  # noqa: E402
+from src.plots.format import apply  # noqa: E402
 
 DATA_DIR = Path("data/suim")
 OUTPUT_DIR = Path("results/a2/eda/suim")
 SPLIT_DIR = Path("results/a2/splits/suim")
 SPLITS = ("train_val", "TEST")
 
-# The split is a decision, not a measurement, so it is written to disk and committed.
-# Regenerating it from this seed must reproduce the files byte for byte.
+# Persist the split; regeneration must produce identical bytes.
 SPLIT_SEED = 42
 VAL_FOLDS = 5
 
-# Calibrated, not guessed: over all 1,200,475 pairs no duplicate confirmed against
-# the pixels differed in more than 9 of the 64 hash bits, so 12 searches past the
-# evidence. The hash alone is far too loose on water scenes, which is why every
-# candidate is then compared pixel by pixel.
+# Confirmed duplicates differed by at most 9 hash bits across 1,200,475 pairs.
+# Search up to 12 bits, then verify candidates against pixels.
 HASH_DISTANCE = 12
 PIXEL_TOLERANCE = 5.0
 
@@ -96,6 +97,7 @@ def label_structure(checks: list[PairCheck]) -> dict:
 
 def plot_class_distribution(stats, image_total: int, path: Path) -> None:
     """Show that counting by image and counting by pixel rank the classes differently."""
+    apply()
     figure, axes = plt.subplots(figsize=(9, 4))
     position = np.arange(NUM_CLASSES)
     axes.bar(
@@ -110,7 +112,7 @@ def plot_class_distribution(stats, image_total: int, path: Path) -> None:
     axes.set_title("Class frequency by image and by pixel")
     axes.legend()
     figure.tight_layout()
-    figure.savefig(path, dpi=150)
+    save_figure(figure, path)
     plt.close(figure)
 
 
@@ -120,25 +122,27 @@ def plot_region_area(checks: list[PairCheck], path: Path) -> None:
         [c.class_pixels[i] / c.total_pixels for c in checks if c.class_pixels[i]]
         for i in range(NUM_CLASSES)
     ]
+    apply()
     figure, axes = plt.subplots(figsize=(9, 4))
     axes.boxplot(areas, tick_labels=list(CLASS_NAMES), showfliers=False)
     axes.set_ylabel("share of the image, where the class is present")
     axes.set_title("How much of an image a class covers when it appears")
     figure.tight_layout()
-    figure.savefig(path, dpi=150)
+    save_figure(figure, path)
     plt.close(figure)
 
 
 def plot_resolutions(checks: list[PairCheck], path: Path) -> None:
     """Show how far the data departs from the four resolutions the paper names."""
     counts = Counter(c.image_size for c in checks if c.image_size is not None).most_common()
+    apply()
     figure, axes = plt.subplots(figsize=(9, 4))
     axes.barh([f"{w}x{h}" for (w, h), _ in counts][::-1], [n for _, n in counts][::-1])
     axes.set_xscale("log")
     axes.set_xlabel("images (log scale)")
     axes.set_title(f"{len(counts)} resolutions across {len(checks)} pairs")
     figure.tight_layout()
-    figure.savefig(path, dpi=150)
+    save_figure(figure, path)
     plt.close(figure)
 
 
@@ -158,14 +162,13 @@ def main() -> None:
     ]
     candidates, confirmed, groups = duplicate_groups(fingerprints)
     crossing = [g for g in groups if len({m.split("/")[0] for m in g}) > 1]
-    # TEST is the published benchmark and stays whole, so the train_val twin goes.
+    # Preserve TEST; drop matching train_val images.
     contaminated = {m.split("/")[1] for g in crossing for m in g if m.startswith("train_val/")}
     kept["train_val"] = [c for c in kept["train_val"] if c.stem not in contaminated]
 
     assignment = grouped_stratified_split(
         kept["train_val"],
-        # Only groups wholly inside train_val are left to keep together; the ones that
-        # crossed into TEST were already resolved by dropping their train_val member.
+        # Cross-TEST duplicates are removed; group the remaining train_val images.
         [[m.split("/")[1] for m in g] for g in groups if not any(m.startswith("TEST/") for m in g)],
         n_splits=VAL_FOLDS,
         seed=SPLIT_SEED,
@@ -175,8 +178,7 @@ def main() -> None:
     halves, digests = {}, {}
     for name, members in (("train", assignment.train), ("val", assignment.val)):
         path = SPLIT_DIR / f"{name}.txt"
-        # newline= is explicit so a Windows run and a Linux run write the same bytes,
-        # which is what makes the digest below worth quoting.
+        # Fix newlines for reproducible cross-platform digests.
         path.write_text("\n".join(members) + "\n", encoding="utf-8", newline="\n")
         digests[name] = hashlib.sha256(path.read_bytes()).hexdigest()[:16]
         halves[name] = [by_stem[stem] for stem in members]

@@ -1,7 +1,7 @@
 """Evaluate saved SUIM predictions without depending on unfinished model loaders.
 
 Usage:
-    python -m scripts.evaluation.evaluate_segmentation --evidence run.pt --output results/a2/run
+    python -m scripts.evaluation.eval_segmentation --evidence run.pt --output results/a2/run
 
 Evidence is a weights-only torch dictionary containing integer targets/predictions
 (N,H,W), split (validation or test), and optional display images (N,3,H,W), float
@@ -19,8 +19,12 @@ import torch
 from matplotlib.patches import Patch
 
 from src.data.suim import CLASS_NAMES
-from src.evaluation.plots import plot_confusion_matrix
 from src.evaluation.segmentation import evaluate_predictions, select_examples
+from src.plots.common import (
+    plot_confusion_matrix,
+    save_figure,
+)
+from src.plots.format import apply
 
 
 def main() -> None:
@@ -98,6 +102,7 @@ def main() -> None:
     )
     palette = torch.tensor([[((i >> bit) & 1) for bit in (2, 1, 0)] for i in range(8)])
     columns = 3 if images is not None else 2
+    apply()
     figure, axes = plt.subplots(
         len(selected), columns, squeeze=False, figsize=(4 * columns, 3 * len(selected))
     )
@@ -117,7 +122,7 @@ def main() -> None:
         ncol=8,
     )
     figure.tight_layout(rect=(0, 0.06, 1, 1))
-    figure.savefig(args.output / "examples.png", dpi=150)
+    save_figure(figure, args.output / "examples.png")
     plt.close(figure)
 
 

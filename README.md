@@ -1,154 +1,133 @@
 # CO3133 - Deep Learning and Its Applications (Semester 261)
 
-Course project repository. Group: Placeholder
+Course project by Placeholder.
 
-**Project website:** https://vietanh1802.github.io/CO3133-Deep-Learning-261-Placeholder/
+[Website](https://vietanh1802.github.io/CO3133-Deep-Learning-261-Placeholder/) · [Assignment 1](web/assignment1.html) · [Assignment 2](web/assignment2.html) · [Assignment 3](web/assignment3.html)
 
-**Assignment pages:** [Assignment 1](web/assignment1.html) · [Assignment 2](web/assignment2.html) · [Assignment 3](web/assignment3.html)
-
-## Installation
+## Setup
 
 ```bash
 uv sync --dev
 uv run pre-commit install
 ```
 
-## Dataset Preparation
+## Datasets
 
-### Assignment 1: Fashion-MNIST, MNIST, CIFAR-10
+Fashion-MNIST, MNIST, and CIFAR-10 download automatically. Assignment 1 uses Fashion-MNIST.
 
-Fashion-MNIST, MNIST, and CIFAR-10 are downloaded and integrity-checked automatically.
-Fashion-MNIST remains the Assignment 1 evaluation dataset; MNIST and CIFAR-10 are available
-for development and later experiments. Generate the A1 EDA figures with:
+For SUIM, extract the dataset into:
+
+```text
+data/suim/
+  train_val/
+    images/
+    masks/
+  TEST/
+    images/
+    masks/
+```
+
+Generate dataset summaries and figures:
 
 ```bash
 uv run python -m scripts.eda.run_fashion_mnist
 uv run python -m scripts.eda.run_mnist
-```
-
-Each command writes the following to `results/a1/eda/<dataset>/`:
-
-| Output | What it answers |
-| --- | --- |
-| `class_distribution.png` | How many samples per class, and how imbalanced the set is |
-| `representative_samples.png` | What the raw inputs look like, three per class |
-| `split_class_distribution.png` | Whether the train and test splits share the same class mix |
-| `pixel_intensity_distribution.png` | How intensities are spread, which justifies the normalization constants |
-| `class_mean_images.png` | The average image of each class |
-| `class_similarity.png` | Which classes look alike before any training, i.e. the confusions to expect |
-| `foreground_coverage.png` | How much of the frame each class occupies |
-| `summary.json` | Every number above, machine-readable, for the report to cite |
-
-The analysis itself lives in `src/data/eda.py` (statistics), `src/data/eda_plots.py`
-(figures), and `src/data/eda_report.py` (one shared run), so the entry points only have
-to name a dataset.
-
-### Assignment 2: SUIM
-
-SUIM is not downloaded automatically and is not in the repository. Unpack it so that `data/suim/train_val/` and `data/suim/TEST/` exist, each with an `images/` and a `masks/` folder, then run:
-
-```bash
 uv run python -m scripts.eda.run_suim
 ```
 
-One run produces every number quoted in the A2 dataset proposal. It takes a few minutes, most of it the near-duplicate search over all 1,635 pairs.
+EDA outputs go to `results/a1/eda/<dataset>/` or `results/a2/eda/suim/`.
+SUIM training reads the committed splits in `results/a2/splits/suim/`.
 
-| Output                                             | What it answers                                                                                                                                                 |
-| -------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `results/a2/eda/suim/summary.json`                 | Pairs on disk, decode and size faults, per-class pixel and image counts for both splits, the resolution histogram, and every duplicate group listed by filename |
-| `results/a2/eda/suim/class_distribution.png`       | Image count beside pixel share, which rank the classes differently                                                                                              |
-| `results/a2/eda/suim/region_area_distribution.png` | How much of a frame a class covers when present, separating rare-and-large from common-and-small                                                                |
-| `results/a2/eda/suim/resolution_distribution.png`  | The eleven resolutions on a log scale                                                                                                                           |
-| `results/a2/splits/suim/train.txt`, `val.txt`      | The fixed 1,143 / 287 split, one filename stem per line                                                                                                         |
-
-The two split files are committed on purpose. Training reads them rather than re-deriving the split, so a later change to the code cannot silently move an image between sides. The statistics live in `src/data/suim.py`; the script only orchestrates and writes.
-
-## Training
+## Classification
 
 ```bash
 uv run python -m scripts.training.train_image_classification --data fashion_mnist --config configs/image_classification/fashion_mnist/linear.yaml
-uv run python -m scripts.training.train_image_classification --data fashion_mnist --config configs/image_classification/fashion_mnist/mlp.yaml
-```
-
-Development dataset runs use their matching entry points and shape-compatible configs:
-
-```bash
-uv run python -m scripts.training.train_image_classification --data mnist --config configs/image_classification/mnist/linear.yaml
-uv run python -m scripts.training.train_image_classification --data cifar10 --config configs/image_classification/cifar10/cnn.yaml
-```
-
-The best-validation checkpoints are written to `checkpoints/<run-name>/best.pt`. Training
-logs, curves, and exact summaries are written to `results/a1/<run-name>/`.
-
-Package optional checkpoint downloads separately for each dataset:
-
-```bash
-uv run python -m scripts.release.package_checkpoints --data fashion_mnist
-uv run python -m scripts.release.package_checkpoints --data mnist
-uv run python -m scripts.release.package_checkpoints --data cifar10
-```
-
-Each command writes `artifacts/<dataset>-checkpoints.zip`. Upload these archives as GitHub
-Release assets; they are not downloaded when cloning the repository.
-
-## Evaluation
-
-```bash
 uv run python -m scripts.evaluation.evaluate --data fashion_mnist --config configs/image_classification/fashion_mnist/linear.yaml
-uv run python -m scripts.evaluation.evaluate --data fashion_mnist --config configs/image_classification/fashion_mnist/mlp.yaml
 uv run python -m scripts.evaluation.compare --results-dir results/a1
 ```
 
-Each evaluation writes the required confusion matrix, per-class accuracy and support,
-most-confused class pairs, and representative correct, confident-error, and uncertain-error
-figures under `results/a1/<run-name>/`.
+Use matching dataset and configuration paths for MNIST or CIFAR-10.
+Configurations live in `configs/image_classification/<dataset>/`.
 
-## Reproducibility
+## Segmentation
 
-- Configuration files: `configs/image_classification/<dataset>/`
-- Draft random seed: 42
-- Dependency versions: locked in `uv.lock`
-- Draft hardware: Apple Silicon MPS for training; CPU for reported inference timing
-- Checkpoint selection: lowest validation loss (A1); highest validation mIoU (A2)
-- Assignment 2 split: fixed in `results/a2/splits/suim/`, seed 42, regenerated by the command above
-- Checkpoint reconstruction: run the training commands above
-
-## Documents
-
-- [Assignment 1 draft report](reports/assignment1-draft.md)
-- [Assignment 2 M1 dataset proposal](reports/a2_proposal.md)
-- [AI Usage Disclosure](AI_USAGE.md)
-
-## Assignment 2 — segmentation
-
-SUIM semantic segmentation proposal is approved. Train the U-Net baseline (trained from
-scratch) on the committed split with:
+Train the U-Net baseline or resume its latest checkpoint:
 
 ```bash
 uv run python -m scripts.training.train_segmentation --config configs/segmentation/suim/baseline.yaml
 uv run python -m scripts.training.train_segmentation --config configs/segmentation/suim/baseline.yaml --resume
 ```
 
-The second command continues an interrupted run from `checkpoints/<name>/last.pt`. The
-checkpoint with the highest validation mIoU is kept as `checkpoints/<name>/best.pt`.
-Checkpoints are not committed; rerun the command to rebuild them. Every run writes
-`results/a2/<name>/`:
+For two GPUs:
 
-| Output                   | Contents                                                                                                                                                                     |
-| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `train.log`              | Configuration, device, and per-epoch loss, mIoU and mDice                                                                                                                    |
-| `history.json`           | Per-epoch records, rewritten after every epoch                                                                                                                               |
-| `training_summary.json`  | Validation metrics of the selected checkpoint (all, boundary, interior), parameter count, hardware, software versions, git commit, seed, training time, peak training memory, inference cost |
-| `learning_curves.png`    | Loss and validation mIoU per epoch, with the selected epoch marked                                                                                                           |
-| `val_evidence.pt`        | Validation predictions for `scripts.evaluation.eval_segmentation` (not committed)                                                                                            |
+```bash
+uv run torchrun --standalone --nproc-per-node=2 -m scripts.training.train_segmentation --config configs/segmentation/suim/baseline.yaml
+```
 
-`training_seconds` includes each epoch's validation pass. Inference cost times only the
-forward pass of the selected checkpoint over the validation split, after two warm-up
-batches.
+`batch_size` and `num_workers` are per process. Effective batch size is
+`batch_size × accumulation_steps × process_count`. Resume with the same process count.
+Use separate run names for separate experiments.
 
-- Data loading: `src/data/suim_dataset.py`
-- Models: `src/models/segmentation.py` (U-Net; pretrained DeepLabV3 in progress)
-- Training: `src/training/segmentation.py`; metrics: `src/evaluation/segmentation.py`;
-  inference cost: `src/evaluation/compute_cost.py`
-- Configurations: `configs/segmentation/suim/`
-- Draft: [Assignment 2 M2 outline](reports/assignment2-draft.md)
+## Outputs
+
+| Path | Contents |
+| --- | --- |
+| `checkpoints/<run-name>/best.pt` | Selected model |
+| `checkpoints/<run-name>/last.pt` | Segmentation resume state |
+| `results/a1/<run-name>/` | Classification logs, metrics, and figures |
+| `results/a2/<run-name>/` | Segmentation logs, history, summary, curves, and validation evidence |
+
+Classification selects the lowest validation loss; segmentation selects the highest validation mIoU.
+Checkpoints are not committed. Dependencies are locked in `uv.lock`; experiment settings and seeds live in the configurations.
+
+Package classification checkpoints for release:
+
+```bash
+uv run python -m scripts.release.package_checkpoints --data fashion_mnist
+```
+
+This writes `artifacts/fashion_mnist-checkpoints.zip`. MNIST and CIFAR-10 use the same command with their dataset names.
+
+## Source layout
+
+| Package | Purpose |
+| --- | --- |
+| `src/config` | Configuration parsing and validation |
+| `src/data` | Dataset contracts, transforms, and loaders |
+| `src/eda` | Statistics, quality checks, duplicates, and splits |
+| `src/models` | Model architectures |
+| `src/training` | Training loops and checkpoints |
+| `src/evaluation` | Metrics and inference costs |
+| `src/error` | Prediction error analysis |
+| `src/plots` | Figure formatting and rendering |
+| `src/utils` | Logging, seeds, environment, and process helpers |
+| `scripts` | Command-line entry points |
+
+Shared contracts live in `base.py`; concrete modules name their dataset, task, or model.
+Data loading stays independent of EDA, plotting, training, and evaluation.
+
+## Plots
+
+Call `src.plots.format.apply()` before creating a figure. Save with
+`src.plots.common.save_figure(figure, output_path)` for 400-dpi PNG and PDF exports.
+The shared style uses DejaVu Sans and requires no LaTeX installation.
+
+## Checks
+
+```bash
+uv run --locked python -m scripts.check
+```
+
+Runs lint, formatting, types, and the CPU test suite. GitHub Actions runs the same
+command on pushes and pull requests. Tests use synthetic data without dataset downloads.
+
+- `tests/contracts`: configuration, imports, data, and package boundaries.
+- `tests/components`: models, metrics, analysis, plots, and shared training behavior.
+- `tests/pipelines`: training, checkpoint reload, resume, evaluation, export, and release packaging.
+
+## Documents
+
+- [Assignment 1 draft](reports/assignment1-draft.md)
+- [Assignment 2 proposal](reports/a2_proposal.md)
+- [Assignment 2 draft](reports/assignment2-draft.md)
+- [AI usage disclosure](AI_USAGE.md)

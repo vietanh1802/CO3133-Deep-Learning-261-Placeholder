@@ -10,18 +10,27 @@ from typing import Any
 
 import torch
 from loguru import logger
-from torch import Tensor, nn
+from torch import distributed as dist
+from torch import nn
+from torch.nn.parallel import DistributedDataParallel
 from torch.optim import Optimizer
 from torch.optim.lr_scheduler import LambdaLR, LRScheduler
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, DistributedSampler
 
 from src.evaluation.segmentation import (
     SegmentationMetrics,
     confusion_matrix,
     metrics_from_confusion,
 )
+from src.training.checkpoint import load_state, save_state
+from src.training.epoch import model_logits, run_training_epoch
+from src.utils.distributed import (
+    is_primary,
+    rank,
+    unwrap,
+    world_size,
+)
 from src.utils.logging import ExperimentState, progress_bar
-from src.utils.seed import capture_rng_state, restore_rng_state
 
 
 @dataclass(frozen=True)
@@ -64,24 +73,8 @@ def save_training_state(
     scheduler: LRScheduler,
     metadata: SegmentationCheckpointMetadata,
 ) -> None:
-    """Persist model, optimizer, scheduler, metadata, and random-number-generator state."""
-    checkpoint_path = Path(path)
-    checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
-    temporary_path = checkpoint_path.with_suffix(checkpoint_path.suffix + ".tmp")
-
-    payload = {
-        "model": model.state_dict(),
-        "optimizer": optimizer.state_dict(),
-        "scheduler": scheduler.state_dict(),
-        "metadata": asdict(metadata),
-        "rng_state": capture_rng_state(),
-    }
-
-    try:
-        torch.save(payload, temporary_path)
-        temporary_path.replace(checkpoint_path)
-    finally:
-        temporary_path.unlink(missing_ok=True)
+    """Collect RNG states on all ranks, then let rank 0 persist the training state."""
+    save_state(path, model, optimizer, asdict(metadata), scheduler=scheduler)
 
 
 def load_training_state(
@@ -94,22 +87,17 @@ def load_training_state(
     restore_rng: bool = True,
 ) -> SegmentationCheckpointMetadata:
     """Restore a segmentation checkpoint and return its metadata."""
-    payload = torch.load(path, map_location=map_location, weights_only=True)
-    required_keys = {"model", "optimizer", "scheduler", "metadata", "rng_state"}
-    missing_keys = required_keys - set(payload)
-    if missing_keys:
-        missing = ", ".join(sorted(missing_keys))
-        raise ValueError(f"checkpoint is missing keys: {missing}")
-
-    model.load_state_dict(payload["model"])
-    if optimizer is not None:
-        optimizer.load_state_dict(payload["optimizer"])
-    if scheduler is not None:
-        scheduler.load_state_dict(payload["scheduler"])
-    if restore_rng:
-        restore_rng_state(payload["rng_state"])
-
-    return SegmentationCheckpointMetadata(**payload["metadata"])
+    return SegmentationCheckpointMetadata(
+        **load_state(
+            path,
+            model,
+            optimizer,
+            scheduler=scheduler,
+            require_scheduler=True,
+            map_location=map_location,
+            restore_rng=restore_rng,
+        )
+    )
 
 
 def optimizer_steps_per_epoch(num_batches: int, accumulation_steps: int) -> int:
@@ -131,48 +119,6 @@ def warmup_cosine(optimizer: Optimizer, warmup_steps: int, total_steps: int) -> 
     return LambdaLR(optimizer, factor)
 
 
-def _logits(model: nn.Module, images: Tensor) -> Tensor:
-    output = model(images)
-    return output["out"] if isinstance(output, dict) else output
-
-
-def train_one_epoch(
-    model: nn.Module,
-    dataloader: DataLoader,
-    optimizer: Optimizer,
-    scheduler: LRScheduler,
-    loss_fn: nn.Module,
-    device: torch.device,
-    accumulation_steps: int,
-) -> float:
-    """Train one epoch and return the sample-weighted mean loss."""
-    model.train()
-    num_batches = len(dataloader)
-    loss_total = 0.0
-    sample_total = 0
-    optimizer.zero_grad(set_to_none=True)
-
-    for index, (images, targets) in enumerate(
-        progress_bar(dataloader, desc=ExperimentState.TRAINING, leave=False)
-    ):
-        images = images.to(device, non_blocking=True)
-        targets = targets.to(device, non_blocking=True)
-        group_size = min(accumulation_steps, num_batches - index + index % accumulation_steps)
-        loss = loss_fn(_logits(model, images), targets)
-        (loss / group_size).backward()
-        if (index + 1) % accumulation_steps == 0 or index + 1 == num_batches:
-            optimizer.step()
-            scheduler.step()
-            optimizer.zero_grad(set_to_none=True)
-
-        loss_total += loss.item() * len(targets)
-        sample_total += len(targets)
-
-    if sample_total == 0:
-        raise ValueError("dataloader yielded no samples")
-    return loss_total / sample_total
-
-
 @torch.no_grad()
 def validate(
     model: nn.Module,
@@ -190,7 +136,7 @@ def validate(
     for images, targets in progress_bar(dataloader, desc=ExperimentState.VALIDATING, leave=False):
         images = images.to(device, non_blocking=True)
         targets = targets.to(device, non_blocking=True)
-        logits = _logits(model, images)
+        logits = model_logits(model, images)
         loss_total += loss_fn(logits, targets).item() * len(targets)
         sample_total += len(targets)
         counts += confusion_matrix(targets, logits.argmax(1), num_classes=num_classes)
@@ -218,39 +164,56 @@ def fit_segmentation(
     num_classes: int = 8,
     resume: bool = False,
 ) -> SegmentationFitResult:
-    """Train, keep the highest-validation-mIoU checkpoint, and save state every epoch.
+    """Train and select the checkpoint with the highest validation mIoU.
 
-    ``best.pt`` holds the selected model and ``last.pt`` the latest full training
-    state; ``history.json`` in ``run_dir`` is rewritten after every epoch.
+    Notes:
+        Saves best.pt for selection and last.pt for resume.
+        Rewrites history.json in run_dir after each epoch.
     """
     checkpoint_dir, run_dir = Path(checkpoint_dir), Path(run_dir)
     last_path, best_path = checkpoint_dir / "last.pt", checkpoint_dir / "best.pt"
     history_path = run_dir / "history.json"
-    run_dir.mkdir(parents=True, exist_ok=True)
-    model.to(device)
+    if is_primary():
+        run_dir.mkdir(parents=True, exist_ok=True)
+    if not isinstance(model, DistributedDataParallel):
+        model.to(device)
 
     history: list[EpochRecord] = []
     if resume:
-        metadata = load_training_state(last_path, model, optimizer, scheduler)
+        metadata = load_training_state(last_path, model, optimizer, scheduler, map_location=device)
         records = json.loads(history_path.read_text(encoding="utf-8"))
-        # History is written before last.pt, so it can hold one epoch the checkpoint lacks.
+        # History may be one epoch ahead of last.pt.
         history = [EpochRecord(**record) for record in records[: metadata.epoch]]
-        logger.info("Resuming after epoch {}", metadata.epoch)
+        if is_primary():
+            logger.info("Resuming after epoch {}", metadata.epoch)
 
     best = max(history, key=lambda record: record.validation_miou, default=None)
     steps_per_epoch = optimizer_steps_per_epoch(len(train_dataloader), accumulation_steps)
 
     for epoch in range(len(history) + 1, epochs + 1):
+        if isinstance(train_dataloader.sampler, DistributedSampler):
+            train_dataloader.sampler.set_epoch(epoch)
         if train_dataloader.generator is not None:
-            train_dataloader.generator.manual_seed(seed + epoch)
+            train_dataloader.generator.manual_seed(seed + epoch + rank())
         learning_rate = optimizer.param_groups[0]["lr"]
         started = time.perf_counter()
-        train_loss = train_one_epoch(
-            model, train_dataloader, optimizer, scheduler, loss_fn, device, accumulation_steps
-        )
-        validation_loss, metrics = validate(
-            model, validation_dataloader, loss_fn, device, num_classes
-        )
+        train_loss = run_training_epoch(
+            model,
+            train_dataloader,
+            optimizer,
+            loss_fn,
+            device,
+            scheduler=scheduler,
+            accumulation_steps=accumulation_steps,
+        ).loss
+        validation_result: list[Any] = [None]
+        if is_primary():
+            validation_result[0] = validate(
+                unwrap(model), validation_dataloader, loss_fn, device, num_classes
+            )
+        if world_size() > 1:
+            dist.broadcast_object_list(validation_result, src=0)
+        validation_loss, metrics = validation_result[0]
         record = EpochRecord(
             epoch=epoch,
             train_loss=train_loss,
@@ -261,17 +224,18 @@ def fit_segmentation(
             seconds=time.perf_counter() - started,
         )
         history.append(record)
-        logger.info(
-            "Epoch {}/{} | train loss {:.4f} | validation loss {:.4f}, mIoU {:.4f}, "
-            "mDice {:.4f} | {:.0f}s",
-            epoch,
-            epochs,
-            train_loss,
-            validation_loss,
-            metrics.mean_iou,
-            metrics.mean_dice,
-            record.seconds,
-        )
+        if is_primary():
+            logger.info(
+                "Epoch {}/{} | train loss {:.4f} | validation loss {:.4f}, mIoU {:.4f}, "
+                "mDice {:.4f} | {:.0f}s",
+                epoch,
+                epochs,
+                train_loss,
+                validation_loss,
+                metrics.mean_iou,
+                metrics.mean_dice,
+                record.seconds,
+            )
 
         improved = best is None or record.validation_miou > best.validation_miou
         if improved:
@@ -284,11 +248,14 @@ def fit_segmentation(
         )
         if improved:
             save_training_state(best_path, model, optimizer, scheduler, metadata)
-        history_path.write_text(
-            json.dumps([asdict(item) for item in history], indent=2), encoding="utf-8"
-        )
+        if is_primary():
+            history_path.write_text(
+                json.dumps([asdict(item) for item in history], indent=2), encoding="utf-8"
+            )
         save_training_state(last_path, model, optimizer, scheduler, metadata)
 
+    if world_size() > 1:
+        dist.barrier()
     if best is None:
         raise ValueError("no epochs were run")
     return SegmentationFitResult(

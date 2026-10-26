@@ -2,14 +2,14 @@
 
 from src.data.base import (
     DataLoaders,
-    ImageClassificationBatch,
+    ImageBatch,
     build_dataloaders,
     register_dataset,
 )
 from src.data.cifar10 import CIFAR10_CLASS_NAMES, build_cifar10_loaders
 from src.data.fashion_mnist import FASHION_MNIST_CLASS_NAMES, build_fashion_mnist_loaders
 from src.data.mnist import build_mnist_loaders
-from src.data.suim_dataset import SuimSegmentation, build_suim_loaders
+from src.data.suim import SuimSegmentation, build_suim_loaders
 
 
 def class_names(name: str) -> tuple[str, ...]:
@@ -26,7 +26,7 @@ def class_names(name: str) -> tuple[str, ...]:
 
 __all__ = [
     "DataLoaders",
-    "ImageClassificationBatch",
+    "ImageBatch",
     "SuimSegmentation",
     "build_cifar10_loaders",
     "build_dataloaders",

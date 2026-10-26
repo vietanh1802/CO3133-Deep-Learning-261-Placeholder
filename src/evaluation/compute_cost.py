@@ -33,10 +33,10 @@ def measure_inference(
     *,
     warmup_batches: int = 2,
 ) -> InferenceCost:
-    """Time every batch's forward pass after ``warmup_batches`` untimed passes.
+    """Time batch forward passes after warmup_batches untimed passes.
 
-    Data loading and host-to-device copies are outside the timed region, so the
-    figure is the model's cost alone. Peak memory is reported on CUDA only.
+    Notes:
+        Excludes data loading and device copies. Reports peak memory on CUDA only.
     """
     if warmup_batches < 0:
         raise ValueError("warmup_batches must be non-negative")
