@@ -1,0 +1,51 @@
+[repo]
+name = "co3133"
+git_url = "https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder"
+ref = "feat/multi-gpu-training"
+
+[resources]
+max_hourly = 0.15
+disk = 40
+min_vram = 8
+
+[tasks.segmentation-smoke]
+download_checkpoints = false
+output_dirs = ["checkpoints"]
+timeout_seconds = 3600
+command = ["bash", "-lc", '''
+set -euo pipefail
+export MPLBACKEND=Agg OMP_NUM_THREADS=1
+uv run --locked python -c 'import torch; assert torch.cuda.is_available(), "CUDA is required"; print(torch.cuda.get_device_name()); print(torch.ones(1, device="cuda"))'
+bash scripts/data/download_suim.sh
+uv run --locked python - <<'PY'
+import json
+import subprocess
+import sys
+
+from src.config.segmentation import load_segmentation_config
+
+config_path = "configs/segmentation/suim/baseline.yaml"
+config = load_segmentation_config(config_path)
+run = config.results_dir / "a2" / config.name
+subprocess.run([
+    sys.executable, "-m", "scripts.training.train_segmentation", "--config", config_path
+], check=True)
+subprocess.run([
+    sys.executable, "-m", "scripts.evaluation.eval_segmentation",
+    "--evidence", str(run / "val_evidence.pt"), "--output", str(run / "evaluation")
+], check=True)
+summary = json.loads((run / "training_summary.json").read_text())
+assert len(summary["history"]) == config.epochs
+assert summary["world_size"] == 1
+for name in (
+    "learning_curves.png", "learning_curves.pdf",
+    "val_evidence.pt", "evaluation/metrics.json",
+    "evaluation/confusion_matrix.png", "evaluation/confusion_matrix.pdf",
+    "evaluation/examples.png", "evaluation/examples.pdf",
+):
+    assert (run / name).stat().st_size > 0, name
+for name in ("best.pt", "last.pt"):
+    assert (config.checkpoint_dir / config.name / name).stat().st_size > 0, name
+print("Segmentation pipeline check passed")
+PY
+''']
