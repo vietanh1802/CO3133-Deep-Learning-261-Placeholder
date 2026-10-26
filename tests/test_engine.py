@@ -6,14 +6,20 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader, TensorDataset
 
-from src.training.checkpoint import CheckpointMetadata, load_checkpoint, save_checkpoint
+from src.training.checkpoint import (
+    CheckpointMetadata,
+    archive_checkpoints,
+    load_checkpoint,
+    save_checkpoint,
+)
 from src.training.engine import EpochResult, FitResult, eval_one_epoch, fit, train_one_epoch
 from src.utils.seed import seed_everything
 
 DEVICE = torch.device("cpu")
 
 
-def test_checkpoint_round_trip_restores_training_and_rng_state(tmp_path):
+@pytest.mark.parametrize("use_archive", [False, True])
+def test_checkpoint_round_trip_restores_training_and_rng_state(tmp_path, use_archive):
     seed_everything(11)
     model = nn.Linear(2, 1)
     optimizer = torch.optim.SGD(model.parameters(), lr=0.1, momentum=0.9)
@@ -29,6 +35,10 @@ def test_checkpoint_round_trip_restores_training_and_rng_state(tmp_path):
     )
     path = tmp_path / "checkpoint.pt"
     save_checkpoint(path, model, optimizer, metadata)
+    if use_archive:
+        archive_path = tmp_path / "a1.zip"
+        archive_checkpoints(archive_path, {"baseline": path})
+        path = archive_path
 
     expected_parameters = [parameter.detach().clone() for parameter in model.parameters()]
     expected_random = (random.random(), np.random.random(), torch.rand(1))
@@ -40,7 +50,9 @@ def test_checkpoint_round_trip_restores_training_and_rng_state(tmp_path):
     np.random.random()
     torch.rand(1)
 
-    restored_metadata = load_checkpoint(path, model, optimizer)
+    restored_metadata = load_checkpoint(
+        path, model, optimizer, run_name="baseline" if use_archive else None
+    )
     actual_random = (random.random(), np.random.random(), torch.rand(1))
 
     assert restored_metadata == metadata
@@ -165,3 +177,29 @@ def test_fit_runs_training_validation_and_saves_best_checkpoint(tmp_path) -> Non
     metadata = load_checkpoint(checkpoint_path, model, optimizer, restore_rng=False)
     assert metadata.epoch == result.best_epoch
     assert metadata.best_validation_loss == result.best_validation_loss
+
+
+def test_archive_update_preserves_other_runs_and_accepts_explorer_zip(tmp_path):
+    from zipfile import ZipFile
+
+    model = nn.Linear(2, 1)
+    optimizer = torch.optim.SGD(model.parameters(), lr=0.1)
+    source = tmp_path / "best.pt"
+    metadata = CheckpointMetadata(1, 1, 0.5, {"name": "first"})
+    save_checkpoint(source, model, optimizer, metadata)
+    original = source.read_bytes()
+    archive = tmp_path / "a1.zip"
+    # Explorer may put model directories directly at the ZIP root.
+    with ZipFile(archive, "w") as output:
+        output.writestr("first/best.pt", original)
+        output.writestr("second/best.pt", original)
+    assert load_checkpoint(archive, model, run_name="first", restore_rng=False) == metadata
+    updated = CheckpointMetadata(2, 2, 0.2, {"name": "first"})
+    save_checkpoint(source, model, optimizer, updated)
+    archive_checkpoints(archive, {"first": source})
+    assert load_checkpoint(archive, model, run_name="first", restore_rng=False) == updated
+    with ZipFile(archive) as stored:
+        assert stored.read("second/best.pt") == original
+        assert "first/best.pt" not in stored.namelist()
+    with pytest.raises(FileNotFoundError, match="missing"):
+        load_checkpoint(archive, model, run_name="missing", restore_rng=False)

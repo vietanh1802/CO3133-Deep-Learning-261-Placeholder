@@ -24,7 +24,7 @@ uv run python -m scripts.eda.run_fashion_mnist
 uv run python -m scripts.eda.run_mnist
 ```
 
-Each command writes the following to `outputs/a1_v1/results/eda/<dataset>/`:
+Each command writes the following to `results/a1/eda/<dataset>/`:
 
 | Output | What it answers |
 | --- | --- |
@@ -40,45 +40,6 @@ Each command writes the following to `outputs/a1_v1/results/eda/<dataset>/`:
 The analysis itself lives in `src/data/eda.py` (statistics), `src/data/eda_plots.py`
 (figures), and `src/data/eda_report.py` (one shared run), so the entry points only have
 to name a dataset.
-
-## Output layout
-
-Local and Colab use the same assignment/version bundle:
-
-```text
-outputs/a1_v1/                 # Local
-MyDrive/BTL_DL_Result/VanhResult/a1_v1/  # Drive
-  checkpoints/<run-name>/best.pt
-  results/<run-name>/
-  results/eda/<dataset>/
-  configs/<run-name>.yaml
-  configs/<run-name>_test.yaml
-  console/<run-name>/train.log
-  console/<run-name>/evaluate.log
-```
-
-The repository's top-level `configs/image_classification/` contains source configs.
-The bundle's `configs/` stores resolved settings used by each command. New A2/A3
-pipelines can use separate `outputs/a2_v1/` and `outputs/a3_v1/` bundles; this
-change only updates A1.
-
-After pulling this change, move any ignored local checkpoints and logs left at the
-old paths by running this once from the repository root (safe to repeat):
-
-```bash
-uv run python -m scripts.maintenance.migrate_a1_outputs
-```
-
-It moves `checkpoints/` and `results/a1/` into the bundle and relocates logs to
-`console/`. Different files at the same destination stop the migration before
-any file is moved. Existing JSON/checkpoint metadata keeps its original paths as
-a historical record; current commands find artifacts using the new config paths.
-Checkpoint weights, evidence tensors, logs, and ZIPs remain ignored by Git.
-
-The [Colab notebook](notebooks/A1_Train_All_Models_CUDA.ipynb) trains and evaluates
-six Fashion-MNIST models, shows live progress, and copies the same bundle layout
-to Drive without an extra run-id folder. Run it after this layout change is merged
-into `a1/m2`. Files with the same names on Drive are overwritten.
 
 ## Training
 
@@ -99,22 +60,68 @@ uv run python -m scripts.training.train_image_classification --data mnist --conf
 uv run python -m scripts.training.train_image_classification --data cifar10 --config configs/image_classification/cifar10/cnn.yaml
 ```
 
-The best-validation checkpoints are written to `outputs/a1_v1/checkpoints/<run-name>/best.pt`. Training
-curves and exact summaries are written to `outputs/a1_v1/results/<run-name>/`.
-Resolved configurations are saved in `outputs/a1_v1/configs/`; train/evaluation logs
-are saved in `outputs/a1_v1/console/<run-name>/`.
+The best-validation checkpoints are stored together in `checkpoints/a1.zip`, with
+`checkpoints/<run-name>/best.pt` inside the ZIP. Each completed training run updates
+only its own checkpoint in the archive. Evaluation reads that member directly; no
+manual extraction is needed. Training logs, curves, and summaries are written to
+`results/a1/<run-name>/`. ZIP packaging occurs after the timed training loop.
 
-Package optional checkpoint downloads separately for each dataset:
+The repository keeps results and checkpoint archives separate:
 
-```bash
-uv run python -m scripts.release.package_checkpoints --data fashion_mnist
-uv run python -m scripts.release.package_checkpoints --data mnist
-uv run python -m scripts.release.package_checkpoints --data cifar10
+```text
+results/a1/<run-name>/
+results/a1/eda/
+results/a1/archive/            # Earlier draft runs, excluded from comparisons
+checkpoints/a1.zip
 ```
 
-Each command writes `outputs/a1_v1/<dataset>-checkpoints.zip`. Upload these archives as GitHub
-Release assets; they are not downloaded when cloning the repository. Extract these
-archives into `outputs/a1_v1/` to restore their `checkpoints/` subdirectory.
+A2 and A3 can use `results/a2/`, `results/a3/`, `checkpoints/a2.zip`,
+and `checkpoints/a3.zip`. This change only implements the A1 pipeline.
+Checkpoint ZIPs, logs, and evidence tensors remain ignored by Git.
+
+To package an existing folder of downloaded `<run-name>/best.pt` files:
+
+```bash
+uv run python -m scripts.release.package_checkpoints --checkpoint-dir .tmp/drive-a1/checkpoints --output-dir checkpoints
+```
+
+This creates `checkpoints/a1.zip`. Running the command without arguments can
+repackage the existing local archive. Optional `--data fashion_mnist` produces
+a dataset-only ZIP for sharing.
+
+## Copy existing Colab results back to local
+
+The running Colab notebook can finish using its current Drive path:
+`MyDrive/BTL_DL_Result/VanhResult/a1_v1/`. No retraining is required for this
+layout change. Wait until all six models finish training and testing, then run the
+comparison/ZIP cell so that `a1_cuda_outputs.zip` contains the final outputs.
+
+1. Download and extract `a1_cuda_outputs.zip` into `.tmp/drive-a1/`. Locate the
+   extracted folder that contains `checkpoints/` and `results/`.
+2. Copy the **contents** of that extracted `results/` folder into local
+   `results/a1/`. Replace matching files in the six Fashion-MNIST run folders;
+   copy the new `comparison_test.md` and `comparison_test.csv` too. Do not create
+   `results/a1/results/`. Existing EDA, MNIST, and CIFAR-10 results can remain.
+3. In File Explorer, compress only the extracted `checkpoints/` folder into a
+   ZIP, rename it `a1.zip`, and paste it into local `checkpoints/`, replacing
+   the previous `a1.zip`. Both `checkpoints/<run-name>/best.pt` and
+   `<run-name>/best.pt` member layouts are supported. Alternatively, use the
+   packaging command above. Do not rename the full `a1_cuda_outputs.zip` as a
+   checkpoint-only archive.
+4. Optionally copy each extracted `console/<run-name>/train.log` and
+   `evaluate.log` into `results/a1/<run-name>/`. The Colab `configs/` folder
+   records its own absolute runtime paths; do not overwrite the source YAML files
+   under the repository's `configs/image_classification/` with those copies.
+5. Run `uv run python -m scripts.evaluation.compare --results-dir results/a1`
+   to regenerate the comparison table. If testing already finished on Colab, do
+   not rerun local evaluation just to import the results; that would replace the
+   recorded inference timings with timings from the local device.
+
+Saved JSON/checkpoint metadata retains its original runtime paths as provenance.
+Current commands use the repository YAML paths and the run name to locate the
+imported artifacts. Files from earlier experiments should be backed up before
+replacement; the local files moved during this layout correction are preserved
+under `.tmp/before-separate-a1-folders/`.
 
 ## Evaluation
 
@@ -122,12 +129,12 @@ archives into `outputs/a1_v1/` to restore their `checkpoints/` subdirectory.
 uv run python -m scripts.evaluation.evaluate --data fashion_mnist --config configs/image_classification/fashion_mnist/linear.yaml
 uv run python -m scripts.evaluation.evaluate --data fashion_mnist --config configs/image_classification/fashion_mnist/mlp.yaml
 uv run python -m scripts.evaluation.evaluate --data fashion_mnist --config configs/image_classification/fashion_mnist/lstm.yaml
-uv run python -m scripts.evaluation.compare --results-dir outputs/a1_v1/results
+uv run python -m scripts.evaluation.compare --results-dir results/a1
 ```
 
 Each evaluation writes the required confusion matrix, per-class accuracy and support,
 most-confused class pairs, and representative correct, confident-error, and uncertain-error
-figures under `outputs/a1_v1/results/<run-name>/`.
+figures under `results/a1/<run-name>/`.
 
 ## Reproducibility
 

@@ -13,5 +13,5 @@ epochs: 50
 num_workers: 0
 val_fraction: 0.1
 data_dir: data
-checkpoint_dir: outputs/a1_v1/checkpoints
-results_dir: outputs/a1_v1/results
+checkpoint_dir: checkpoints
+results_dir: results
