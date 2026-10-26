@@ -12,9 +12,9 @@ from torch import nn
 from src.data import build_dataloaders
 from src.evaluation.plots import plot_learning_curves
 from src.models import ImageClassifier, build_model
+from src.training.checkpoint import archive_checkpoints
 from src.training.engine import fit
 from src.utils import ExperimentState, load_config, seed_everything, setup_logging
-from src.utils.config import save_config
 from src.utils.logging import log_config
 
 
@@ -44,12 +44,10 @@ def main() -> None:
     args = parse_args()
     config = replace(load_config(args.config), dataset=args.data)
 
-    run_directory = Path(config.results_dir) / config.name
+    run_directory = Path(config.results_dir) / "a1" / config.name
     checkpoint_path = Path(config.checkpoint_dir) / config.name / "best.pt"
     run_directory.mkdir(parents=True, exist_ok=True)
-    output_root = Path(config.results_dir).parent
-    setup_logging(log_file=output_root / "console" / config.name / "train.log")
-    save_config(config, output_root / "configs" / f"{config.name}.yaml")
+    setup_logging(log_file=run_directory / "train.log")
     logger.info(ExperimentState.INITIALIZING)
     log_config(config.to_dict())
 
@@ -85,6 +83,11 @@ def main() -> None:
         checkpoint_path=checkpoint_path,
         checkpoint_config=config.to_dict(),
     )
+    checkpoint_archive = Path(config.checkpoint_dir) / "a1.zip"
+    archive_checkpoints(checkpoint_archive, {config.name: checkpoint_path})
+    checkpoint_path.unlink()
+    if not any(checkpoint_path.parent.iterdir()):
+        checkpoint_path.parent.rmdir()
     train_losses = [epoch.loss for epoch in result.training]
     validation_losses = [epoch.loss for epoch in result.validation]
     plot_learning_curves(
@@ -103,7 +106,8 @@ def main() -> None:
         "training_seconds": result.duration_seconds,
         "train_loss": train_losses,
         "validation_loss": validation_losses,
-        "checkpoint": str(checkpoint_path),
+        "checkpoint": str(checkpoint_archive),
+        "checkpoint_member": f"checkpoints/{config.name}/best.pt",
         "config": config.to_dict(),
     }
     (run_directory / "training_summary.json").write_text(

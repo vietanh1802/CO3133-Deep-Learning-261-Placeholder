@@ -22,8 +22,8 @@ class ExperimentConfig:
     num_workers: int = 0
     val_fraction: float = 0.1
     data_dir: Path = Path("data")
-    checkpoint_dir: Path = Path("outputs/a1_v1/checkpoints")
-    results_dir: Path = Path("outputs/a1_v1/results")
+    checkpoint_dir: Path = Path("checkpoints")
+    results_dir: Path = Path("results")
 
     def __post_init__(self) -> None:
         if not self.name.strip():
@@ -76,10 +76,3 @@ def load_config(path: str | Path) -> ExperimentConfig:
             raw[key] = Path(raw[key])
 
     return ExperimentConfig(**raw)
-
-
-def save_config(config: ExperimentConfig, path: str | Path) -> None:
-    """Save the resolved settings used by a training or evaluation command."""
-    output_path = Path(path)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text(yaml.safe_dump(config.to_dict(), sort_keys=False), encoding="utf-8")
