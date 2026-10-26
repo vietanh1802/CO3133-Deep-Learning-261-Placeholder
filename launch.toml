@@ -9,6 +9,7 @@ max_hourly = 0.15
 disk = 40
 min_vram = 8
 min_cuda = 12.6
+min_download = 500
 
 [tasks.segmentation-smoke]
 download_checkpoints = false
