@@ -1,15 +1,15 @@
 [repo]
 name = "co3133"
 git_url = "https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder"
-ref = "feat/multi-gpu-training"
+ref = "a2/m1"
 
 [resources]
 num_gpus = 2
-max_hourly = 0.15
+max_hourly = 1
 disk = 40
 min_vram = 8
 min_cuda = 12.6
-min_download = 500
+min_download = 100
 
 [tasks.segmentation-smoke]
 download_checkpoints = false

@@ -44,6 +44,21 @@ Behavioral requirements: Use uv, ruff, and ty check for blazing fast development
 - **AI contribution:** The student set the goal, the scope and the target branch, and decided which of the proposed analyses to keep and what to report. The model proposed the candidate analyses, explained what each one shows, and wrote the implementation, the unit tests and the accompanying text.
 - **How the output was edited and verified:** Ruff lint and format and the full test suite (57 tests) were run, including 17 new unit tests that check every statistic against a six-image toy dataset with hand-computed expected values. Both EDA entry points were executed end to end on the real datasets and every generated figure was inspected. One figure drafted for the report (the share of pixels in the darkest intensity bin) was wrong and was corrected against `summary.json` before committing. The similarity matrix was cross-checked against the confusion pairs already reported in the draft error analysis, and the MNIST run against the well-known 4/9 and 7/9 confusions.
 
+### Entry 4
+
+- **Tool / model:** Claude Opus 5.5 (Medium)
+- **Used by:** Tran Nguyen Giap (2352284)
+- **Date / development stage:** 2026-10-26 - Models 
+- **Purpose:** Check my implementation of some models. 
+- **Affected sections / files:** Models/ folder
+- **Representative prompt:**
+
+```
+Here is my implementation of Linear, RNN, and CNN. Check if they are correct and mark what is wrong.
+```
+
+- **How the output was edited and verified:** The implementation is compared with standard library like timm, pytorch models. 
+
 ## Assignment 2
 
 ## Assignment 3
