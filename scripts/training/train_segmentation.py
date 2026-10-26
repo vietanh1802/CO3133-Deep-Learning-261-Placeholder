@@ -7,14 +7,21 @@ from pathlib import Path
 
 import torch
 from loguru import logger
+from torch import distributed as dist
 from torch import nn
+from torch.distributed.elastic.multiprocessing.errors import record
+from torch.nn.parallel import DistributedDataParallel
 
-from src.data import SuimSegmentation, build_dataloaders
+from src.config.segmentation import load_segmentation_config
+from src.data import build_dataloaders
+from src.data.segmentation import SegmentationDataset
 from src.data.suim import CLASS_NAMES, NUM_CLASSES
 from src.evaluation.compute_cost import measure_inference
 from src.evaluation.segmentation import evaluate_model
-from src.evaluation.segmentation_plots import plot_segmentation_curves
 from src.models import build_model
+from src.plots.segmentation import (
+    plot_segmentation_curves,
+)
 from src.training.segmentation import (
     fit_segmentation,
     load_training_state,
@@ -22,9 +29,16 @@ from src.training.segmentation import (
     warmup_cosine,
 )
 from src.utils import ExperimentState, seed_everything, setup_logging
+from src.utils.distributed import (
+    cleanup,
+    initialize,
+    is_primary,
+    rank,
+    unwrap,
+    world_size,
+)
 from src.utils.environment import git_revision, software_versions
 from src.utils.logging import log_config
-from src.utils.segmentation_config import load_segmentation_config
 
 
 def parse_args() -> argparse.Namespace:
@@ -37,22 +51,14 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def _device() -> torch.device:
-    if torch.cuda.is_available():
-        return torch.device("cuda")
-    if torch.backends.mps.is_available():
-        return torch.device("mps")
-    return torch.device("cpu")
-
-
 @torch.no_grad()
 def export_evidence(
     model: nn.Module, dataloader: torch.utils.data.DataLoader, device: torch.device, path: Path
 ) -> None:
     """Save validation targets, predictions, and display images for eval_segmentation."""
     dataset = dataloader.dataset
-    if not isinstance(dataset, SuimSegmentation):
-        raise TypeError("evidence export expects a SuimSegmentation dataset")
+    if not isinstance(dataset, SegmentationDataset):
+        raise TypeError("evidence export expects a SegmentationDataset")
     model.eval()
     targets, predictions, images = [], [], []
     for batch, target in dataloader:
@@ -73,7 +79,7 @@ def export_evidence(
     )
 
 
-def main() -> None:
+def run() -> None:
     """Train, select by validation mIoU, re-evaluate the best checkpoint, and save results."""
     args = parse_args()
     config = load_segmentation_config(args.config)
@@ -82,13 +88,22 @@ def main() -> None:
 
     run_directory = Path(config.results_dir) / "a2" / config.name
     checkpoint_directory = Path(config.checkpoint_dir) / config.name
+    device = initialize()
     run_directory.mkdir(parents=True, exist_ok=True)
-    setup_logging(log_file=run_directory / "train.log")
+    setup_logging(log_file=run_directory / ("train.log" if is_primary() else f"rank{rank()}.log"))
+    if not is_primary():
+        logger.remove()
+        logger.add(run_directory / f"rank{rank()}.log", level="WARNING")
+        logger.add(
+            lambda message: print(message, end=""),
+            level="WARNING",
+            format="rank {extra[rank]} | {level} | {message}",
+        )
+        logger.configure(extra={"rank": rank()})
     logger.info(ExperimentState.INITIALIZING)
     log_config(config.to_dict())
 
     seed_everything(config.seed)
-    device = _device()
     device_name = torch.cuda.get_device_name(device) if device.type == "cuda" else str(device)
     logger.info("Device: {}", device_name)
 
@@ -107,7 +122,19 @@ def main() -> None:
 
     model = build_model(config.model, config.model_config).to(device)
     parameter_count = sum(parameter.numel() for parameter in model.parameters())
+    if dist.is_initialized():
+        model = DistributedDataParallel(
+            model, device_ids=[device.index] if device.type == "cuda" else None
+        )
     logger.info("Parameters: {:,}", parameter_count)
+    logger.info(
+        "Processes: {} | per-device batch: {} | effective batch: {}",
+        world_size(),
+        config.batch_size,
+        config.batch_size * config.accumulation_steps * world_size(),
+    )
+    if dist.is_initialized():
+        seed_everything(config.seed + rank())
     optimizer = torch.optim.AdamW(
         model.parameters(), lr=config.learning_rate, weight_decay=config.weight_decay
     )
@@ -141,6 +168,9 @@ def main() -> None:
         torch.cuda.max_memory_allocated(device) / 2**20 if device.type == "cuda" else None
     )
 
+    if not is_primary():
+        return
+    model = unwrap(model)
     logger.info(ExperimentState.SAVING)
     load_training_state(checkpoint_directory / "best.pt", model, restore_rng=False)
     regional = evaluate_model(model, dataloaders.validation, device, num_classes=NUM_CLASSES)
@@ -167,6 +197,9 @@ def main() -> None:
         "git": revision,
         "seed": config.seed,
         "mixed_precision": False,
+        "world_size": world_size(),
+        "batch_size_per_device": config.batch_size,
+        "effective_batch_size": config.batch_size * config.accumulation_steps * world_size(),
         "checkpoint_selection": "highest validation mIoU",
         "best_epoch": result.best_epoch,
         "best_validation_miou": result.best_validation_miou,
@@ -201,6 +234,17 @@ def main() -> None:
         result.best_validation_miou,
         result.duration_seconds / 60,
     )
+
+
+@record
+def main() -> None:
+    try:
+        run()
+    except Exception:
+        logger.exception("Training failed on rank {}", rank())
+        raise
+    finally:
+        cleanup()
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 """Exploratory data analysis for image-classification datasets.
 
-This module only *computes* statistics; rendering lives in :mod:`src.data.eda_plots`
+This module only *computes* statistics; rendering lives in :mod:`src.plots.eda`
 and orchestration lives in ``scripts/eda/``. Keeping the three apart means every number
 reported in the assignment can be unit-tested without touching matplotlib.
 """

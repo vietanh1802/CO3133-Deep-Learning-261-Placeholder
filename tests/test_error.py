@@ -9,7 +9,12 @@ from src.error import (
     select_bottom_k,
     select_top_k,
 )
-from src.evaluation import ClassificationMetrics, EvaluationResult
+from src.evaluation.classification import (
+    EvaluationResult,
+)
+from src.evaluation.classification_metrics import (
+    ClassificationMetrics,
+)
 
 
 @register_error_analyzer("test-task")

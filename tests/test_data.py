@@ -5,20 +5,20 @@ import torch
 from torch.utils.data import DataLoader, TensorDataset
 
 from src.data import build_dataloaders, class_names, register_dataset
-from src.data.base import DataLoaders, ImageClassificationBatch
+from src.data.base import DataLoaders, ImageBatch
 
 
 def test_dataset_factory_dispatches_to_named_builder() -> None:
     dataset = TensorDataset(torch.zeros(1, 1), torch.zeros(1, dtype=torch.long))
     loader = DataLoader(dataset)
     expected = cast(
-        DataLoaders[ImageClassificationBatch],
+        DataLoaders[ImageBatch],
         DataLoaders(train=loader, validation=loader, test=loader),
     )
     received: list[dict[str, Any]] = []
 
     @register_dataset("test_dataset")
-    def builder(**config: Any) -> DataLoaders[ImageClassificationBatch]:
+    def builder(**config: Any) -> DataLoaders[ImageBatch]:
         received.append(config)
         return expected
 

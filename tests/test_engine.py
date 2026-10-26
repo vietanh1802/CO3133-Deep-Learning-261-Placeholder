@@ -7,7 +7,13 @@ from torch import nn
 from torch.utils.data import DataLoader, TensorDataset
 
 from src.training.checkpoint import CheckpointMetadata, load_checkpoint, save_checkpoint
-from src.training.engine import EpochResult, FitResult, eval_one_epoch, fit, train_one_epoch
+from src.training.classification import (
+    EpochResult,
+    FitResult,
+    eval_one_epoch,
+    fit,
+    train_one_epoch,
+)
 from src.utils.seed import seed_everything
 
 DEVICE = torch.device("cpu")

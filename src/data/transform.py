@@ -9,6 +9,8 @@ _GRAYSCALE_MEAN = [0.5]
 _GRAYSCALE_STD = [0.5]
 _CIFAR10_MEAN = [0.4914, 0.4822, 0.4465]
 _CIFAR10_STD = [0.2470, 0.2435, 0.2616]
+IMAGENET_MEAN = (0.485, 0.456, 0.406)
+IMAGENET_STD = (0.229, 0.224, 0.225)
 
 
 def build_train_transform() -> Transform:

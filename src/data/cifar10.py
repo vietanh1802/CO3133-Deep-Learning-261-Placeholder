@@ -6,10 +6,10 @@ from torchvision.datasets import CIFAR10
 
 from src.data.base import (
     DataLoaders,
-    ImageClassificationBatch,
-    build_image_classification_loaders,
+    ImageBatch,
     register_dataset,
 )
+from src.data.classification import build_image_classification_loaders
 from src.data.transform import build_cifar10_eval_transform, build_cifar10_train_transform
 
 CIFAR10_CLASS_NAMES = (
@@ -34,7 +34,7 @@ def build_cifar10_loaders(
     val_fraction: float,
     seed: int,
     num_workers: int = 0,
-) -> DataLoaders[ImageClassificationBatch]:
+) -> DataLoaders[ImageBatch]:
     """Build CIFAR-10 loaders using a reproducible train/validation split."""
     return build_image_classification_loaders(
         train_dataset=CIFAR10(

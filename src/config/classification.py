@@ -4,7 +4,7 @@ from dataclasses import asdict, dataclass, field, fields
 from pathlib import Path
 from typing import Any
 
-import yaml
+from src.config.io import load_config_values, serialize_paths
 
 
 @dataclass(frozen=True)
@@ -45,34 +45,9 @@ class ExperimentConfig:
 
     def to_dict(self) -> dict[str, Any]:
         """Return a serialization-ready representation."""
-        values = asdict(self)
-        for key in ("data_dir", "checkpoint_dir", "results_dir"):
-            values[key] = str(values[key])
-        return values
+        return serialize_paths(asdict(self))
 
 
 def load_config(path: str | Path) -> ExperimentConfig:
     """Load and validate an experiment configuration file."""
-    config_path = Path(path)
-    with config_path.open(encoding="utf-8") as config_file:
-        raw = yaml.safe_load(config_file)
-
-    if not isinstance(raw, dict):
-        raise ValueError("configuration root must be a mapping")
-
-    valid_keys = {field.name for field in fields(ExperimentConfig)}
-    unknown_keys = set(raw) - valid_keys
-    if unknown_keys:
-        unknown = ", ".join(sorted(unknown_keys))
-        raise ValueError(f"unknown configuration keys: {unknown}")
-
-    missing_keys = {"name", "model"} - set(raw)
-    if missing_keys:
-        missing = ", ".join(sorted(missing_keys))
-        raise ValueError(f"missing required configuration keys: {missing}")
-
-    for key in ("data_dir", "checkpoint_dir", "results_dir"):
-        if key in raw:
-            raw[key] = Path(raw[key])
-
-    return ExperimentConfig(**raw)
+    return ExperimentConfig(**load_config_values(path, fields(ExperimentConfig)))

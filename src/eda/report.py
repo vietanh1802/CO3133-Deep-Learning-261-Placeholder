@@ -7,18 +7,18 @@ which is what makes the report's dataset sections directly comparable.
 
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, Protocol
 
 import numpy as np
 
-from src.data.eda import (
+from src.eda.base import RawImageDataset
+from src.eda.classification import (
     DatasetProfile,
     format_summary_lines,
     profile_dataset,
     summarize_class_balance,
     write_summary_json,
 )
-from src.data.eda_plots import (
+from src.plots.eda import (
     plot_class_distribution,
     plot_class_mean_images,
     plot_class_similarity,
@@ -27,13 +27,6 @@ from src.data.eda_plots import (
     plot_representative_samples,
     plot_split_class_distribution,
 )
-
-
-class RawImageDataset(Protocol):
-    """The part of a torchvision dataset the EDA needs: undecoded images and labels."""
-
-    data: Any
-    targets: Any
 
 
 def dataset_arrays(dataset: RawImageDataset) -> tuple[np.ndarray, np.ndarray]:

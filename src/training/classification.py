@@ -12,6 +12,7 @@ from torch import nn
 from torch.utils.data import DataLoader
 
 from src.training.checkpoint import CheckpointMetadata, save_checkpoint
+from src.training.epoch import run_training_epoch
 from src.utils.logging import ExperimentState, progress_bar
 
 
@@ -117,30 +118,20 @@ def train_one_epoch(
     :class:`~torch.nn.CrossEntropyLoss`. The caller is responsible for moving
     ``model`` onto ``device`` before the first epoch.
     """
-    model.train()
-    batches = progress_bar(dataloader, desc=ExperimentState.TRAINING, leave=False)
-
-    loss_total = 0.0
-    correct_total = 0
-    sample_total = 0
-    start = time.perf_counter()
-
-    for images, targets in batches:
-        images = images.to(device, non_blocking=True)
-        targets = targets.to(device, non_blocking=True)
-
-        optimizer.zero_grad(set_to_none=True)
-        logits = model(images)
-        loss = loss_fn(logits, targets)
-        loss.backward()
-        optimizer.step()
-
-        batch_size = targets.shape[0]
-        loss_total += loss.item() * batch_size
-        correct_total += int((logits.argmax(dim=1) == targets).sum().item())
-        sample_total += batch_size
-
-    return _aggregate(loss_total, correct_total, sample_total, time.perf_counter() - start)
+    result = run_training_epoch(
+        model,
+        dataloader,
+        optimizer,
+        loss_fn,
+        device,
+        batch_metric=lambda logits, targets: float((logits.argmax(dim=1) == targets).sum().item()),
+    )
+    return EpochResult(
+        loss=result.loss,
+        accuracy=result.metric_total / result.sample_count,
+        sample_count=result.sample_count,
+        duration_seconds=result.duration_seconds,
+    )
 
 
 def eval_one_epoch(

@@ -1,7 +1,7 @@
 """Figures for the Assignment 1 exploratory data analysis.
 
-Every function here takes an already-computed summary from :mod:`src.data.eda` and
-writes exactly one PNG, so a figure can never disagree with the JSON summary.
+Every function here takes an already-computed summary from :mod:`src.eda.classification` and
+writes matching PNG and PDF figures, so a figure can never disagree with the JSON summary.
 """
 
 from collections.abc import Sequence
@@ -14,14 +14,9 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 
-from src.data.eda import ClassBalance, DatasetProfile, IntensitySummary  # noqa: E402
-
-
-def _prepare_output_path(output_path: str | Path) -> Path:
-    """Create the parent directory for a figure and return its path."""
-    path = Path(output_path)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    return path
+from src.eda.classification import ClassBalance, DatasetProfile, IntensitySummary  # noqa: E402
+from src.plots.common import prepare_output_path, save_figure  # noqa: E402
+from src.plots.format import BLUE, GREEN, RED, YELLOW, apply  # noqa: E402
 
 
 def _as_displayable(image: np.ndarray) -> np.ndarray:
@@ -51,12 +46,13 @@ def plot_class_distribution(
     title: str,
 ) -> None:
     """Save the required class-distribution bar chart with counts annotated."""
-    path = _prepare_output_path(output_path)
+    path = prepare_output_path(output_path)
     names = balance.class_names
     counts = np.asarray(balance.counts)
 
+    apply()
     figure, axes = plt.subplots(figsize=(max(7.0, 0.9 * len(names)), 4.5))
-    bars = axes.bar(names, counts, color="steelblue")
+    bars = axes.bar(names, counts, color=BLUE)
     axes.bar_label(bars, fmt="%d", fontsize=8, padding=2)
 
     # A flat line at the perfectly balanced count makes any skew obvious at a glance.
@@ -76,7 +72,7 @@ def plot_class_distribution(
     axes.legend()
 
     figure.tight_layout()
-    figure.savefig(path, dpi=150)
+    save_figure(figure, path)
     plt.close(figure)
 
 
@@ -94,25 +90,26 @@ def plot_split_class_distribution(
     if train_balance.class_names != test_balance.class_names:
         raise ValueError("both splits must use the same class names")
 
-    path = _prepare_output_path(output_path)
+    path = prepare_output_path(output_path)
     names = train_balance.class_names
     positions = np.arange(len(names))
     width = 0.4
 
+    apply()
     figure, axes = plt.subplots(figsize=(max(7.0, 0.9 * len(names)), 4.5))
     axes.bar(
         positions - width / 2,
         train_balance.proportions,
         width,
         label="Train",
-        color="steelblue",
+        color=BLUE,
     )
     axes.bar(
         positions + width / 2,
         test_balance.proportions,
         width,
         label="Test",
-        color="indianred",
+        color=RED,
     )
 
     axes.set_xticks(positions)
@@ -121,10 +118,9 @@ def plot_split_class_distribution(
     axes.set_ylabel("Proportion of split")
     axes.set_title(title)
     axes.legend()
-    axes.grid(True, axis="y", alpha=0.3)
 
     figure.tight_layout()
-    figure.savefig(path, dpi=150)
+    save_figure(figure, path)
     plt.close(figure)
 
 
@@ -135,22 +131,23 @@ def plot_intensity_histogram(
     title: str,
 ) -> None:
     """Save the pixel-intensity histogram that motivates the normalization constants."""
-    path = _prepare_output_path(output_path)
+    path = prepare_output_path(output_path)
     edges = np.asarray(intensity.bin_edges)
     counts = np.asarray(intensity.histogram)
     centers = (edges[:-1] + edges[1:]) / 2.0
 
+    apply()
     figure, axes = plt.subplots(figsize=(7.5, 4.5))
-    axes.bar(centers, counts, width=np.diff(edges), color="steelblue", align="center")
+    axes.bar(centers, counts, width=np.diff(edges), color=BLUE, align="center")
 
     # Log scale: the background spike at 0 is orders of magnitude taller than the rest,
     # and would otherwise flatten the entire foreground range into the axis.
     axes.set_yscale("log")
     axes.axvline(
         intensity.mean,
-        color="darkorange",
+        color=YELLOW,
         linestyle="--",
-        linewidth=1.5,
+        linewidth=1,
         label=f"Mean intensity ({intensity.mean:.1f})",
     )
 
@@ -158,10 +155,9 @@ def plot_intensity_histogram(
     axes.set_ylabel("Pixel count (log scale)")
     axes.set_title(f"{title} (std {intensity.std:.1f})")
     axes.legend()
-    axes.grid(True, alpha=0.3)
 
     figure.tight_layout()
-    figure.savefig(path, dpi=150)
+    save_figure(figure, path)
     plt.close(figure)
 
 
@@ -172,11 +168,12 @@ def plot_class_mean_images(
     title: str,
 ) -> None:
     """Save the average image of each class, side by side."""
-    path = _prepare_output_path(output_path)
+    path = prepare_output_path(output_path)
     names = profile.balance.class_names
     columns = min(5, len(names))
     rows = int(np.ceil(len(names) / columns))
 
+    apply()
     figure, axes = plt.subplots(
         rows,
         columns,
@@ -194,7 +191,7 @@ def plot_class_mean_images(
 
     figure.suptitle(title)
     figure.tight_layout(rect=(0.0, 0.0, 1.0, 0.96))
-    figure.savefig(path, dpi=150)
+    save_figure(figure, path)
     plt.close(figure)
 
 
@@ -205,11 +202,12 @@ def plot_class_similarity(
     title: str,
 ) -> None:
     """Save the class-prototype similarity heatmap, annotated with its values."""
-    path = _prepare_output_path(output_path)
+    path = prepare_output_path(output_path)
     names = profile.balance.class_names
     similarity = np.asarray(profile.class_similarity)
 
     size = max(6.0, 0.75 * len(names))
+    apply()
     figure, axes = plt.subplots(figsize=(size, size))
     image = axes.imshow(similarity, cmap="coolwarm", vmin=-1.0, vmax=1.0)
     figure.colorbar(image, ax=axes, fraction=0.046, label="Cosine similarity")
@@ -234,7 +232,7 @@ def plot_class_similarity(
             )
 
     figure.tight_layout()
-    figure.savefig(path, dpi=150)
+    save_figure(figure, path)
     plt.close(figure)
 
 
@@ -245,15 +243,16 @@ def plot_foreground_coverage(
     title: str,
 ) -> None:
     """Save per-class foreground coverage: how much of the frame the object fills."""
-    path = _prepare_output_path(output_path)
+    path = prepare_output_path(output_path)
     names = profile.balance.class_names
     coverage = np.asarray(profile.intensity.per_class_foreground_fraction)
 
     order = np.argsort(coverage)[::-1]
     sorted_names = [names[index] for index in order]
 
+    apply()
     figure, axes = plt.subplots(figsize=(max(7.0, 0.9 * len(names)), 4.5))
-    bars = axes.barh(sorted_names, coverage[order], color="seagreen")
+    bars = axes.barh(sorted_names, coverage[order], color=GREEN)
     axes.bar_label(bars, fmt="%.2f", fontsize=8, padding=2)
 
     axes.invert_yaxis()
@@ -261,10 +260,9 @@ def plot_foreground_coverage(
     axes.set_ylabel("Class")
     axes.set_title(title)
     axes.set_xlim(0, min(1.0, float(coverage.max()) * 1.18))
-    axes.grid(True, axis="x", alpha=0.3)
 
     figure.tight_layout()
-    figure.savefig(path, dpi=150)
+    save_figure(figure, path)
     plt.close(figure)
 
 
@@ -285,12 +283,13 @@ def plot_representative_samples(
     if samples_per_class <= 0:
         raise ValueError("samples_per_class must be positive")
 
-    path = _prepare_output_path(output_path)
+    path = prepare_output_path(output_path)
     batch = np.asarray(images)
     if batch.ndim == 3:
         batch = batch[..., np.newaxis]
     values = np.asarray(labels).astype(np.int64).ravel()
 
+    apply()
     figure, axes = plt.subplots(
         len(class_names),
         samples_per_class,
@@ -314,5 +313,5 @@ def plot_representative_samples(
 
     figure.suptitle(title)
     figure.tight_layout()
-    figure.savefig(path, dpi=150)
+    save_figure(figure, path)
     plt.close(figure)

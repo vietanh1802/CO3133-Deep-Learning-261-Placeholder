@@ -7,7 +7,7 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader
 
-from src.evaluation.metrics import (
+from src.evaluation.classification_metrics import (
     ClassificationMetrics,
     compute_classification_metrics,
     count_trainable_parameters,

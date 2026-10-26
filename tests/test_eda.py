@@ -4,7 +4,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from src.data.eda import (
+from src.eda.classification import (
     as_image_batch,
     compute_class_mean_images,
     compute_class_similarity,

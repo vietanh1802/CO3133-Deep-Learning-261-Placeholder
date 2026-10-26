@@ -4,9 +4,7 @@ from dataclasses import asdict, dataclass, field, fields
 from pathlib import Path
 from typing import Any
 
-import yaml
-
-PATH_KEYS = ("data_dir", "checkpoint_dir", "results_dir")
+from src.config.io import load_config_values, serialize_paths
 
 
 @dataclass(frozen=True)
@@ -50,30 +48,9 @@ class SegmentationConfig:
 
     def to_dict(self) -> dict[str, Any]:
         """Return a serialization-ready representation."""
-        values = asdict(self)
-        for key in PATH_KEYS:
-            values[key] = str(values[key])
-        return values
+        return serialize_paths(asdict(self))
 
 
 def load_segmentation_config(path: str | Path) -> SegmentationConfig:
     """Load a segmentation configuration file, rejecting unknown or missing keys."""
-    with Path(path).open(encoding="utf-8") as config_file:
-        raw = yaml.safe_load(config_file)
-
-    if not isinstance(raw, dict):
-        raise ValueError("configuration root must be a mapping")
-
-    unknown_keys = set(raw) - {item.name for item in fields(SegmentationConfig)}
-    if unknown_keys:
-        raise ValueError(f"unknown configuration keys: {', '.join(sorted(unknown_keys))}")
-
-    missing_keys = {"name", "model"} - set(raw)
-    if missing_keys:
-        raise ValueError(f"missing required configuration keys: {', '.join(sorted(missing_keys))}")
-
-    for key in PATH_KEYS:
-        if key in raw:
-            raw[key] = Path(raw[key])
-
-    return SegmentationConfig(**raw)
+    return SegmentationConfig(**load_config_values(path, fields(SegmentationConfig)))

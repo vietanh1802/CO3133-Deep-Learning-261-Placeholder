@@ -7,14 +7,20 @@ from PIL import Image
 from torch import nn
 from torch.utils.data import DataLoader, TensorDataset
 
-from src.data.suim_dataset import IMAGENET_MEAN, IMAGENET_STD, SuimSegmentation, build_suim_loaders
+from src.config.segmentation import load_segmentation_config
+from src.data.suim import (
+    SuimSegmentation,
+    build_suim_loaders,
+)
+from src.data.transform import IMAGENET_MEAN, IMAGENET_STD
 from src.evaluation.compute_cost import measure_inference
-from src.evaluation.segmentation_plots import plot_segmentation_curves
 from src.models import UNet, build_model
+from src.plots.segmentation import (
+    plot_segmentation_curves,
+)
 from src.training.segmentation import fit_segmentation, warmup_cosine
 from src.utils.environment import git_revision, software_versions
 from src.utils.seed import make_generator, seed_everything
-from src.utils.segmentation_config import load_segmentation_config
 
 DEVICE = torch.device("cpu")
 COLOURS = {0: (0, 0, 0), 1: (0, 0, 255), 4: (255, 0, 0), 7: (255, 255, 255)}

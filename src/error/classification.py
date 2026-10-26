@@ -6,7 +6,9 @@ import torch
 
 from src.error.base import ErrorAnalyzer, register_error_analyzer
 from src.error.selection import select_bottom_k, select_top_k
-from src.evaluation import EvaluationResult
+from src.evaluation.classification import (
+    EvaluationResult,
+)
 
 
 @dataclass(frozen=True)

@@ -77,7 +77,7 @@ def test_evidence_command(tmp_path):
         [
             sys.executable,
             "-m",
-            "scripts.evaluation.evaluate_segmentation",
+            "scripts.evaluation.eval_segmentation",
             "--evidence",
             str(evidence),
             "--output",
@@ -89,6 +89,8 @@ def test_evidence_command(tmp_path):
     assert record["metrics"]["all"]["mean_iou"] == pytest.approx(2 / 8)
     assert record["metrics"]["all"]["pixel_count"] == 4
     assert (output / "examples.png").is_file()
+    assert (output / "examples.pdf").is_file()
+    assert (output / "confusion_matrix.pdf").is_file()
     assert (output / "confusion_matrix.png").is_file()
 
 
