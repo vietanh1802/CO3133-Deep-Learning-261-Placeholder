@@ -1,0 +1,278 @@
+{
+  "cifar10": {
+    "baseline": "mlp",
+    "rule": "lowest validation loss among Linear and MLP; ties favor Linear",
+    "categories": {
+      "CNN corrects baseline": [
+        0,
+        3
+      ],
+      "Both miss": [
+        8,
+        12
+      ],
+      "Baseline correct, CNN wrong": [
+        7,
+        15
+      ]
+    },
+    "samples": [
+      {
+        "category": "CNN corrects baseline",
+        "sample_index": 0,
+        "target": 3,
+        "predictions": {
+          "linear": 3,
+          "mlp": 1,
+          "cnn": 3,
+          "gru": 3,
+          "transformer": 3
+        }
+      },
+      {
+        "category": "CNN corrects baseline",
+        "sample_index": 3,
+        "target": 0,
+        "predictions": {
+          "linear": 0,
+          "mlp": 8,
+          "cnn": 0,
+          "gru": 0,
+          "transformer": 0
+        }
+      },
+      {
+        "category": "Both miss",
+        "sample_index": 8,
+        "target": 3,
+        "predictions": {
+          "linear": 5,
+          "mlp": 5,
+          "cnn": 5,
+          "gru": 5,
+          "transformer": 3
+        }
+      },
+      {
+        "category": "Both miss",
+        "sample_index": 12,
+        "target": 5,
+        "predictions": {
+          "linear": 3,
+          "mlp": 3,
+          "cnn": 3,
+          "gru": 5,
+          "transformer": 3
+        }
+      },
+      {
+        "category": "Baseline correct, CNN wrong",
+        "sample_index": 7,
+        "target": 6,
+        "predictions": {
+          "linear": 6,
+          "mlp": 6,
+          "cnn": 4,
+          "gru": 2,
+          "transformer": 6
+        }
+      },
+      {
+        "category": "Baseline correct, CNN wrong",
+        "sample_index": 15,
+        "target": 8,
+        "predictions": {
+          "linear": 8,
+          "mlp": 8,
+          "cnn": 6,
+          "gru": 6,
+          "transformer": 8
+        }
+      }
+    ]
+  },
+  "fashion_mnist": {
+    "baseline": "mlp",
+    "rule": "lowest validation loss among Linear and MLP; ties favor Linear",
+    "categories": {
+      "CNN corrects baseline": [
+        21,
+        51
+      ],
+      "Both miss": [
+        17,
+        23
+      ],
+      "Baseline correct, CNN wrong": [
+        6,
+        26
+      ]
+    },
+    "samples": [
+      {
+        "category": "CNN corrects baseline",
+        "sample_index": 21,
+        "target": 5,
+        "predictions": {
+          "linear": 7,
+          "mlp": 7,
+          "cnn": 5,
+          "gru": 5,
+          "transformer": 5
+        }
+      },
+      {
+        "category": "CNN corrects baseline",
+        "sample_index": 51,
+        "target": 4,
+        "predictions": {
+          "linear": 2,
+          "mlp": 2,
+          "cnn": 4,
+          "gru": 4,
+          "transformer": 4
+        }
+      },
+      {
+        "category": "Both miss",
+        "sample_index": 17,
+        "target": 4,
+        "predictions": {
+          "linear": 2,
+          "mlp": 6,
+          "cnn": 6,
+          "gru": 4,
+          "transformer": 4
+        }
+      },
+      {
+        "category": "Both miss",
+        "sample_index": 23,
+        "target": 9,
+        "predictions": {
+          "linear": 9,
+          "mlp": 5,
+          "cnn": 5,
+          "gru": 5,
+          "transformer": 5
+        }
+      },
+      {
+        "category": "Baseline correct, CNN wrong",
+        "sample_index": 6,
+        "target": 4,
+        "predictions": {
+          "linear": 4,
+          "mlp": 4,
+          "cnn": 2,
+          "gru": 4,
+          "transformer": 4
+        }
+      },
+      {
+        "category": "Baseline correct, CNN wrong",
+        "sample_index": 26,
+        "target": 6,
+        "predictions": {
+          "linear": 6,
+          "mlp": 6,
+          "cnn": 4,
+          "gru": 6,
+          "transformer": 6
+        }
+      }
+    ]
+  },
+  "mnist": {
+    "baseline": "mlp",
+    "rule": "lowest validation loss among Linear and MLP; ties favor Linear",
+    "categories": {
+      "CNN corrects baseline": [
+        104,
+        247
+      ],
+      "Both miss": [
+        445,
+        449
+      ],
+      "Baseline correct, CNN wrong": [
+        18,
+        151
+      ]
+    },
+    "samples": [
+      {
+        "category": "CNN corrects baseline",
+        "sample_index": 104,
+        "target": 9,
+        "predictions": {
+          "linear": 9,
+          "mlp": 5,
+          "cnn": 9,
+          "gru": 9,
+          "transformer": 9
+        }
+      },
+      {
+        "category": "CNN corrects baseline",
+        "sample_index": 247,
+        "target": 4,
+        "predictions": {
+          "linear": 6,
+          "mlp": 6,
+          "cnn": 4,
+          "gru": 6,
+          "transformer": 4
+        }
+      },
+      {
+        "category": "Both miss",
+        "sample_index": 445,
+        "target": 6,
+        "predictions": {
+          "linear": 0,
+          "mlp": 0,
+          "cnn": 0,
+          "gru": 6,
+          "transformer": 0
+        }
+      },
+      {
+        "category": "Both miss",
+        "sample_index": 449,
+        "target": 3,
+        "predictions": {
+          "linear": 5,
+          "mlp": 5,
+          "cnn": 5,
+          "gru": 3,
+          "transformer": 3
+        }
+      },
+      {
+        "category": "Baseline correct, CNN wrong",
+        "sample_index": 18,
+        "target": 3,
+        "predictions": {
+          "linear": 3,
+          "mlp": 3,
+          "cnn": 5,
+          "gru": 9,
+          "transformer": 3
+        }
+      },
+      {
+        "category": "Baseline correct, CNN wrong",
+        "sample_index": 151,
+        "target": 9,
+        "predictions": {
+          "linear": 9,
+          "mlp": 9,
+          "cnn": 8,
+          "gru": 9,
+          "transformer": 9
+        }
+      }
+    ]
+  }
+}

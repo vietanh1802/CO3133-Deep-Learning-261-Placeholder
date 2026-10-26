@@ -1,0 +1,179 @@
+{
+  "per_class_accuracy": {
+    "0": 0.9948979591836735,
+    "1": 0.9973568281938326,
+    "2": 0.9893410852713178,
+    "3": 0.996039603960396,
+    "4": 0.9898167006109979,
+    "5": 0.9899103139013453,
+    "6": 0.9916492693110647,
+    "7": 0.9970817120622568,
+    "8": 0.9948665297741273,
+    "9": 0.9890981169474727
+  },
+  "per_class_support": {
+    "0": 980,
+    "1": 1135,
+    "2": 1032,
+    "3": 1010,
+    "4": 982,
+    "5": 892,
+    "6": 958,
+    "7": 1028,
+    "8": 974,
+    "9": 1009
+  },
+  "most_confused_pairs": [
+    {
+      "target": 9,
+      "prediction": 4,
+      "count": 8
+    },
+    {
+      "target": 4,
+      "prediction": 9,
+      "count": 7
+    },
+    {
+      "target": 5,
+      "prediction": 3,
+      "count": 6
+    },
+    {
+      "target": 2,
+      "prediction": 7,
+      "count": 5
+    },
+    {
+      "target": 2,
+      "prediction": 3,
+      "count": 3
+    }
+  ],
+  "confident_errors": [
+    {
+      "sample_index": 4176,
+      "target": 2,
+      "prediction": 7,
+      "confidence": 0.9991410970687866,
+      "true_class_probability": 0.0004936213372275233,
+      "margin": 0.9986474514007568
+    },
+    {
+      "sample_index": 9792,
+      "target": 4,
+      "prediction": 9,
+      "confidence": 0.9976776242256165,
+      "true_class_probability": 0.002256040694192052,
+      "margin": 0.9954215884208679
+    },
+    {
+      "sample_index": 1901,
+      "target": 9,
+      "prediction": 4,
+      "confidence": 0.9967427849769592,
+      "true_class_probability": 0.002291944110766053,
+      "margin": 0.9944508671760559
+    },
+    {
+      "sample_index": 2035,
+      "target": 5,
+      "prediction": 3,
+      "confidence": 0.9951510429382324,
+      "true_class_probability": 0.004845591261982918,
+      "margin": 0.9903054237365723
+    },
+    {
+      "sample_index": 9729,
+      "target": 5,
+      "prediction": 6,
+      "confidence": 0.990060567855835,
+      "true_class_probability": 0.00992816686630249,
+      "margin": 0.9801324009895325
+    }
+  ],
+  "uncertain_errors": [
+    {
+      "sample_index": 4571,
+      "target": 6,
+      "prediction": 8,
+      "confidence": 0.4365556836128235,
+      "true_class_probability": 0.3590017855167389,
+      "margin": 0.0775538980960846
+    },
+    {
+      "sample_index": 1393,
+      "target": 5,
+      "prediction": 3,
+      "confidence": 0.4714151918888092,
+      "true_class_probability": 0.06305345147848129,
+      "margin": 0.4083617329597473
+    },
+    {
+      "sample_index": 5997,
+      "target": 5,
+      "prediction": 9,
+      "confidence": 0.5188694596290588,
+      "true_class_probability": 0.42647552490234375,
+      "margin": 0.09239393472671509
+    },
+    {
+      "sample_index": 1033,
+      "target": 8,
+      "prediction": 1,
+      "confidence": 0.5190907716751099,
+      "true_class_probability": 0.3324955701828003,
+      "margin": 0.18659520149230957
+    },
+    {
+      "sample_index": 5735,
+      "target": 5,
+      "prediction": 3,
+      "confidence": 0.5229467153549194,
+      "true_class_probability": 0.18356001377105713,
+      "margin": 0.3393867015838623
+    }
+  ],
+  "representative_correct": [
+    {
+      "sample_index": 1320,
+      "target": 8,
+      "prediction": 8,
+      "confidence": 1.0,
+      "true_class_probability": 1.0,
+      "margin": 0.0
+    },
+    {
+      "sample_index": 1474,
+      "target": 8,
+      "prediction": 8,
+      "confidence": 1.0,
+      "true_class_probability": 1.0,
+      "margin": 0.0
+    },
+    {
+      "sample_index": 5775,
+      "target": 8,
+      "prediction": 8,
+      "confidence": 1.0,
+      "true_class_probability": 1.0,
+      "margin": 0.0
+    },
+    {
+      "sample_index": 8877,
+      "target": 8,
+      "prediction": 8,
+      "confidence": 1.0,
+      "true_class_probability": 1.0,
+      "margin": 0.0
+    },
+    {
+      "sample_index": 8894,
+      "target": 8,
+      "prediction": 8,
+      "confidence": 1.0,
+      "true_class_probability": 1.0,
+      "margin": 0.0
+    }
+  ]
+}

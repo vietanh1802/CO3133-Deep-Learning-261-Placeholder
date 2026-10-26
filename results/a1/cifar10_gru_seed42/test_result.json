@@ -1,0 +1,69 @@
+{
+  "name": "cifar10_gru_seed42",
+  "model": "gru",
+  "dataset": "cifar10",
+  "split": "test",
+  "seed": 42,
+  "config": {
+    "name": "cifar10_gru_seed42",
+    "model": "gru",
+    "model_config": {
+      "input_size": 96,
+      "hidden_size": 128,
+      "num_layers": 1,
+      "dropout": 0.0
+    },
+    "dataset": "cifar10",
+    "seed": 42,
+    "batch_size": 128,
+    "learning_rate": 0.001,
+    "epochs": 50,
+    "num_workers": 0,
+    "val_fraction": 0.1,
+    "data_dir": "data",
+    "checkpoint_dir": "checkpoints",
+    "results_dir": "results"
+  },
+  "checkpoint": {
+    "path": "checkpoints/cifar10_gru_seed42/best.pt",
+    "selection_rule": "lowest validation loss",
+    "epoch": 45,
+    "global_step": 15840,
+    "best_validation_loss": 0.9698954074859619,
+    "config": {
+      "name": "cifar10_gru_seed42",
+      "model": "gru",
+      "model_config": {
+        "input_size": 96,
+        "hidden_size": 128,
+        "num_layers": 1,
+        "dropout": 0.0
+      },
+      "dataset": "cifar10",
+      "seed": 42,
+      "batch_size": 128,
+      "learning_rate": 0.001,
+      "epochs": 50,
+      "num_workers": 0,
+      "val_fraction": 0.1,
+      "data_dir": "data",
+      "checkpoint_dir": "checkpoints",
+      "results_dir": "results"
+    }
+  },
+  "metrics": {
+    "accuracy": 0.6424000263214111,
+    "macro_f1": 0.6401410174062857
+  },
+  "parameter_count": 88074,
+  "training_seconds": 482.1469284270006,
+  "inference_seconds": 0.5042048315517604,
+  "sample_count": 10000,
+  "git_commit": "fcc1589f6dbd2c81ad7ecd3e72930c3663b0e1ba-dirty",
+  "environment": {
+    "python": "3.13.5",
+    "torch": "2.14.0",
+    "platform": "macOS-27.0.1-arm64-arm-64bit-Mach-O",
+    "device_name": "arm"
+  }
+}

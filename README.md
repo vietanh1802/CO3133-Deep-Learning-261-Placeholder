@@ -43,7 +43,8 @@ SUIM training reads the committed splits in `results/a2/splits/suim/`.
 ```bash
 uv run python -m scripts.training.train_image_classification --data fashion_mnist --config configs/image_classification/fashion_mnist/linear.yaml
 uv run python -m scripts.evaluation.evaluate --data fashion_mnist --config configs/image_classification/fashion_mnist/linear.yaml
-uv run python -m scripts.evaluation.compare --results-dir results/a1
+uv run python -m scripts.evaluation.compare --results-dir results/a1 --epochs 50 \
+  --figures-dir web/images/comparison/a1
 ```
 
 Use matching dataset and configuration paths for MNIST or CIFAR-10.

@@ -1,0 +1,179 @@
+{
+  "per_class_accuracy": {
+    "0": 0.9918367346938776,
+    "1": 0.9973568281938326,
+    "2": 0.9864341085271318,
+    "3": 0.9831683168316832,
+    "4": 0.9755600814663951,
+    "5": 0.9786995515695067,
+    "6": 0.988517745302714,
+    "7": 0.9824902723735408,
+    "8": 0.9815195071868583,
+    "9": 0.977205153617443
+  },
+  "per_class_support": {
+    "0": 980,
+    "1": 1135,
+    "2": 1032,
+    "3": 1010,
+    "4": 982,
+    "5": 892,
+    "6": 958,
+    "7": 1028,
+    "8": 974,
+    "9": 1009
+  },
+  "most_confused_pairs": [
+    {
+      "target": 4,
+      "prediction": 9,
+      "count": 20
+    },
+    {
+      "target": 5,
+      "prediction": 3,
+      "count": 11
+    },
+    {
+      "target": 9,
+      "prediction": 3,
+      "count": 7
+    },
+    {
+      "target": 9,
+      "prediction": 7,
+      "count": 7
+    },
+    {
+      "target": 2,
+      "prediction": 7,
+      "count": 6
+    }
+  ],
+  "confident_errors": [
+    {
+      "sample_index": 449,
+      "target": 3,
+      "prediction": 5,
+      "confidence": 0.9948427081108093,
+      "true_class_probability": 0.0051573230884969234,
+      "margin": 0.9896853566169739
+    },
+    {
+      "sample_index": 6783,
+      "target": 1,
+      "prediction": 6,
+      "confidence": 0.9924485683441162,
+      "true_class_probability": 0.0005424678092822433,
+      "margin": 0.9919061064720154
+    },
+    {
+      "sample_index": 1530,
+      "target": 8,
+      "prediction": 7,
+      "confidence": 0.9808638095855713,
+      "true_class_probability": 0.003917919006198645,
+      "margin": 0.9769458770751953
+    },
+    {
+      "sample_index": 1226,
+      "target": 7,
+      "prediction": 2,
+      "confidence": 0.9800472855567932,
+      "true_class_probability": 0.009251164272427559,
+      "margin": 0.9707961082458496
+    },
+    {
+      "sample_index": 2387,
+      "target": 9,
+      "prediction": 1,
+      "confidence": 0.9652144312858582,
+      "true_class_probability": 0.0169676560908556,
+      "margin": 0.9482467770576477
+    }
+  ],
+  "uncertain_errors": [
+    {
+      "sample_index": 3702,
+      "target": 5,
+      "prediction": 3,
+      "confidence": 0.2020200490951538,
+      "true_class_probability": 0.1543397158384323,
+      "margin": 0.0476803332567215
+    },
+    {
+      "sample_index": 9700,
+      "target": 2,
+      "prediction": 8,
+      "confidence": 0.26277780532836914,
+      "true_class_probability": 0.2338142693042755,
+      "margin": 0.028963536024093628
+    },
+    {
+      "sample_index": 2109,
+      "target": 3,
+      "prediction": 7,
+      "confidence": 0.3072158098220825,
+      "true_class_probability": 0.1900637298822403,
+      "margin": 0.11715207993984222
+    },
+    {
+      "sample_index": 5678,
+      "target": 8,
+      "prediction": 6,
+      "confidence": 0.3282269835472107,
+      "true_class_probability": 0.2980368733406067,
+      "margin": 0.030190110206604004
+    },
+    {
+      "sample_index": 6558,
+      "target": 6,
+      "prediction": 2,
+      "confidence": 0.3382432758808136,
+      "true_class_probability": 0.0979369580745697,
+      "margin": 0.2403063178062439
+    }
+  ],
+  "representative_correct": [
+    {
+      "sample_index": 71,
+      "target": 0,
+      "prediction": 0,
+      "confidence": 1.0,
+      "true_class_probability": 1.0,
+      "margin": 0.0
+    },
+    {
+      "sample_index": 162,
+      "target": 5,
+      "prediction": 5,
+      "confidence": 1.0,
+      "true_class_probability": 1.0,
+      "margin": 0.0
+    },
+    {
+      "sample_index": 183,
+      "target": 0,
+      "prediction": 0,
+      "confidence": 1.0,
+      "true_class_probability": 1.0,
+      "margin": 0.0
+    },
+    {
+      "sample_index": 188,
+      "target": 0,
+      "prediction": 0,
+      "confidence": 1.0,
+      "true_class_probability": 1.0,
+      "margin": 0.0
+    },
+    {
+      "sample_index": 305,
+      "target": 0,
+      "prediction": 0,
+      "confidence": 1.0,
+      "true_class_probability": 1.0,
+      "margin": 0.0
+    }
+  ]
+}

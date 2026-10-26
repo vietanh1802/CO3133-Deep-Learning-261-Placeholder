@@ -94,3 +94,27 @@ def test_plotters_apply_style_and_preserve_values(tmp_path, monkeypatch):
         assert image.get_cmap().name == "Blues"
         assert image.get_clim() == (0.0, 1.0)
         np.testing.assert_allclose(image.get_array(), [[0.75, 0.25], [0, 1]])
+
+
+def test_shared_predictions_pair_images_with_captions_in_two_columns(tmp_path, monkeypatch):
+    from src.plots import classification
+
+    figures = []
+    monkeypatch.setattr(classification, "save_figure", lambda figure, path: figures.append(figure))
+    samples = [
+        {"sample_index": i, "target": 0, "category": "Both miss", "predictions": {"CNN": 1}}
+        for i in range(3)
+    ]
+    classification.plot_shared_predictions(
+        [np.zeros((28, 28)) for _ in samples], samples, ["A", "B"], tmp_path / "shared.png"
+    )
+    figure = figures[0]
+    figure.canvas.draw()
+    assert figure.get_figheight() == pytest.approx(3.4)
+    images, captions = figure.axes[::2], figure.axes[1::2]
+    assert images[0].get_position().x0 < images[1].get_position().x0
+    assert images[2].get_position().y1 < images[0].get_position().y0
+    for index, (image, caption) in enumerate(zip(images, captions, strict=True)):
+        assert image.get_position().x1 < caption.get_position().x0
+        assert image.get_title() == f"#{index}: A"
+        assert caption.texts[0].get_text() == "Both miss\nCNN: B (wrong)"

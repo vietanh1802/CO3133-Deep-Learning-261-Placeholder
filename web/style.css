@@ -97,6 +97,7 @@ td.num, th.num { text-align: right; }
 ul.links { list-style: none; padding: 0; }
 ul.links li { padding: .55rem 0; border-bottom: 1px solid var(--border); }
 .gallery { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2.5rem; margin: 2rem 0; }
+.gallery.gallery-pair { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
 .gallery figure { margin: 0; min-width: 0; }
 .gallery img { display: block; width: 100%; background: white; }
 .gallery figcaption { margin-top: .75rem; font-size: .76rem; line-height: 1.6; color: var(--muted); }
@@ -125,7 +126,7 @@ footer { max-width: 1160px; margin: auto; padding: 1.5rem 2.5rem 2.5rem; border-
   .report-shell article { width: 100%; }
   .article-header { padding: 0 0 1.5rem; margin-bottom: 2rem; }
   .article-header h1 { font-size: 2.6rem; }
-  .gallery { grid-template-columns: 1fr; }
+  .gallery, .gallery.gallery-pair { grid-template-columns: 1fr; }
   dl.meta { grid-template-columns: 1fr; gap: .1rem; }
   dl.meta dd { margin-bottom: .7rem; }
   footer { margin: 0 1.2rem; padding: 1.5rem 0; }

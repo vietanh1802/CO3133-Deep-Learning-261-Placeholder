@@ -1,0 +1,69 @@
+{
+  "name": "fashion_mnist_gru_seed42",
+  "model": "gru",
+  "dataset": "fashion_mnist",
+  "split": "test",
+  "seed": 42,
+  "config": {
+    "name": "fashion_mnist_gru_seed42",
+    "model": "gru",
+    "model_config": {
+      "input_size": 28,
+      "hidden_size": 128,
+      "num_layers": 1,
+      "dropout": 0.0
+    },
+    "dataset": "fashion_mnist",
+    "seed": 42,
+    "batch_size": 128,
+    "learning_rate": 0.001,
+    "epochs": 50,
+    "num_workers": 0,
+    "val_fraction": 0.1,
+    "data_dir": "data",
+    "checkpoint_dir": "checkpoints",
+    "results_dir": "results"
+  },
+  "checkpoint": {
+    "path": "checkpoints/fashion_mnist_gru_seed42/best.pt",
+    "selection_rule": "lowest validation loss",
+    "epoch": 49,
+    "global_step": 20678,
+    "best_validation_loss": 0.26755424491564433,
+    "config": {
+      "name": "fashion_mnist_gru_seed42",
+      "model": "gru",
+      "model_config": {
+        "input_size": 28,
+        "hidden_size": 128,
+        "num_layers": 1,
+        "dropout": 0.0
+      },
+      "dataset": "fashion_mnist",
+      "seed": 42,
+      "batch_size": 128,
+      "learning_rate": 0.001,
+      "epochs": 50,
+      "num_workers": 0,
+      "val_fraction": 0.1,
+      "data_dir": "data",
+      "checkpoint_dir": "checkpoints",
+      "results_dir": "results"
+    }
+  },
+  "metrics": {
+    "accuracy": 0.8988000154495239,
+    "macro_f1": 0.8990115081845076
+  },
+  "parameter_count": 61962,
+  "training_seconds": 652.4817179190004,
+  "inference_seconds": 0.3681820410420187,
+  "sample_count": 10000,
+  "git_commit": "fcc1589f6dbd2c81ad7ecd3e72930c3663b0e1ba-dirty",
+  "environment": {
+    "python": "3.13.5",
+    "torch": "2.14.0",
+    "platform": "macOS-27.0.1-arm64-arm-64bit-Mach-O",
+    "device_name": "arm"
+  }
+}
