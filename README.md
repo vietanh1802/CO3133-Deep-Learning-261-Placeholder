@@ -119,29 +119,36 @@ figures under `results/a1/<run-name>/`.
 - [Assignment 2 M1 dataset proposal](reports/a2_proposal.md)
 - [AI Usage Disclosure](AI_USAGE.md)
 
-## Assignment 2 — segmentation scaffold
+## Assignment 2 — segmentation
 
-<<<<<<< Updated upstream
-SUIM semantic segmentation proposal is approved. Data analysis and fixed split files
-are available above. Remaining implementation placeholders:
+SUIM semantic segmentation proposal is approved. Train the U-Net baseline (trained from
+scratch) on the committed split with:
 
-- Baseline and pretrained model: `src/models/segmentation.py`
-- Training and evaluation: `src/training/segmentation.py`, `src/evaluation/segmentation.py`
-- Entry points: `scripts/training/train_segmentation.py`,
-=======
-SUIM semantic segmentation proposal is approved. Implementation placeholders:
+```bash
+uv run python -m scripts.training.train_segmentation --config configs/segmentation/suim/baseline.yaml
+uv run python -m scripts.training.train_segmentation --config configs/segmentation/suim/baseline.yaml --resume
+```
 
-- Data and EDA: `src/data/suim.py`, `src/data/suim_eda.py`
-- Baseline and pretrained model: `src/models/segmentation.py`
-- Training and evaluation: `src/training/segmentation.py`, `src/evaluation/segmentation.py`
-- Entry points: `scripts/eda/run_suim.py`, `scripts/training/train_segmentation.py`,
->>>>>>> Stashed changes
-  `scripts/evaluation/evaluate_segmentation.py`
-- Configuration placeholders: `configs/segmentation/suim/`
+The second command continues an interrupted run from `checkpoints/<name>/last.pt`. The
+checkpoint with the highest validation mIoU is kept as `checkpoints/<name>/best.pt`.
+Checkpoints are not committed; rerun the command to rebuild them. Every run writes
+`results/a2/<name>/`:
+
+| Output                   | Contents                                                                                                                                                                     |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `train.log`              | Configuration, device, and per-epoch loss, mIoU and mDice                                                                                                                    |
+| `history.json`           | Per-epoch records, rewritten after every epoch                                                                                                                               |
+| `training_summary.json`  | Validation metrics of the selected checkpoint (all, boundary, interior), parameter count, hardware, software versions, git commit, seed, training time, peak training memory, inference cost |
+| `learning_curves.png`    | Loss and validation mIoU per epoch, with the selected epoch marked                                                                                                           |
+| `val_evidence.pt`        | Validation predictions for `scripts.evaluation.eval_segmentation` (not committed)                                                                                            |
+
+`training_seconds` includes each epoch's validation pass. Inference cost times only the
+forward pass of the selected checkpoint over the validation split, after two warm-up
+batches.
+
+- Data loading: `src/data/suim_dataset.py`
+- Models: `src/models/segmentation.py` (U-Net; pretrained DeepLabV3 in progress)
+- Training: `src/training/segmentation.py`; metrics: `src/evaluation/segmentation.py`;
+  inference cost: `src/evaluation/compute_cost.py`
+- Configurations: `configs/segmentation/suim/`
 - Draft: [Assignment 2 M2 outline](reports/assignment2-draft.md)
-- Results: `results/a2/`
-
-These remaining files are blank scaffolds, not runnable experiments. Implement the
-U-Net baseline and pretrained DeepLabV3 using the proposal and committed split files.
-These files are blank scaffolds, not runnable experiments. Select model architectures
-and complete the data/split protocol before implementing them.

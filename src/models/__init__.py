@@ -8,6 +8,7 @@ from src.models.linear import Linear
 from src.models.lstm import LSTM
 from src.models.mlp import MLP
 from src.models.rnn import RNN
+from src.models.segmentation import UNet
 from src.models.transformer import Transformer
 
 __all__ = [
@@ -20,6 +21,7 @@ __all__ = [
     "Model",
     "RNN",
     "Transformer",
+    "UNet",
     "build_model",
     "register_model",
 ]
