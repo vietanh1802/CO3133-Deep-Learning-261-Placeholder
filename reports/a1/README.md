@@ -3,6 +3,10 @@
 Compile `main.tex`. Write in English and replace each blue prompt with report text.
 The outline keeps the three main parts already used by the report.
 
+Part 1 has a standalone [PDF review copy](part1-review.pdf). Its source is
+[`Sections/3-Problem-and-Data.tex`](Sections/3-Problem-and-Data.tex), with the
+supporting split table in `Tables/` and figures in `Images/`.
+
 | File in `Sections/` | What to write |
 | --- | --- |
 | `2-Abstract.tex` | Question, protocol, main finding, trade-off, and limitation. Write last. |
