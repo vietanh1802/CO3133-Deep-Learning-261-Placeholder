@@ -59,6 +59,17 @@ Here is my implementation of Linear, RNN, and CNN. Check if they are correct and
 
 - **How the output was edited and verified:** The implementation is compared with standard library like timm, pytorch models. 
 
+### Entry 5
+
+- **Tool / model:** Codex (GPT-6).
+- **Used by:** Tran Lam Anh (2352067).
+- **Date / development stage:** 2026-10-27 - Assignment 1, Part 1 report preparation.
+- **Purpose:** Complete Problem and Data Description in the existing group LaTeX report, covering the task, dataset, EDA, split protocol, and preprocessing.
+- **Affected sections / files:** `reports/a1/Sections/3-Problem-and-Data.tex`, `Tables/data_splits.tex`, two report images, supporting references, and this use's report disclosure.
+- **Representative prompt (translated):** "Write report Part 1 as planned, then let me review it. Push only after I approve."
+- **AI contribution:** Drafted and edited the English text and table; prepared a compact grid of real Fashion-MNIST images and a heatmap of the saved class-similarity statistics. Added source citations and prepared a PDF review copy.
+- **Verification:** The assistant checked counts, seed, split logic, normalization, and augmentation against the code and configurations; recomputed the saved EDA mean, standard deviation, and lowest-bin pixel share from the local dataset; checked the four download checksums; and inspected an actual validation batch. The student approved publication on 2026-10-27. No training or model-evaluation run was added for this writing task.
+
 ## Assignment 2
 
 ### Entry 1
