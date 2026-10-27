@@ -12,7 +12,7 @@ min_cuda = 12.6
 min_download = 100
 
 [tasks.segmentation-deeplab]
-download_checkpoints = true
+download_checkpoints = false
 output_dirs = ["checkpoints"]
 timeout_seconds = 14400
 command = ["bash", "-lc", '''
