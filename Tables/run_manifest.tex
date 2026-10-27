@@ -1,0 +1,17 @@
+% Check recorded revisions against the source result JSONs in results/a1/.
+\begin{longtable}{p{0.14\linewidth}p{0.46\linewidth}p{0.30\linewidth}}
+\caption{Run provenance snapshot. Paths are relative to the repository root.
+The configuration file for each model is under
+\codepath{configs/image_classification/fashion_mnist/}.}
+\label{tab:manifest}\\
+\toprule Model & Experiment / source records & Recorded source revision\\\midrule
+\endfirsthead
+\toprule Model & Experiment / source records & Recorded source revision\\\midrule\endhead
+LINEAR & \codepath{fashion_mnist_linear_seed42}\newline \codepath{results/a1/fashion_mnist_linear_seed42/} & \codepath{27e7c0c98ad6} \\
+MLP & \codepath{fashion_mnist_mlp_seed42}\newline \codepath{results/a1/fashion_mnist_mlp_seed42/} & \codepath{27e7c0c98ad6} + dirty tree \\
+CNN & \codepath{fashion_mnist_cnn_seed42}\newline \codepath{results/a1/fashion_mnist_cnn_seed42/} & \codepath{27e7c0c98ad6} + dirty tree \\
+GRU & \codepath{fashion_mnist_gru_seed42}\newline \codepath{results/a1/fashion_mnist_gru_seed42/} & \codepath{27e7c0c98ad6} + dirty tree \\
+LSTM & \codepath{fashion_mnist_lstm_seed42}\newline \codepath{results/a1/fashion_mnist_lstm_seed42/} & \codepath{27e7c0c98ad6} + dirty tree \\
+TRANSFORMER & \codepath{fashion_mnist_transformer_seed42}\newline \codepath{results/a1/fashion_mnist_transformer_seed42/} & \codepath{27e7c0c98ad6} + dirty tree \\
+\bottomrule
+\end{longtable}

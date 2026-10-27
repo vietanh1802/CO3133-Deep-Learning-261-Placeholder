@@ -1,0 +1,19 @@
+% Snapshot of saved Fashion-MNIST test results; verify against results/a1/ before use.
+\begin{table}[htbp]
+\centering\small
+\caption{Imported Fashion-MNIST test results (one run per model, seed 42).
+Times are recorded values in seconds; timing protocol and comparability still
+need to be documented in Section~\ref{sec:metrics}.}
+\label{tab:comparison}
+\begin{tabular}{lrrrrr}
+\toprule
+Model & Acc. (\%) & Macro-F1 & Parameters & Train (s) & Infer. (s)\\\midrule
+LINEAR & 77.05 & 0.7694 & 7,850 & 535.2 & 0.028 \\
+MLP & 87.18 & 0.8711 & 235,146 & 585.1 & 0.048 \\
+CNN & 86.21 & 0.8615 & 19,562 & 562.8 & 1.592 \\
+GRU & 89.88 & 0.8990 & 61,962 & 652.5 & 0.799 \\
+LSTM & 89.82 & 0.8975 & 82,186 & 3919.3 & 1.032 \\
+TRANSFORMER & 90.43 & 0.9040 & 1,191,050 & 685.0 & 4.134 \\
+\bottomrule
+\end{tabular}
+\end{table}

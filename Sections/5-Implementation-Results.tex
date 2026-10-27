@@ -1,0 +1,45 @@
+\section{Implementation results}
+\label{sec:results}
+
+\subsection{Test performance and model size}
+\label{sec:quantitative}
+\reporttodo{Add one table of test accuracy, macro-F1, and trainable parameters.
+Identify the dataset, seed count, training budget, and selected checkpoints.
+Check every value against its result JSON. Compare timing only under a documented,
+comparable protocol.}
+
+\subsection{Learning behavior}
+\reporttodo{Compare architectures in one learning-curve figure per dataset.
+Discuss convergence, instability, train--validation gaps, and checkpoint choice
+where the curves support those observations. Note relevant implementation issues.}
+
+\subsection{Per-class performance and error analysis}
+\label{sec:errors}
+\reporttodo{Compare selected models using class recall and normalized confusion
+matrices. Quantify important error groups with counts or rates. Connect patterns
+to data properties, and distinguish observations from proposed explanations.}
+
+\subsection{Predictions on shared images}
+\label{sec:qualitative}
+\reporttodo{Show the same images with true labels and predictions from several
+models. Include corrected errors, shared mistakes, and the reverse disagreement.
+State the selection rule and include difficult correct predictions where useful.
+Do not infer calibration from confident errors alone.}
+
+\subsection{Architecture trade-offs}
+\label{sec:discussion}
+\reporttodo{Answer the research question with measured differences in quality,
+model size, and verified compute cost. Discuss representation and inductive bias
+without claiming a causal explanation that the experiment did not test.}
+
+\subsection{Additional experiments}
+\reporttodo{Report completed ablations or extensions separately, with their
+controls and findings. Remove this subsection if no additional experiment belongs here.}
+
+\subsection{Limitations}
+\reporttodo{State the limits from seed count, tuning, unequal budgets, timing,
+and dataset representativeness. Explain which conclusions the evidence cannot support.}
+
+\subsection{Conclusion}
+\reporttodo{Give a short answer to the research question and the practical
+trade-off supported by the results. End with one useful next experiment.}

@@ -1,0 +1,30 @@
+% Presentation only: keep report content in Sections/.
+\usepackage{hcmut}
+\usepackage{booktabs,longtable,float,microtype}
+\usepackage{svg}
+\usetikzlibrary{positioning,arrows.meta}
+\thesislayout
+\setlength{\parskip}{5pt}
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{2}
+\renewcommand{\arraystretch}{1.18}
+\captionsetup{font=small,labelfont=bf}
+\hypersetup{pdftitle={Assignment 1 - Foundations of Deep Learning Pipelines and Architectures},pdfauthor={Group Placeholder}}
+\fancyfoot[L]{\scriptsize\ttfamily CO3133 / Semester 261 / Group Placeholder / A1}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+
+% Visible editorial prompts: resolve every call before final submission.
+\newcommand{\reporttodo}[1]{\par\begingroup\small\color{blue!65!black}\noindent\textbf{To complete:} #1\par\endgroup}
+\newcommand{\pending}{\textit{Pending}}
+\newcommand{\codepath}[1]{\texttt{\detokenize{#1}}}
+
+% A missing image remains a visible, compilable placeholder, never silent evidence.
+% Usage: \reportfigure{path}{caption}{label}
+\newcommand{\reportfigure}[3]{%
+  \begin{figure}[htbp]
+    \centering
+    \IfFileExists{#1}{\includegraphics[width=0.88\linewidth,height=0.59\textheight,keepaspectratio]{#1}}{%
+      \fbox{\parbox[c][32mm][c]{0.86\linewidth}{\centering\small
+      Evidence not yet supplied.\\[4pt]\codepath{#1}}}}
+    \caption{#2}\label{#3}
+  \end{figure}}
