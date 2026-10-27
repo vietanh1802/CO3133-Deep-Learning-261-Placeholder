@@ -15,10 +15,11 @@ CONFIG_PATH = (
 
 @pytest.mark.parametrize("layers", [1, 2, 3])
 @pytest.mark.parametrize("batch,length", [(1, 1), (3, 7)])
-def test_lstm_matches_reference_outputs_and_gradients(layers, batch, length):
+@pytest.mark.parametrize("channels", [1, 3])
+def test_lstm_matches_reference_outputs_and_gradients(layers, batch, length, channels):
     torch.manual_seed(42)
-    model = LSTM(input_size=4, hidden_size=5, num_layers=layers).double()
-    reference = nn.LSTM(4, 5, num_layers=layers, batch_first=True).double()
+    model = LSTM(input_size=channels * 4, hidden_size=5, num_layers=layers).double()
+    reference = nn.LSTM(channels * 4, 5, num_layers=layers, batch_first=True).double()
     with torch.no_grad():
         for index, cell in enumerate(model.cells):
             assert isinstance(cell, LSTMCell)
@@ -32,8 +33,10 @@ def test_lstm_matches_reference_outputs_and_gradients(layers, batch, length):
             ):
                 getattr(reference, f"{name}_l{index}").copy_(parameter)
 
-    images = torch.randn(batch, 1, length, 4, dtype=torch.float64, requires_grad=True)
-    sequence = images.detach().squeeze(1).clone().requires_grad_(True)
+    images = torch.randn(batch, channels, length, 4, dtype=torch.float64, requires_grad=True)
+    sequence = (
+        images.detach().permute(0, 2, 1, 3).reshape(batch, length, channels * 4).clone()
+    ).requires_grad_(True)
     features = model(images)
     _, (hidden, _) = reference(sequence)
     torch.testing.assert_close(features, hidden[-1], rtol=1e-9, atol=1e-11)
@@ -43,7 +46,8 @@ def test_lstm_matches_reference_outputs_and_gradients(layers, batch, length):
     (hidden[-1] * probe).sum().backward()
     assert images.grad is not None
     assert sequence.grad is not None
-    torch.testing.assert_close(images.grad.squeeze(1), sequence.grad, rtol=1e-9, atol=1e-11)
+    image_grad = images.grad.permute(0, 2, 1, 3).reshape(batch, length, channels * 4)
+    torch.testing.assert_close(image_grad, sequence.grad, rtol=1e-9, atol=1e-11)
     for index, cell in enumerate(model.cells):
         assert isinstance(cell, LSTMCell)
         assert cell.project_input.bias is not None

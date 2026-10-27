@@ -3,6 +3,7 @@ import sys
 from dataclasses import replace
 from pathlib import Path
 
+import pytest
 import torch
 import yaml
 from torch.utils.data import DataLoader, TensorDataset
@@ -19,10 +20,21 @@ CONFIG_PATH = (
 )
 
 
-def test_lstm_train_and_evaluate_entry_points(tmp_path, monkeypatch):
+@pytest.mark.parametrize(
+    "dataset,channels,size,parameters",
+    [
+        ("fashion_mnist", 1, 28, 82186),
+        ("mnist", 1, 28, 82186),
+        ("cifar10", 3, 32, 117002),
+    ],
+)
+def test_lstm_train_and_evaluate_entry_points(
+    tmp_path, monkeypatch, dataset, channels, size, parameters
+):
     config = replace(
-        load_config(CONFIG_PATH),
+        load_config(CONFIG_PATH.parent.parent / dataset / "lstm.yaml"),
         name="lstm_pipeline_smoke",
+        dataset=dataset,
         epochs=2,
         batch_size=4,
         results_dir=tmp_path / "results",
@@ -34,7 +46,7 @@ def test_lstm_train_and_evaluate_entry_points(tmp_path, monkeypatch):
 
     def make_loader(count):
         dataset = TensorDataset(
-            torch.randn(count, 1, 28, 28, generator=generator),
+            torch.randn(count, channels, size, size, generator=generator),
             torch.arange(count) % 10,
         )
         return DataLoader(dataset, batch_size=config.batch_size)
@@ -44,9 +56,7 @@ def test_lstm_train_and_evaluate_entry_points(tmp_path, monkeypatch):
     monkeypatch.setattr(evaluate, "build_dataloaders", lambda *_: loaders)
     monkeypatch.setattr(train_image_classification, "_device", lambda: torch.device("cpu"))
     monkeypatch.setattr(torch.cuda, "is_available", lambda: False)
-    monkeypatch.setattr(
-        sys, "argv", ["train", "--data", "fashion_mnist", "--config", str(config_path)]
-    )
+    monkeypatch.setattr(sys, "argv", ["train", "--data", dataset, "--config", str(config_path)])
     train_image_classification.main()
 
     run_dir = config.results_dir / "a1" / config.name
@@ -58,9 +68,7 @@ def test_lstm_train_and_evaluate_entry_points(tmp_path, monkeypatch):
     assert metadata.epoch == summary["best_epoch"]
     assert metadata.best_validation_loss == min(summary["validation_loss"])
 
-    monkeypatch.setattr(
-        sys, "argv", ["evaluate", "--data", "fashion_mnist", "--config", str(config_path)]
-    )
+    monkeypatch.setattr(sys, "argv", ["evaluate", "--data", dataset, "--config", str(config_path)])
     evaluate.main()
 
     record = json.loads((run_dir / "test_result.json").read_text(encoding="utf-8"))
@@ -68,7 +76,7 @@ def test_lstm_train_and_evaluate_entry_points(tmp_path, monkeypatch):
     assert record["sample_count"] == 10
     assert record["checkpoint"]["epoch"] == summary["best_epoch"]
     assert record["checkpoint"]["selection_rule"] == "lowest validation loss"
-    assert record["parameter_count"] == 82186
+    assert record["parameter_count"] == parameters
     assert 0 <= record["metrics"]["accuracy"] <= 1
     assert 0 <= record["metrics"]["macro_f1"] <= 1
     assert record["training_seconds"] == summary["training_seconds"]
@@ -80,8 +88,9 @@ def test_lstm_train_and_evaluate_entry_points(tmp_path, monkeypatch):
         "learning_curves.png",
         "test_confusion_matrix.png",
         "test_error_analysis.json",
-        "test_confident_errors.png",
-        "test_uncertain_errors.png",
-        "test_confident_correct.png",
     ):
         assert (run_dir / filename).is_file()
+
+    errors = json.loads((run_dir / "test_error_analysis.json").read_text(encoding="utf-8"))
+    for category in ("confident_errors", "uncertain_errors", "confident_correct"):
+        assert (run_dir / f"test_{category}.png").is_file() == bool(errors[category])
