@@ -11,8 +11,8 @@ min_vram = 8
 min_cuda = 12.6
 min_download = 100
 
-[tasks.segmentation-smoke]
-download_checkpoints = false
+[tasks.segmentation-deeplab]
+download_checkpoints = true
 output_dirs = ["checkpoints"]
 timeout_seconds = 14400
 command = ["bash", "-lc", '''
