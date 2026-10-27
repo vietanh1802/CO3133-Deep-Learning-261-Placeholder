@@ -104,8 +104,7 @@ def plot_comparative_learning_curves(histories, output_path, *, loss_max):
 
     apply()
     figure, axes = plt.subplots(1, 2, figsize=(9, 3.6), sharex=True, sharey=True)
-    # A neutral fifth color extends the four-color preset without changing it.
-    colors = (*COLORS, "#555555")
+    colors = COLORS
     for index, (model, summary) in enumerate(histories.items()):
         color = colors[index % len(colors)]
         for axis, key in zip(axes, ("train_loss", "validation_loss"), strict=True):

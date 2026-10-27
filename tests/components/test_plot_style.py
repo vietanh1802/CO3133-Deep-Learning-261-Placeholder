@@ -91,7 +91,7 @@ def test_plotters_apply_style_and_preserve_values(tmp_path, monkeypatch):
         assert not any(line.get_visible() for line in axes.get_xgridlines())
         plot_confusion_matrix(np.array([[3, 1], [0, 4]]), ["A", "B"], tmp_path / "counts.png")
         image = figures[1].axes[0].images[0]
-        assert image.get_cmap().name == "Blues"
+        assert image.get_cmap().name == "blue_red"
         assert image.get_clim() == (0.0, 1.0)
         np.testing.assert_allclose(image.get_array(), [[0.75, 0.25], [0, 1]])
 
@@ -118,3 +118,26 @@ def test_shared_predictions_pair_images_with_captions_in_two_columns(tmp_path, m
         assert image.get_position().x1 < caption.get_position().x0
         assert image.get_title() == f"#{index}: A"
         assert caption.texts[0].get_text() == "Both miss\nCNN: B (wrong)"
+
+
+def test_clustered_similarity_keeps_labels_and_values_aligned(tmp_path, monkeypatch):
+    from src.eda.classification import profile_dataset
+    from src.plots import eda
+
+    images = np.arange(4 * 3 * 3, dtype=np.uint8).reshape(4, 3, 3)
+    profile = profile_dataset(
+        images, np.arange(4), ["A", "B", "C", "D"], dataset="toy", split="train"
+    )
+    figures = []
+    monkeypatch.setattr(eda, "save_figure", lambda figure, path: figures.append(figure))
+    eda.plot_class_similarity(profile, tmp_path / "similarity.png", title="Similarity")
+    tree, matrix, _ = figures[0].axes
+    labels = [tick.get_text() for tick in matrix.get_yticklabels()]
+    assert labels == [tick.get_text() for tick in matrix.get_xticklabels()]
+    order = [list(profile.balance.class_names).index(label) for label in labels]
+    np.testing.assert_allclose(
+        matrix.images[0].get_array(), profile.class_similarity[np.ix_(order, order)]
+    )
+    assert tree.yaxis_inverted()
+    assert tree.get_ylim() == (40, 0)
+    assert matrix.get_ylim() == (3.5, -0.5)

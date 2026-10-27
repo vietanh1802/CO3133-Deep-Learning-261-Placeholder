@@ -2,6 +2,7 @@
 
 import matplotlib as mpl
 from cycler import cycler
+from matplotlib import colormaps
 from matplotlib.colors import LinearSegmentedColormap, to_hex
 
 LIGHT_BLUE = "#B2DDF4"
@@ -13,6 +14,8 @@ COLORS = (BLUE, RED, LIGHT_BLUE, "#F6BDBB", "#549ED0")
 BLUE_RED = LinearSegmentedColormap.from_list(
     "blue_red", [BLUE, LIGHT_BLUE, "white", "#F8CECC", RED]
 )
+if BLUE_RED.name not in colormaps:
+    colormaps.register(BLUE_RED)
 CLASS_COLORS = tuple(to_hex(BLUE_RED(i / 9)) for i in range(10))
 
 
@@ -49,6 +52,7 @@ def apply() -> None:
             "axes.axisbelow": True,
             "axes.formatter.use_mathtext": True,
             "axes.prop_cycle": cycler(color=COLORS),
+            "image.cmap": BLUE_RED.name,
             "xtick.major.width": 0.6,
             "ytick.major.width": 0.6,
             "xtick.minor.width": 0.6,

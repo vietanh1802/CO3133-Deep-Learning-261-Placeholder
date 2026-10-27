@@ -9,6 +9,8 @@ matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
+from scipy.cluster.hierarchy import dendrogram, linkage  # noqa: E402
+from scipy.spatial.distance import squareform  # noqa: E402
 
 from src.eda.classification import ClassBalance, DatasetProfile, IntensitySummary  # noqa: E402
 from src.plots.common import prepare_output_path, save_figure  # noqa: E402
@@ -184,26 +186,51 @@ def plot_class_similarity(
     *,
     title: str,
 ) -> None:
-    """Save the class-prototype similarity heatmap, annotated with its values."""
+    """Cluster centered prototypes by average linkage on cosine dissimilarity."""
     path = prepare_output_path(output_path)
     names = profile.balance.class_names
     similarity = np.asarray(profile.class_similarity)
+    distance = np.clip(1.0 - similarity, 0.0, 2.0)
+    np.fill_diagonal(distance, 0.0)
 
     size = max(6.0, 0.75 * len(names))
     apply()
-    figure, axes = plt.subplots(figsize=(size, size))
-    image = axes.imshow(similarity, cmap=BLUE_RED, vmin=-1.0, vmax=1.0)
-    figure.colorbar(image, ax=axes, fraction=0.046, label="Cosine similarity")
-
-    axes.set_xticks(np.arange(len(names)))
-    axes.set_yticks(np.arange(len(names)))
-    axes.set_xticklabels(names, rotation=45, ha="right")
-    axes.set_yticklabels(names)
-    axes.set_title(title)
-
+    figure = plt.figure(figsize=(size + 2.6, size))
+    grid = figure.add_gridspec(1, 4, width_ratios=(0.65, 1.0, 7.5, 0.3), wspace=0.08)
+    tree_axes = figure.add_subplot(grid[0, 0])
+    axes = figure.add_subplot(grid[0, 2])
+    color_axes = figure.add_subplot(grid[0, 3])
+    if len(names) > 1:
+        clusters = linkage(
+            squareform(distance, checks=False), method="average", optimal_ordering=True
+        )
+        tree = dendrogram(
+            clusters,
+            orientation="left",
+            no_labels=True,
+            link_color_func=lambda _: "#333333",
+            ax=tree_axes,
+        )
+        order = tree["leaves"]
+        tree_axes.invert_yaxis()
+        tree_axes.tick_params(axis="x", labelsize=8)
+        tree_axes.set_xlabel("Distance", fontsize=9)
+        tree_axes.spines["left"].set_visible(False)
+        tree_axes.set_yticks([])
+    else:
+        order = [0]
+        tree_axes.axis("off")
+    ordered = similarity[np.ix_(order, order)]
+    image = axes.imshow(ordered, cmap=BLUE_RED, vmin=-1.0, vmax=1.0, aspect="auto")
+    figure.colorbar(image, cax=color_axes, label="Cosine similarity")
+    axes.set_xticks(np.arange(len(names)), [names[i] for i in order], rotation=45, ha="right")
+    axes.set_yticks(np.arange(len(names)), [names[i] for i in order])
+    axes.tick_params(length=0)
+    figure.suptitle(title)
+    figure.text(0.5, 0.01, "Average-linkage clustering", ha="center", fontsize=9)
     for row in range(len(names)):
         for column in range(len(names)):
-            value = similarity[row, column]
+            value = ordered[row, column]
             axes.text(
                 column,
                 row,
@@ -213,8 +240,7 @@ def plot_class_similarity(
                 fontsize=9,
                 color="white" if abs(value) > 0.85 else "black",
             )
-
-    figure.tight_layout()
+    figure.subplots_adjust(left=0.04, right=0.91, top=0.92, bottom=0.19)
     save_figure(figure, path)
     plt.close(figure)
 

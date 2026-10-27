@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 
 from src.plots.common import prepare_output_path, save_figure  # noqa: E402
-from src.plots.format import GREEN, apply  # noqa: E402
+from src.plots.format import BLUE, apply  # noqa: E402
 
 
 def plot_segmentation_curves(
@@ -36,7 +36,7 @@ def plot_segmentation_curves(
     loss_axes.plot(epochs, validation_loss, marker="s", markersize=4, label="Validation loss")
     loss_axes.set_ylabel("Cross-entropy loss")
     loss_axes.set_title("Training and validation loss")
-    miou_axes.plot(epochs, validation_miou, marker="s", markersize=4, color=GREEN)
+    miou_axes.plot(epochs, validation_miou, marker="s", markersize=4, color=BLUE)
     miou_axes.set_ylabel("Validation mIoU")
     miou_axes.set_title("Validation mIoU")
 
