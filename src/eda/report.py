@@ -63,14 +63,14 @@ def run_dataset_eda(
     plot_class_distribution(
         profile.balance,
         output_path / "class_distribution.png",
-        title=f"{display_name} training class distribution",
+        title=f"{display_name} training class counts",
     )
     plot_representative_samples(
         train_images,
         train_labels,
         class_names,
         output_path / "representative_samples.png",
-        title=f"{display_name} representative training samples",
+        title=f"{display_name} training examples",
     )
 
     # Preprocessing and error-analysis evidence.
@@ -78,27 +78,27 @@ def run_dataset_eda(
         profile.balance,
         summarize_class_balance(test_labels, class_names),
         output_path / "split_class_distribution.png",
-        title=f"{display_name} train vs test class proportions",
+        title=f"{display_name} split proportions",
     )
     plot_intensity_histogram(
         profile.intensity,
         output_path / "pixel_intensity_distribution.png",
-        title=f"{display_name} pixel intensity distribution",
+        title=f"{display_name} pixel intensity",
     )
     plot_class_mean_images(
         profile,
         output_path / "class_mean_images.png",
-        title=f"{display_name} average image per class",
+        title=f"{display_name} class means",
     )
     plot_class_similarity(
         profile,
         output_path / "class_similarity.png",
-        title=f"{display_name} class prototype similarity",
+        title=f"{display_name} prototype similarity",
     )
     plot_foreground_coverage(
         profile,
         output_path / "foreground_coverage.png",
-        title=f"{display_name} foreground coverage per class",
+        title=f"{display_name} foreground coverage",
     )
 
     summary_path = write_summary_json(profile, output_path / "summary.json")

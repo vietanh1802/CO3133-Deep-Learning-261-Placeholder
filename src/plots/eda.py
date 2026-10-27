@@ -12,7 +12,7 @@ import numpy as np  # noqa: E402
 
 from src.eda.classification import ClassBalance, DatasetProfile, IntensitySummary  # noqa: E402
 from src.plots.common import prepare_output_path, save_figure  # noqa: E402
-from src.plots.format import BLUE, GREEN, RED, YELLOW, apply  # noqa: E402
+from src.plots.format import BLUE, BLUE_RED, CLASS_COLORS, RED, apply  # noqa: E402
 
 
 def _as_displayable(image: np.ndarray) -> np.ndarray:
@@ -48,24 +48,16 @@ def plot_class_distribution(
 
     apply()
     figure, axes = plt.subplots(figsize=(max(7.0, 0.9 * len(names)), 4.5))
-    bars = axes.bar(names, counts, color=BLUE)
-    axes.bar_label(bars, fmt="%d", fontsize=8, padding=2)
-
-    # Show the balanced-count reference.
-    axes.axhline(
-        counts.mean(),
-        color="grey",
-        linestyle="--",
-        linewidth=1,
-        label=f"Balanced count ({counts.mean():.0f})",
+    bars = axes.bar(
+        names, counts, color=[CLASS_COLORS[i % len(CLASS_COLORS)] for i in range(len(names))]
     )
+    axes.bar_label(bars, fmt="%d", fontsize=10, padding=2)
 
     axes.set_xlabel("Class")
     axes.set_ylabel("Number of samples")
-    axes.set_title(f"{title} (imbalance ratio {balance.imbalance_ratio:.2f})")
+    axes.set_title(title)
     axes.set_ylim(0, counts.max() * 1.12)
-    axes.tick_params(axis="x", rotation=30)
-    axes.legend()
+    axes.set_xticks(range(len(names)), names, rotation=30, ha="right")
 
     figure.tight_layout()
     save_figure(figure, path)
@@ -109,8 +101,8 @@ def plot_split_class_distribution(
     axes.set_xticklabels(names, rotation=30, ha="right")
     axes.set_xlabel("Class")
     axes.set_ylabel("Proportion of split")
-    axes.set_title(title)
-    axes.legend()
+    axes.set_title(title, pad=35)
+    axes.legend(loc="lower center", bbox_to_anchor=(0.5, 1.01), ncol=2)
 
     figure.tight_layout()
     save_figure(figure, path)
@@ -131,22 +123,22 @@ def plot_intensity_histogram(
 
     apply()
     figure, axes = plt.subplots(figsize=(7.5, 4.5))
-    axes.bar(centers, counts, width=np.diff(edges), color=BLUE, align="center")
+    axes.bar(centers, counts, width=np.diff(edges), color=BLUE_RED(centers / 255.0), align="center")
 
     # Log scale keeps the background spike from hiding foreground counts.
     axes.set_yscale("log")
     axes.axvline(
         intensity.mean,
-        color=YELLOW,
+        color=RED,
         linestyle="--",
         linewidth=1,
-        label=f"Mean intensity ({intensity.mean:.1f})",
+        label=f"Mean {intensity.mean:.1f}",
     )
 
     axes.set_xlabel("Pixel intensity (0-255)")
     axes.set_ylabel("Pixel count (log scale)")
-    axes.set_title(f"{title} (std {intensity.std:.1f})")
-    axes.legend()
+    axes.set_title(title, pad=35)
+    axes.legend(loc="lower center", bbox_to_anchor=(0.5, 1.01), ncol=2)
 
     figure.tight_layout()
     save_figure(figure, path)
@@ -200,7 +192,7 @@ def plot_class_similarity(
     size = max(6.0, 0.75 * len(names))
     apply()
     figure, axes = plt.subplots(figsize=(size, size))
-    image = axes.imshow(similarity, cmap="coolwarm", vmin=-1.0, vmax=1.0)
+    image = axes.imshow(similarity, cmap=BLUE_RED, vmin=-1.0, vmax=1.0)
     figure.colorbar(image, ax=axes, fraction=0.046, label="Cosine similarity")
 
     axes.set_xticks(np.arange(len(names)))
@@ -218,8 +210,8 @@ def plot_class_similarity(
                 f"{value:.2f}",
                 ha="center",
                 va="center",
-                fontsize=7,
-                color="white" if abs(value) > 0.6 else "black",
+                fontsize=9,
+                color="white" if abs(value) > 0.85 else "black",
             )
 
     figure.tight_layout()
@@ -243,11 +235,13 @@ def plot_foreground_coverage(
 
     apply()
     figure, axes = plt.subplots(figsize=(max(7.0, 0.9 * len(names)), 4.5))
-    bars = axes.barh(sorted_names, coverage[order], color=GREEN)
-    axes.bar_label(bars, fmt="%.2f", fontsize=8, padding=2)
+    bars = axes.barh(
+        sorted_names, coverage[order], color=[CLASS_COLORS[i % len(CLASS_COLORS)] for i in order]
+    )
+    axes.bar_label(bars, fmt="%.2f", fontsize=10, padding=2)
 
     axes.invert_yaxis()
-    axes.set_xlabel("Fraction of pixels above the foreground threshold")
+    axes.set_xlabel("Foreground fraction")
     axes.set_ylabel("Class")
     axes.set_title(title)
     axes.set_xlim(0, min(1.0, float(coverage.max()) * 1.18))
@@ -266,7 +260,7 @@ def plot_representative_samples(
     title: str,
     samples_per_class: int = 3,
 ) -> None:
-    """Save several real examples per class, with one row per class."""
+    """Save the first examples per class in a compact grid of class panels."""
     if samples_per_class <= 0:
         raise ValueError("samples_per_class must be positive")
 
@@ -277,27 +271,25 @@ def plot_representative_samples(
     values = np.asarray(labels).astype(np.int64).ravel()
 
     apply()
-    figure, axes = plt.subplots(
-        len(class_names),
-        samples_per_class,
-        figsize=(1.5 * samples_per_class, 1.5 * len(class_names)),
-        squeeze=False,
-    )
+    columns = min(5, len(class_names))
+    rows = int(np.ceil(len(class_names) / columns))
+    figure = plt.figure(figsize=(2.0 * columns, 1.5 * rows))
+    grid = figure.add_gridspec(rows, columns, hspace=0.45, wspace=0.15)
     for class_id, name in enumerate(class_names):
+        cell = grid[class_id // columns, class_id % columns].subgridspec(
+            1, samples_per_class, wspace=0.04
+        )
         indices = np.flatnonzero(values == class_id)[:samples_per_class]
-        for column, axis in enumerate(axes[class_id]):
+        for column in range(samples_per_class):
+            axis = figure.add_subplot(cell[0, column])
             if column >= len(indices):
                 axis.axis("off")
                 continue
             _show_image(axis, batch[indices[column]])
-            if column == 0:
-                # Place row labels outside the images.
-                axis.axis("on")
-                axis.set_xticks([])
-                axis.set_yticks([])
-                axis.set_ylabel(name, fontsize=8, rotation=0, ha="right", va="center")
+            if column == samples_per_class // 2:
+                axis.set_title(name)
 
     figure.suptitle(title)
-    figure.tight_layout()
+    figure.subplots_adjust(top=0.78, bottom=0.06, left=0.02, right=0.98)
     save_figure(figure, path)
     plt.close(figure)
