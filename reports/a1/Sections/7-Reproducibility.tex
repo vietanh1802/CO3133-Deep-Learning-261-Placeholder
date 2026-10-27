@@ -1,58 +1,20 @@
-\section{Reproducibility and Deliverable Links}
+\section{Reproducibility and contributions}
 \label{app:reproducibility}
 
-\subsection{Artifact provenance and run manifest}
-\input{Tables/run_manifest}
-\reporttodo{Associate every result with its exact configuration, dataset split
-indices or reproducible split recipe, checkpoint, log/experiment ID and source
-commit/tag. A recorded revision ending in -dirty is incomplete provenance:
-preserve the corresponding working-tree patch or reproduce from a clean tagged
-revision, and document which evidence supports the final claim.}
-The JSON snapshots under \codepath{Evidence/} preserve source records used for
-these tables. The numerical snapshot is not an additional experiment.
+\subsection{Run records and environment}
+\reporttodo{Map reported results to configurations, splits, checkpoints, logs,
+and source revisions. Record dependency versions and training hardware. Explain
+any differences between the saved evidence and the final code.}
 
-\subsection{Installation, training and evaluation}
-Execute from the repository root, not this LaTeX directory. The following shows
-one model; repeat with each verified model configuration.
-\begin{lstlisting}[basicstyle=\ttfamily\scriptsize,breaklines=true,frame=single]
-uv sync --dev
-uv run python -m scripts.eda.run_fashion_mnist
-uv run python -m scripts.training.train_image_classification --data fashion_mnist --config configs/image_classification/fashion_mnist/linear.yaml
-uv run python -m scripts.evaluation.evaluate --data fashion_mnist --config configs/image_classification/fashion_mnist/linear.yaml
-uv run python -m scripts.evaluation.compare --results-dir results/a1
-\end{lstlisting}
-\reporttodo{Verify these commands in the final environment. Explain dataset download
-and integrity checking, checkpoint reconstruction, exact environment/dependency
-versions and hardware. Ensure the main comparison contains only the intended
-Fashion-MNIST runs; document filtering if the results directory also contains
-MNIST or CIFAR-10 experiments. Add checkpoint URLs or reconstruction instructions.}
+\subsection{Reproduction commands}
+\reporttodo{Give the commands to install dependencies, prepare data, train,
+evaluate, and generate figures. State the working directory and required files.
+Check the commands before submission.}
 
-\subsection{Submission links and individual contributions}
-\begin{table}[htbp]
-\centering\small
-\caption{Submission artifact index. Replace every pending entry with a checked link.}
-\begin{tabularx}{\linewidth}{lY}
-\toprule
-Artifact & Location\\\midrule
-Source repository & \href{\RepoURL}{Source repository}\\
-Project landing page & \href{\ProjectURL}{Project landing page}\\
-Assignment 1 page & \url{https://vietanh1802.github.io/CO3133-Deep-Learning-261-Placeholder/web/assignment1.html}\\
-Report / slides & \pending\\
-YouTube presentation & \pending; Public or Unlisted; all members participate\\
-Checkpoints & \pending; or give verified reconstruction instructions\\
-AI disclosure & Appendix~\ref{app:ai}, repository \codepath{AI_USAGE.md}, and both web pages\\
-Final PDF on LMS & \codepath{Placeholder_A1_Report.pdf}; representative submits\\
-Updated A1 deadline & 28 October 2026, 23:59 GMT+7 (group update)\\
-\bottomrule
-\end{tabularx}
-\end{table}
-\reporttodo{Record each member's actual contribution and final verification
-responsibilities. Confirm the registered group spelling and all external links.
-Slides, video and website remain separate required deliverables.}
+\subsection{Deliverables and team contributions}
+\reporttodo{Link the repository, website, checkpoints, slides, and presentation.
+List each member's actual work and final review responsibilities.}
 
-\clearpage
-\subsection{Per-model learning curves and confusion matrices}
+\subsection{Supporting figures}
 \label{app:evidence}
-The following figures are copies of local Fashion-MNIST run artifacts. Each model
-has its own training/validation curve and test confusion matrix.
 \input{Sections/9-Model-Evidence}
