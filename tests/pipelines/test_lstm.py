@@ -82,6 +82,6 @@ def test_lstm_train_and_evaluate_entry_points(tmp_path, monkeypatch):
         "test_error_analysis.json",
         "test_confident_errors.png",
         "test_uncertain_errors.png",
-        "test_representative_correct.png",
+        "test_confident_correct.png",
     ):
         assert (run_dir / filename).is_file()

@@ -92,7 +92,10 @@ def test_classification_error_analyzer_builds_required_evidence() -> None:
     ]
     assert [example.sample_index for example in report.confident_errors] == [14, 11]
     assert [example.sample_index for example in report.uncertain_errors] == [13, 11]
-    assert [example.sample_index for example in report.representative_correct] == [10, 12]
+    assert [example.sample_index for example in report.confident_correct] == [10, 12]
+    assert [example.confidence for example in report.confident_correct] == pytest.approx([0.8, 0.6])
+    top_correct = ClassificationErrorAnalyzer(num_examples=1).analyze(evaluation).confident_correct
+    assert [example.sample_index for example in top_correct] == [10]
 
 
 def test_classification_error_analyzer_rejects_invalid_probabilities() -> None:

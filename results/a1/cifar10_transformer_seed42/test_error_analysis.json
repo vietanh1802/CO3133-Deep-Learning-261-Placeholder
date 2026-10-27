@@ -134,7 +134,7 @@
       "margin": 0.1323264241218567
     }
   ],
-  "representative_correct": [
+  "confident_correct": [
     {
       "sample_index": 4787,
       "target": 8,

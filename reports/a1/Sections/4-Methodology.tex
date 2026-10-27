@@ -35,9 +35,83 @@ pooling, and the classifier. Include the attention equation and define its dimen
 
 \subsection{Loss and evaluation metrics}
 \label{sec:metrics}
-\reporttodo{Define cross-entropy from logits, accuracy, macro-F1, and per-class
-recall. State the zero-division policy and parameter-counting rule. Define timing
-boundaries and hardware before reporting speed comparisons.}
+
+Let $\mathcal{D}=\{(x_i,y_i)\}_{i=1}^{N}$ denote a labelled sample, where
+$y_i\in\{0,\ldots,K-1\}$ and $K=10$. For an input $x_i$, the model produces
+a vector of logits $z_i=f_\theta(x_i)\in\mathbb{R}^{K}$. The corresponding
+class probabilities and predicted label are
+\begin{equation}
+ p_{ik}=\frac{\exp(z_{ik})}{\sum_{j=0}^{K-1}\exp(z_{ij})},
+ \qquad
+ \hat y_i=\operatorname*{arg\,max}_{k}z_{ik}.
+\end{equation}
+
+\paragraph{Training objective.}
+All models minimize the mean categorical cross-entropy,
+\begin{equation}
+ \mathcal{L}_{\mathrm{CE}}(\theta;\mathcal{D})
+ =-\frac{1}{N}\sum_{i=1}^{N}\log p_{i,y_i}
+ =\frac{1}{N}\sum_{i=1}^{N}
+ \left[\log\sum_{k=0}^{K-1}\exp(z_{ik})-z_{i,y_i}\right].
+\end{equation}
+The implementation evaluates this loss directly from logits, without a preceding
+softmax operation. Each optimization step uses the mean loss of its minibatch.
+Epoch losses weight each minibatch by its sample count, so a smaller final batch
+does not receive disproportionate weight. The checkpoint with the lowest
+validation cross-entropy supplies the final test predictions. Test labels do not
+enter this selection.
+
+\paragraph{Classification performance.}
+Define the confusion matrix $C$ by
+\begin{equation}
+ C_{ab}=\sum_{i=1}^{N}\mathbf{1}\{y_i=a,\ \hat y_i=b\},
+\end{equation}
+where rows correspond to true classes and columns to predicted classes.
+Accuracy is the proportion of correct predictions,
+\begin{equation}
+ \mathrm{Accuracy}=\frac{1}{N}\sum_{k=0}^{K-1}C_{kk}.
+\end{equation}
+Accuracy summarizes overall classification performance but does not identify
+which classes account for the errors.
+
+For class $k$, let
+$\mathrm{TP}_k=C_{kk}$,
+$\mathrm{FP}_k=\sum_{a\ne k}C_{ak}$, and
+$\mathrm{FN}_k=\sum_{b\ne k}C_{kb}$.
+We report the unweighted mean of the class F1 scores,
+\begin{equation}
+ F_{1,k}=\frac{2\mathrm{TP}_k}
+ {2\mathrm{TP}_k+\mathrm{FP}_k+\mathrm{FN}_k},
+ \qquad
+ \mathrm{Macro\text{-}F1}=\frac{1}{K}\sum_{k=0}^{K-1}F_{1,k}.
+\end{equation}
+A class with a zero denominator receives an F1 score of zero and remains in the
+average. Macro-F1 gives every class equal weight, irrespective of its frequency.
+We compute accuracy and macro-F1 from predictions over the complete evaluation
+split, rather than averaging scores computed separately for each minibatch.
+
+\paragraph{Class-level analysis.}
+Per-class recall measures the fraction of examples of a true class that the
+model identifies correctly,
+\begin{equation}
+ R_k=\frac{C_{kk}}{\sum_b C_{kb}}.
+\end{equation}
+For a class with nonzero support, the row-normalized confusion matrix is
+$\widetilde C_{ab}=C_{ab}/\sum_j C_{aj}$.
+Its diagonal entries equal class recall; its off-diagonal entries give the
+fractions assigned to particular incorrect classes. Rows with no true examples
+are displayed as zero and provide no estimate of recall. Counts and normalized
+rates are distinguished throughout the error analysis.
+
+\paragraph{Model size and computation.}
+Model size is the number of trainable scalar parameters in the encoder and
+classification head. This count excludes buffers and optimizer state. It measures
+model size, not the number of operations required for a prediction. The evaluation
+code also records the cumulative duration of model forward passes, excluding data
+loading, input transfer, and subsequent probability and metric computation. These
+single-pass measurements have no separate warm-up or repeated-trial protocol.
+They are retained as execution records, not as evidence for a reliable speed
+ranking across architectures.
 
 \subsection{Training configuration}
 \label{sec:training-setup}

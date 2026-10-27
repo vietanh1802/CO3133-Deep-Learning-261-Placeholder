@@ -89,7 +89,7 @@ Pullover-to-Coat and Coat-to-Pullover are also common in both models. This patte
 consistent with both encoders discarding explicit spatial locality by flattening the image.
 
 The saved qualitative figures separate highly confident mistakes from low-confidence
-mistakes and include representative correct predictions. Several confident errors exceed
+mistakes and include the highest-confidence correct predictions. Several confident errors exceed
 99% predicted probability, so confidence alone is not a reliable indicator that either
 current model is correct. These observations describe the present single-seed checkpoints;
 they will be revisited after the CNN, GRU, and Transformer runs.

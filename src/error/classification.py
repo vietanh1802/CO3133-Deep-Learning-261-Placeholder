@@ -34,14 +34,14 @@ class ConfusionPair:
 
 @dataclass(frozen=True)
 class ClassificationErrorReport:
-    """Structured evidence produced by classification error analysis."""
+    """Error summaries and examples, with correct examples ranked by confidence."""
 
     per_class_accuracy: torch.Tensor
     per_class_support: torch.Tensor
     most_confused_pairs: tuple[ConfusionPair, ...]
     confident_errors: tuple[ClassificationError, ...]
     uncertain_errors: tuple[ClassificationError, ...]
-    representative_correct: tuple[ClassificationError, ...]
+    confident_correct: tuple[ClassificationError, ...]
 
 
 @register_error_analyzer("classification")
@@ -126,5 +126,5 @@ class ClassificationErrorAnalyzer(ErrorAnalyzer[EvaluationResult, Classification
             most_confused_pairs=tuple(pair_counts[: self.num_confusions]),
             confident_errors=examples(confident_indices),
             uncertain_errors=examples(uncertain_indices),
-            representative_correct=examples(correct_indices),
+            confident_correct=examples(correct_indices),
         )

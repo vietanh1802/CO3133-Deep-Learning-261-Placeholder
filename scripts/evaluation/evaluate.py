@@ -240,9 +240,7 @@ def main() -> None:
         "most_confused_pairs": [asdict(pair) for pair in error_report.most_confused_pairs],
         "confident_errors": [asdict(example) for example in error_report.confident_errors],
         "uncertain_errors": [asdict(example) for example in error_report.uncertain_errors],
-        "representative_correct": [
-            asdict(example) for example in error_report.representative_correct
-        ],
+        "confident_correct": [asdict(example) for example in error_report.confident_correct],
     }
     error_path = run_directory / f"{args.split}_error_analysis.json"
     error_path.write_text(json.dumps(error_record, indent=2), encoding="utf-8")
@@ -250,9 +248,9 @@ def main() -> None:
 
     for examples, filename, title in (
         (
-            error_report.representative_correct,
-            "representative_correct.png",
-            "Representative correct predictions",
+            error_report.confident_correct,
+            "confident_correct.png",
+            "Highest-confidence correct predictions",
         ),
         (error_report.confident_errors, "confident_errors.png", "Confident errors"),
         (error_report.uncertain_errors, "uncertain_errors.png", "Uncertain errors"),
