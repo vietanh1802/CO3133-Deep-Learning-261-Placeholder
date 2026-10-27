@@ -14,7 +14,7 @@ min_download = 100
 [tasks.segmentation-smoke]
 download_checkpoints = false
 output_dirs = ["checkpoints"]
-timeout_seconds = 3600
+timeout_seconds = 14400
 command = ["bash", "-lc", '''
 set -euo pipefail
 export MPLBACKEND=Agg OMP_NUM_THREADS=1
@@ -30,7 +30,7 @@ import yaml
 
 from src.config.segmentation import load_segmentation_config
 
-config_path = "configs/segmentation/suim/baseline.yaml"
+config_path = "configs/segmentation/suim/pretrained.yaml"
 config = load_segmentation_config(config_path)
 config = replace(config, name=config.name + "_2gpu")
 run = config.results_dir / "a2" / config.name
