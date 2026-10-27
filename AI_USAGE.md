@@ -61,4 +61,15 @@ Here is my implementation of Linear, RNN, and CNN. Check if they are correct and
 
 ## Assignment 2
 
+### Entry 1
+
+- **Tool / model:** Codex (GPT-6).
+- **Used by:** Tran Lam Anh (2352067).
+- **Date / development stage:** 2026-10-27 - DeepLabV3 implementation and testing.
+- **Purpose:** Explain segmentation inputs/outputs and implement the pretrained SUIM model, fine-tuning configuration, separate backbone/head optimizer rates, and integration tests.
+- **Affected sections / files:** `src/models/deeplabv3.py`, model exports, segmentation config and optimizer, training entry point, `configs/segmentation/suim/pretrained.yaml`, README, and DeepLabV3 tests.
+- **Representative prompt (translated):** "Give me the knowledge I need, then implement and test. I will review before committing, pushing, and creating a PR."
+- **AI contribution:** Explained tensor shapes, logits, transfer learning, optimizer parameter groups, and BatchNorm behavior; wrote the implementation and tests. BatchNorm running statistics are fixed by default while its affine parameters and the remaining network still receive gradients.
+- **Verification:** `uv run --locked python -m scripts.check` passed lint, formatting, type checking, and 157 CPU tests. Tests cover real randomly initialized DeepLabV3 forward/backward, singleton batches, full-resolution outputs, and BatchNorm statistics. Download-free tests verify weight selection and optimizer groups. A synthetic SUIM integration test uses a small substitute backbone for training, interruption/resume, checkpoint selection, evidence export, and evaluation. A separate CPU smoke check loaded the actual `COCO_WITH_VOC_LABELS_V1` weights and verified forward/backward on one synthetic image. No SUIM training experiment or GPU benchmark was run; student review is pending.
+
 ## Assignment 3

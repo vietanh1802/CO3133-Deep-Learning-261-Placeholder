@@ -1,6 +1,7 @@
 """Semantic-segmentation configuration loading and validation."""
 
 from dataclasses import asdict, dataclass, field, fields
+from math import isfinite
 from pathlib import Path
 from typing import Any
 
@@ -19,6 +20,7 @@ class SegmentationConfig:
     batch_size: int = 4
     accumulation_steps: int = 4
     learning_rate: float = 1e-3
+    backbone_learning_rate: float | None = None
     weight_decay: float = 1e-4
     epochs: int = 40
     warmup_epochs: int = 5
@@ -39,6 +41,10 @@ class SegmentationConfig:
                 raise ValueError(f"{key} must be positive")
         if self.learning_rate <= 0:
             raise ValueError("learning_rate must be positive")
+        if self.backbone_learning_rate is not None and (
+            not isfinite(self.backbone_learning_rate) or self.backbone_learning_rate <= 0
+        ):
+            raise ValueError("backbone_learning_rate must be finite and positive")
         if self.weight_decay < 0:
             raise ValueError("weight_decay must be non-negative")
         if not 0 <= self.warmup_epochs < self.epochs:

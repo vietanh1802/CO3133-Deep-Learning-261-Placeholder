@@ -13,7 +13,7 @@ from loguru import logger
 from torch import distributed as dist
 from torch import nn
 from torch.nn.parallel import DistributedDataParallel
-from torch.optim import Optimizer
+from torch.optim import AdamW, Optimizer
 from torch.optim.lr_scheduler import LambdaLR, LRScheduler
 from torch.utils.data import DataLoader, DistributedSampler
 
@@ -22,6 +22,7 @@ from src.evaluation.segmentation import (
     confusion_matrix,
     metrics_from_confusion,
 )
+from src.models import DeepLabV3
 from src.training.checkpoint import load_state, save_state
 from src.training.epoch import model_logits, run_training_epoch
 from src.utils.distributed import (
@@ -31,6 +32,38 @@ from src.utils.distributed import (
     world_size,
 )
 from src.utils.logging import ExperimentState, progress_bar
+
+
+def build_segmentation_optimizer(
+    model: nn.Module,
+    *,
+    learning_rate: float,
+    weight_decay: float,
+    backbone_learning_rate: float | None = None,
+) -> AdamW:
+    """Build AdamW, optionally separating DeepLabV3 head and backbone rates.
+
+    Keep the head first so the existing history records its learning rate.
+    The shared scheduler scales both groups by the same factor.
+    """
+    if backbone_learning_rate is None:
+        return AdamW(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
+
+    module = unwrap(model)
+    if not isinstance(module, DeepLabV3):
+        raise ValueError("backbone_learning_rate is only supported for DeepLabV3")
+    return AdamW(
+        [
+            {"params": module.network.classifier.parameters(), "lr": learning_rate, "name": "head"},
+            {
+                "params": module.network.backbone.parameters(),
+                "lr": backbone_learning_rate,
+                "name": "backbone",
+            },
+        ],
+        lr=learning_rate,
+        weight_decay=weight_decay,
+    )
 
 
 @dataclass(frozen=True)

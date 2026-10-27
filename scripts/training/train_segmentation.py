@@ -23,6 +23,7 @@ from src.plots.segmentation import (
     plot_segmentation_curves,
 )
 from src.training.segmentation import (
+    build_segmentation_optimizer,
     fit_segmentation,
     load_training_state,
     optimizer_steps_per_epoch,
@@ -135,8 +136,11 @@ def run() -> None:
     )
     if dist.is_initialized():
         seed_everything(config.seed + rank())
-    optimizer = torch.optim.AdamW(
-        model.parameters(), lr=config.learning_rate, weight_decay=config.weight_decay
+    optimizer = build_segmentation_optimizer(
+        model,
+        learning_rate=config.learning_rate,
+        weight_decay=config.weight_decay,
+        backbone_learning_rate=config.backbone_learning_rate,
     )
     steps_per_epoch = optimizer_steps_per_epoch(len(dataloaders.train), config.accumulation_steps)
     scheduler = warmup_cosine(

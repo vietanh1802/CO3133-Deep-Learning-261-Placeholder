@@ -3,6 +3,7 @@
 from src.models.base import Model, build_model, register_model
 from src.models.classifier import ImageClassifier
 from src.models.cnn import CNN
+from src.models.deeplabv3 import DeepLabV3
 from src.models.gru import GRU
 from src.models.linear import Linear
 from src.models.lstm import LSTM
@@ -14,6 +15,7 @@ from src.models.unet import UNet
 __all__ = [
     "CNN",
     "GRU",
+    "DeepLabV3",
     "ImageClassifier",
     "LSTM",
     "Linear",

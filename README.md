@@ -69,6 +69,26 @@ uv run torchrun --standalone --nproc-per-node=2 -m scripts.training.train_segmen
 `batch_size × accumulation_steps × process_count`. Resume with the same process count.
 Use separate run names for separate experiments.
 
+Fine-tune the pretrained DeepLabV3-ResNet50 on the same SUIM splits:
+
+```bash
+uv run python -m scripts.training.train_segmentation --config configs/segmentation/suim/pretrained.yaml
+```
+
+The first run downloads torchvision's `COCO_WITH_VOC_LABELS_V1` weights. The final
+classifier layer is replaced for eight classes and the auxiliary classifier is removed.
+AdamW uses learning rates of `1e-4` for the backbone and `1e-3` for the classifier,
+with the same warm-up/cosine schedule. BatchNorm running statistics stay fixed to
+support small batches; its affine parameters and the rest of the network still train.
+The configuration uses batch size 4 and accumulation 4 (effective batch 16 on one GPU).
+For CPU checks without weight downloads, construct the model with `pretrained=False`.
+
+After training, export validation metrics and qualitative examples:
+
+```bash
+uv run python -m scripts.evaluation.eval_segmentation --evidence results/a2/suim_deeplabv3_ce_seed42/val_evidence.pt --output results/a2/suim_deeplabv3_ce_seed42/evaluation
+```
+
 ## Outputs
 
 | Path | Contents |
