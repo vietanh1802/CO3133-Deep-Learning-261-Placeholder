@@ -34,7 +34,7 @@ spatial weight sharing. It provides the simplest baseline in the study.
 
 \begin{figure}[htbp]
 \centering
-\includesvg[width=0.75\linewidth]{Images/models/linear}
+\includegraphics[width=0.75\linewidth]{Images/models/linear.png}
 \caption{Linear classifier. The flattened image is mapped to ten class logits.}
 \label{fig:model-linear}
 \end{figure}
@@ -48,7 +48,7 @@ remain fully connected without spatial weight sharing.
 
 \begin{figure}[htbp]
 \centering
-\includesvg[width=0.95\linewidth]{Images/models/mlp}
+\includegraphics[width=0.95\linewidth]{Images/models/mlp.png}
 \caption{MLP with hidden widths 256 and 128, ReLU, and dropout.}
 \label{fig:model-mlp}
 \end{figure}
@@ -69,7 +69,7 @@ effect on classification errors is assessed in Section~\ref{sec:errors}.
 
 \begin{figure}[htbp]
 \centering
-\includesvg[width=0.95\linewidth]{Images/models/cnn}
+\includegraphics[width=0.95\linewidth]{Images/models/cnn.png}
 \caption{CNN with two convolutional blocks, global average pooling, and a linear head.}
 \label{fig:model-cnn}
 \end{figure}
@@ -97,7 +97,7 @@ the linear classifier. No recurrent dropout is used in the evaluated configurati
 
 \begin{figure}[htbp]
 \centering
-\includesvg[width=0.95\linewidth]{Images/models/gru}
+\includegraphics[width=0.95\linewidth]{Images/models/gru.png}
 \caption{GRU cell and row-sequence classifier. The final hidden state supplies the class logits.}
 \label{fig:model-gru}
 \end{figure}
@@ -120,7 +120,7 @@ available for the reported test comparison.
 
 \begin{figure}[htbp]
 \centering
-\includesvg[width=0.95\linewidth]{Images/models/lstm}
+\includegraphics[width=0.95\linewidth]{Images/models/lstm.png}
 \caption{Implemented LSTM cell and row-sequence classifier. No LSTM test result is reported.}
 \label{fig:model-lstm}
 \end{figure}
@@ -148,7 +148,7 @@ all row positions, while positional encoding supplies their order.
 
 \begin{figure}[htbp]
 \centering
-\includesvg[width=0.95\linewidth]{Images/models/transformer}
+\includegraphics[width=0.95\linewidth]{Images/models/transformer.png}
 \caption{Transformer with row embeddings, positional encoding, two encoder layers, and mean pooling.}
 \label{fig:model-transformer}
 \end{figure}
