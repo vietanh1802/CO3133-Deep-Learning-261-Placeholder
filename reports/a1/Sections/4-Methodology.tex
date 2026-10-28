@@ -54,23 +54,24 @@ remain fully connected without spatial weight sharing.
 \end{figure}
 
 \subsubsection{Convolutional neural network}
-The CNN retains the image grid and applies two convolutional blocks. Each
+The CNN applies two convolutional blocks with 32 and 64 channels. Each
 block contains a $3\times3$ convolution with stride 1 and padding 1, batch
 normalization, ReLU, and $2\times2$ max pooling with stride 2. Convolution
-biases are disabled. The channel widths are 32 and 64, giving block outputs
-$32\times14\times14$ and $64\times7\times7$. Global average pooling reduces
-the second output to 64 features for the linear head.
+biases are disabled. For a $28\times28$ image, the blocks produce
+$32\times14\times14$ and $64\times7\times7$ feature maps. Flattening gives
+3,136 values, followed by a 128-unit linear layer and ReLU. A ten-class
+linear head produces the logits. For CIFAR-10, the final feature map is
+$64\times8\times8$, so the hidden layer receives 4,096 values.
 
-Convolution restricts each filter to a local neighbourhood and shares its
-weights across spatial positions. Max pooling reduces spatial resolution;
-global average pooling removes the explicit spatial coordinates from the final
-feature vector. These choices define the model's spatial structure. Their
-effect on classification errors is assessed in Section~\ref{sec:errors}.
+Convolution shares local filters across image positions. Flattening preserves
+the positions of their responses, and the hidden layer can combine responses
+across the full feature map. The classifier has 421,738 parameters for grayscale
+images and 545,194 for CIFAR-10.
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.95\linewidth]{Images/models/cnn.png}
-\caption{CNN with two convolutional blocks, global average pooling, and a linear head.}
+\caption{CNN for MNIST and Fashion-MNIST. Flattened convolutional features feed a 128-unit hidden layer and the classification head.}
 \label{fig:model-cnn}
 \end{figure}
 
@@ -115,13 +116,12 @@ to $h_t$, it maintains a cell state $c_t$. With zero initial states, the updates
 \end{align*}
 where $q_t\in\mathbb{R}^{512}$ is divided into four 128-dimensional vectors.
 The input, forget, and output gates control the cell update and hidden output.
-This architecture is documented for completeness. No saved LSTM run is
-available for the reported test comparison.
+The LSTM is included in the measured comparisons.
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.95\linewidth]{Images/models/lstm.png}
-\caption{Implemented LSTM cell and row-sequence classifier. No LSTM test result is reported.}
+\caption{Implemented LSTM cell and row-sequence classifier.}
 \label{fig:model-lstm}
 \end{figure}
 
@@ -257,20 +257,20 @@ flip. Its channel means are $(0.4914,0.4822,0.4465)$ and standard deviations
 $(0.2470,0.2435,0.2616)$. Validation and test transforms retain scaling and
 normalization and omit random augmentation.
 
-Training logs record CUDA execution but do not identify the GPU model.
-The saved test evaluations record a separate macOS ARM environment with
-Python 3.13.5 and PyTorch 2.14.0. These records do not establish comparable
-hardware conditions for a speed ranking. Augmentation, dropout, and batch
+Saved evaluations record different environments. CNN evaluation uses an
+NVIDIA GeForce RTX 4060 Ti with Python 3.11.11 and PyTorch 2.14.0+cu126.
+Other runs include macOS ARM and CUDA environments. These records do not
+establish comparable conditions for a speed ranking. Augmentation, dropout, and batch
 normalization also make training and validation losses measurements under
 different conditions.
 
 \subsection{Comparison protocol}
 \label{sec:experiment-design}
-The main comparison includes Linear, MLP, CNN, GRU, and Transformer on all
-three datasets, giving 15 runs of 50 epochs with seed 42. Earlier five-epoch
-Fashion-MNIST runs are preliminary and are excluded. The reported settings
-specify one configuration per model; no systematic hyperparameter search or
-component ablation is documented.
+The main comparison includes Linear, MLP, CNN, GRU, LSTM, and Transformer
+on Fashion-MNIST. MNIST is development data and CIFAR-10 is an extension.
+Only completed evaluations enter the comparisons. Each reported run uses
+50 epochs and seed 42. No systematic hyperparameter search or component
+ablation is documented.
 
 Within each dataset, models share the split, preprocessing, augmentation,
 optimizer settings, epoch budget, and checkpoint rule. Model-specific

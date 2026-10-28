@@ -13,7 +13,7 @@ min_download = 100
 
 [tasks.classification-cnn]
 download_checkpoints = false
-output_dirs = ["checkpoints", "results/a1"]
+output_dirs = ["checkpoints"]
 timeout_seconds = 14400
 command = ["bash", "-lc", '''
 set -euo pipefail

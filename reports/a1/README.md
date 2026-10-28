@@ -14,9 +14,6 @@ supporting split table in `Tables/` and figures in `Images/`.
 | `4-Methodology.tex` | Pipeline, architectures, metrics, training settings, and comparison protocol. |
 | `5-Implementation-Results.tex` | Test comparison, learning behavior, errors, shared predictions, discussion, and conclusion. |
 | `6-References.tex` | Sources cited in the report. |
-| `7-Reproducibility.tex` | Run records, environment, commands, deliverables, and contributions. |
-| `8-AI-Usage.tex` | Actual AI use and human review. |
-| `9-Model-Evidence.tex` | Supporting figures included by the reproducibility appendix. |
 
 Edit the cover information in `metadata.tex`. Keep shared formatting in
 `preamble.tex` and `hcmut.sty`.
@@ -43,3 +40,5 @@ Explain shared settings once. Use consistent model descriptions and comparison a
 Give every figure a purpose and a caption that states its dataset and selection rule.
 Separate measured observations, possible explanations, and proposed experiments.
 Remove unused optional sections and resolve all prompts before submission.
+
+The compiled report has no appendices. AI-use disclosure appears in the main report; reproduction commands remain in the repository README.
