@@ -70,6 +70,37 @@ Here is my implementation of Linear, RNN, and CNN. Check if they are correct and
 - **AI contribution:** Drafted and edited the English text and table; prepared a compact grid of real Fashion-MNIST images and a heatmap of the saved class-similarity statistics. Added source citations and prepared a PDF review copy.
 - **Verification:** The assistant checked counts, seed, split logic, normalization, and augmentation against the code and configurations; recomputed the saved EDA mean, standard deviation, and lowest-bin pixel share from the local dataset; checked the four download checksums; and inspected an actual validation batch. The student approved publication on 2026-10-27. No training or model-evaluation run was added for this writing task.
 
+### Entry 6
+
+- **Tool / model:** Codex
+- **Used by:** Vu Duc Viet Anh (2352074)
+- **Date / development stage:** Assignment 1 - LSTM pipeline and training-code review.
+- **Purpose:** Use AI as a supporting code-review tool to check the existing LSTM pipeline and image-classification training code for possible bugs or inconsistencies. The scope was reviewing existing code and understanding potential issues.
+- **Affected sections / files:** `src/models/lstm.py`, `scripts/training/train_image_classification.py`.
+- **Representative prompt (paraphrased):**
+
+```
+Please check my existing LSTM pipeline and the Assignment 1 training code in scripts/training for possible errors and explain the issues you identify.
+```
+
+- **How the output was edited and verified:** Codex provided review feedback on the existing implementation. Its role was to support code checking, rather than supply a complete replacement pipeline. Specific code edits and verification runs are not recorded for this review.
+
+### Entry 7
+
+- **Tool / model:** Codex
+- **Used by:** Vu Duc Viet Anh (2352074)
+- **Date / development stage:** Assignment 1 - Model unit-test development.
+- **Purpose:** Use AI to generate supporting unit-test code for checking whether the existing Assignment 1 model implementations behave as expected.
+- **Affected sections / files:** `tests/components/test_models.py`.
+- **Representative prompt (paraphrased):**
+
+```
+Generate unit tests in tests/test_models.py to check whether the Assignment 1 models behave as expected. Include assertions that can reveal implementation errors.
+```
+
+- **AI contribution:** Drafted test cases and assertions to support validation of the existing models. The AI-generated code for this use concerns the tests.
+- **How the output was edited and verified:** The current test file includes checks for model-factory dispatch, output shapes, forward/backward behavior, finite loss and gradients, invalid inputs, checkpoint reloading, and comparisons of custom LSTM/GRU outputs with PyTorch under matched weights. No test-run result is recorded for this use.
+
 ## Assignment 2
 
 ### Entry 1
