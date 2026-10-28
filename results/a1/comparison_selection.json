@@ -26,6 +26,7 @@
           "mlp": 1,
           "cnn": 3,
           "gru": 3,
+          "lstm": 3,
           "transformer": 3
         }
       },
@@ -38,6 +39,7 @@
           "mlp": 8,
           "cnn": 0,
           "gru": 0,
+          "lstm": 0,
           "transformer": 0
         }
       },
@@ -50,6 +52,7 @@
           "mlp": 5,
           "cnn": 5,
           "gru": 5,
+          "lstm": 3,
           "transformer": 3
         }
       },
@@ -62,6 +65,7 @@
           "mlp": 3,
           "cnn": 3,
           "gru": 5,
+          "lstm": 5,
           "transformer": 3
         }
       },
@@ -74,6 +78,7 @@
           "mlp": 6,
           "cnn": 4,
           "gru": 2,
+          "lstm": 6,
           "transformer": 6
         }
       },
@@ -86,6 +91,7 @@
           "mlp": 8,
           "cnn": 6,
           "gru": 6,
+          "lstm": 8,
           "transformer": 8
         }
       }
@@ -118,6 +124,7 @@
           "mlp": 7,
           "cnn": 5,
           "gru": 5,
+          "lstm": 7,
           "transformer": 5
         }
       },
@@ -130,6 +137,7 @@
           "mlp": 2,
           "cnn": 4,
           "gru": 4,
+          "lstm": 2,
           "transformer": 4
         }
       },
@@ -142,6 +150,7 @@
           "mlp": 6,
           "cnn": 6,
           "gru": 4,
+          "lstm": 4,
           "transformer": 4
         }
       },
@@ -154,6 +163,7 @@
           "mlp": 5,
           "cnn": 5,
           "gru": 5,
+          "lstm": 5,
           "transformer": 5
         }
       },
@@ -166,6 +176,7 @@
           "mlp": 4,
           "cnn": 2,
           "gru": 4,
+          "lstm": 4,
           "transformer": 4
         }
       },
@@ -178,6 +189,7 @@
           "mlp": 6,
           "cnn": 4,
           "gru": 6,
+          "lstm": 6,
           "transformer": 6
         }
       }
@@ -210,6 +222,7 @@
           "mlp": 5,
           "cnn": 9,
           "gru": 9,
+          "lstm": 9,
           "transformer": 9
         }
       },
@@ -222,6 +235,7 @@
           "mlp": 6,
           "cnn": 4,
           "gru": 6,
+          "lstm": 6,
           "transformer": 4
         }
       },
@@ -234,6 +248,7 @@
           "mlp": 0,
           "cnn": 0,
           "gru": 6,
+          "lstm": 6,
           "transformer": 0
         }
       },
@@ -246,6 +261,7 @@
           "mlp": 5,
           "cnn": 5,
           "gru": 3,
+          "lstm": 3,
           "transformer": 3
         }
       },
@@ -258,6 +274,7 @@
           "mlp": 3,
           "cnn": 5,
           "gru": 9,
+          "lstm": 3,
           "transformer": 3
         }
       },
@@ -270,6 +287,7 @@
           "mlp": 9,
           "cnn": 8,
           "gru": 9,
+          "lstm": 9,
           "transformer": 9
         }
       }

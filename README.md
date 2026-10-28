@@ -50,18 +50,16 @@ uv run python -m scripts.evaluation.compare --results-dir results/a1 --epochs 50
 Use matching dataset and configuration paths for MNIST or CIFAR-10.
 Configurations live in `configs/image_classification/<dataset>/`.
 
-Re-evaluate Linear, MLP, CNN, GRU, and Transformer on all three datasets
-using the same NVIDIA GPU and existing Python environment used to evaluate LSTM:
+Train Linear, MLP, CNN, GRU, LSTM, and Transformer on all three datasets
+using the shared training entry point:
 
 ```bash
-bash test.sh
+bash train.sh
 ```
 
-This evaluates 15 existing checkpoints without training or re-evaluating LSTM.
+Use the shared evaluation command above for each model and dataset.
 Place each `best.pt` at `checkpoints/<dataset>_<model>_seed42/best.pt` first.
-CUDA, all configurations, checkpoints, and training summaries are checked before
-evaluation starts. The script stops on the first failure and replaces the test
-outputs in `results/a1/<run-name>/`. `--no-sync` keeps the installed environment.
+Evaluation loads the selected checkpoint and saves test outputs in `results/a1/<run-name>/`.
 
 After the evaluations finish, rebuild the comparison table:
 
