@@ -110,6 +110,7 @@ footer { max-width: 1160px; margin: auto; padding: 1.5rem 2.5rem 2.5rem; border-
   .card-bottom { flex-direction: column; gap: .3rem; }
 }
 @media (max-width: 760px) {
+  html.a2-page { scroll-padding-top: 9rem; }
   .header-inner { padding: .9rem 1.2rem; gap: 1rem; flex-wrap: wrap; }
   .header-inner nav { gap: 1rem; width: 100%; flex-wrap: wrap; font-size: .75rem; }
   .home-main { padding: 0 1.2rem; }

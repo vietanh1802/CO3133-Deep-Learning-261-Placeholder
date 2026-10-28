@@ -1,127 +1,243 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="a2-page">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Assignment 2 - Deep Learning on Large-Scale Data and Specialized Tasks | CO3133</title>
-<meta name="description" content="Assignment 2 - Deep learning on large-scale data for specialized computer vision or language tasks.">
+<title>Assignment 2 M2 - Deep Learning on Large-Scale Data and Specialized Tasks | CO3133</title>
+<meta name="description" content="Assignment 2 Milestone 2: SUIM data analysis and preliminary validation results for a U-Net baseline and pretrained DeepLabV3-ResNet50.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&amp;family=IBM+Plex+Sans:wght@400;600&amp;display=swap">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="site-header"><div class="header-inner">
   <a class="brand" href="index.html"><img src="logo.png" width="32" height="32" alt="HCMUT"><span>Placeholder <small>Deep Learning Project</small></span></a>
   <nav aria-label="Main navigation"><a href="index.html">Overview</a><a href="assignment1.html">Assignment 1</a><a href="assignment2.html" aria-current="page">Assignment 2</a><a href="assignment3.html">Assignment 3</a></nav>
-</div></header><main id="main" class="report-shell"><aside class="contents"><p class="eyebrow">In this report</p><nav aria-label="Report contents"><a href="#problem">Problem statement</a><a href="#track">Task track</a><a href="#proposal">Dataset approval</a><a href="#dataset">Dataset and EDA</a><a href="#methodology">Methodology</a><a href="#setup">Experimental setup</a><a href="#results">Results</a><a href="#comparison">Discussion</a><a href="#error-analysis">Error analysis</a><a href="#compute-cost">Compute cost</a><a href="#limitations">Limitations and conclusion</a><a href="#links">Links</a><a href="#members">Group members</a></nav><a class="contents-repo" href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder">View repository</a></aside><article><header class="article-header">
-  <p class="eyebrow">Assignment 2</p>
+</div></header>
+<main id="main" class="report-shell">
+<aside class="contents">
+  <p class="eyebrow">In this draft</p>
+  <nav aria-label="Report contents">
+    <a href="#problem">Problem statement</a>
+    <a href="#track">M2 progress</a>
+    <a href="#proposal">Dataset approval</a>
+    <a href="#dataset">Dataset and EDA</a>
+    <a href="#methodology">Methodology</a>
+    <a href="#setup">Experimental setup</a>
+    <a href="#results">Validation results</a>
+    <a href="#comparison">Discussion</a>
+    <a href="#examples">Input and output examples</a>
+    <a href="#error-analysis">Error analysis</a>
+    <a href="#compute-cost">Compute cost</a>
+    <a href="#limitations">Limitations and next steps</a>
+    <a href="#links">Evidence and reproduction</a>
+    <a href="#members">Group members</a>
+  </nav>
+  <a class="contents-repo" href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder">View repository</a>
+</aside>
+<article>
+<header class="article-header">
+  <p class="eyebrow">Assignment 2 · Milestone 2 Draft · <time datetime="2026-10-28">28 October 2026</time></p>
   <h1>Underwater segmentation</h1>
-  <p class="article-subtitle">Semantic segmentation of underwater images with SUIM.</p>
+  <p class="article-subtitle">Deep Learning on Large-Scale Data and Specialized Tasks.</p>
+  <p>SUIM data analysis and preliminary comparison of a U-Net baseline with pretrained DeepLabV3-ResNet50.</p>
 </header>
 
-  <section id="problem">
-    <h2>Problem statement</h2>
-    <p class="pending">(To be added)</p>
-  </section>
+<section id="problem">
+  <h2>Problem statement</h2>
+  <p>Semantic segmentation assigns a category to every pixel of an underwater photograph. Distinguishing water, divers, robots, marine life, vegetation, reefs, wrecks and the sea floor could support underwater scene understanding. SUIM provides a controlled benchmark for this task; these experiments do not establish readiness for deployment.</p>
+  <p>The input is an RGB image resized to 320 × 240 pixels. Each model returns eight scores per pixel, and the predicted mask takes the class with the highest score. The question is how a model trained from scratch compares with a pretrained segmentation model on the same data partitions, especially for rare classes and object boundaries.</p>
+</section>
 
-  <section id="track">
-    <h2>Task track</h2>
-    <p class="pending">Semantic segmentation — SUIM.</p>
-  </section>
+<section id="track">
+  <h2>M2 progress</h2>
+  <p>The M2 draft includes EDA, a simple baseline, progress on a pretrained model, and preliminary metrics. Both learned models have completed 40 epochs. <strong>All model scores on this page are validation results on 287 images.</strong> No final scores on the 110-image official test split are reported.</p>
+  <div class="table-scroll"><table>
+    <caption>Evidence available for the M2 draft.</caption>
+    <thead><tr><th scope="col">Requirement</th><th scope="col">Completed evidence</th></tr></thead>
+    <tbody>
+      <tr><td>EDA and data preparation</td><td>Mask-quality audit, duplicate checks, class/region/resolution analysis, and committed train/validation lists.</td></tr>
+      <tr><td>Simple baseline</td><td>U-Net trained from scratch for 40 epochs.</td></tr>
+      <tr><td>Pretrained model</td><td>DeepLabV3-ResNet50 fine-tuned for 40 epochs.</td></tr>
+      <tr><td>Preliminary metrics</td><td>Validation mIoU, mean Dice, per-class IoU, learning curves and recorded compute cost.</td></tr>
+    </tbody>
+  </table></div>
+</section>
 
-  <section id="proposal">
-    <h2>Dataset approval</h2>
-    <p><a href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder/blob/a2-m1/reports/a2_proposal.md">Assignment 2 M1 - Dataset Proposal</a></p>
-    <dl class="meta">
-      <dt>Submitted</dt>
-      <dd class="pending">(Submission date to be recorded)</dd>
-      <dt>Approval status</dt>
-      <dd><span class="status">Approved</span></dd>
-      <dt>Conditions, if any</dt>
-      <dd class="pending">(Approval conditions, if any, to be recorded)</dd>
-    </dl>
-    <p class="note">
-      Main experiments may begin only after the proposal is Approved or Approved with conditions.
-    </p>
-  </section>
+<section id="proposal">
+  <h2>Dataset approval</h2>
+  <p>The <a href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder/blob/a2/m1/reports/a2_proposal.md">M1 dataset proposal</a> records <strong>Approved</strong>, confirmed by a group member. The approval date and any conditions have not been recorded in that document. SUIM semantic segmentation remains the selected task.</p>
+</section>
 
-  <section id="dataset">
-    <h2>Dataset and EDA</h2>
-    <p class="pending">(To be added)</p>
-  </section>
+<section id="dataset">
+  <h2>Dataset and EDA</h2>
+  <p><a href="https://irvlab.cs.umn.edu/resources/suim-dataset">SUIM</a> contains underwater RGB images paired with colour-coded segmentation masks. Its eight labels comprise background waterbody (BW), human divers (HD), aquatic plants and sea-grass (PF), wrecks and ruins (WR), robots and instruments (RO), reefs and invertebrates (RI), fish and vertebrates (FV), and sea-floor and rocks (SR).</p>
+  <p>The downloaded archive has 1,525 training/validation pairs and 110 official test pairs. The audit excludes 85 training/validation pairs with invalid mask colours and ten that duplicate official test images, retaining <strong>1,540 usable pairs</strong>. The test split retains all 110 pairs. The software repository uses an MIT licence; the proposal does not assume that this also grants a licence to redistribute the image archive.</p>
+  <div class="table-scroll"><table>
+    <caption>Working split after the documented exclusions.</caption>
+    <thead><tr><th scope="col">Split</th><th scope="col" class="num">Pairs</th><th scope="col">Use</th></tr></thead>
+    <tbody>
+      <tr><td>Training</td><td class="num">1,143</td><td>Fit model parameters, with horizontal-flip augmentation.</td></tr>
+      <tr><td>Validation</td><td class="num">287</td><td>Select checkpoints and report M2 preliminary results.</td></tr>
+      <tr><td>Official test</td><td class="num">110</td><td>Reserved for final evaluation after configurations are fixed.</td></tr>
+    </tbody>
+  </table></div>
+  <p>Duplicate groups stay within one partition. A five-fold stratified group split with seed 42 uses fold 0 for validation; stratification uses each image's rarest present class. The committed <a href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder/blob/a2/m1/results/a2/splits/suim/train.txt">training list</a> and <a href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder/blob/a2/m1/results/a2/splits/suim/val.txt">validation list</a> are disjoint and unchanged between the recorded runs.</p>
+  <p>Class imbalance is substantial: reefs occupy 35.64% of usable training/validation pixels, while robots occupy 0.56%. There are 69 robot-containing training images and 17 in validation. Rare categories can contribute little to pixel-wise loss even when their segmentation is poor.</p>
+  <div class="gallery">
+    <figure><a href="images/a2/m2/suim_class_distribution.png"><img src="images/a2/m2/suim_class_distribution.png" width="1350" height="600" alt="SUIM class frequency by image occurrence and pixel share, with reefs dominant and robots rare" loading="lazy"></a><figcaption>Usable training/validation data: the proportion of images containing each class and its share of all labelled pixels. Image occurrence is not pixel frequency.</figcaption></figure>
+  </div>
+  <p>Across all 1,540 usable pairs, including the official test split, the resolution audit identifies 11 original sizes; about 84% of images are 640 × 480. Resizing may remove small objects and fine boundaries. Region-area distributions show that class occurrence alone does not describe how much of an image a class occupies.</p>
+  <div class="gallery gallery-pair">
+    <figure><a href="images/a2/m2/suim_resolution_distribution.png"><img src="images/a2/m2/suim_resolution_distribution.png" width="1350" height="600" alt="Distribution of original SUIM image resolutions" loading="lazy"></a><figcaption>Original resolutions across all 1,540 usable pairs. This dataset audit includes the official test split.</figcaption></figure>
+    <figure><a href="images/a2/m2/suim_region_area_distribution.png"><img src="images/a2/m2/suim_region_area_distribution.png" width="1350" height="600" alt="Distribution of class area within SUIM images where each class is present" loading="lazy"></a><figcaption>Usable training/validation data: class area as a fraction of image area, conditional on that class being present.</figcaption></figure>
+  </div>
+  <p>Counts, exclusion rules, duplicate groups and split fingerprints are recorded in the <a href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder/blob/a2/m1/results/a2/eda/suim/summary.json">EDA summary</a> and proposal.</p>
+</section>
 
-  <section id="methodology">
-    <h2>Methodology</h2>
-    <p class="pending">(To be added - simple baseline, pretrained or modern model, fine-tuning procedure.)</p>
-  </section>
+<section id="methodology">
+  <h2>Methodology</h2>
+  <p>Images and masks are paired by filename stem. RGB mask colours are decoded into integer labels 0–7. Images use bilinear resizing and ImageNet normalization; masks use nearest-neighbour resizing to retain discrete labels. The training image and mask receive the same random horizontal flip. Validation uses deterministic resizing and normalization.</p>
+  <div class="table-scroll"><table>
+    <caption>The two evaluated configurations.</caption>
+    <thead><tr><th scope="col">Model</th><th scope="col">Initialization and training</th><th scope="col" class="num">Parameters</th></tr></thead>
+    <tbody>
+      <tr><td>U-Net baseline</td><td>Trained from scratch; base width 32, RGB input and eight output classes.</td><td class="num">7,763,272</td></tr>
+      <tr><td>DeepLabV3-ResNet50</td><td>Initialized with torchvision <code>COCO_WITH_VOC_LABELS_V1</code> weights. The final classifier is replaced with an eight-class head; the auxiliary classifier is removed.</td><td class="num">39,635,528</td></tr>
+    </tbody>
+  </table></div>
+  <p>Both configurations use cross-entropy over all eight classes. DeepLabV3 fine-tunes the backbone at a base learning rate of 0.0001 and its classifier at 0.001. BatchNorm running statistics remain fixed; its affine parameters and the rest of the network still train. U-Net uses one base learning rate of 0.001.</p>
+  <p>The checkpoint with the <strong>highest validation mIoU</strong> supplies the reported metrics. IoU and Dice are computed from confusion counts accumulated over the whole validation split, then averaged equally across all eight classes, including background. The reported convention assigns zero to an absent-class denominator and ignores no labels.</p>
+</section>
 
-  <section id="setup">
-    <h2>Experimental setup</h2>
-    <p class="pending">(To be added)</p>
-  </section>
+<section id="setup">
+  <h2>Experimental setup</h2>
+  <p>Both runs use seed 42, the committed data split, 320 × 240 inputs, AdamW with weight decay 0.0001, float32 training, and a 40-epoch budget. The learning-rate schedule uses five warm-up epochs followed by cosine decay. Both accumulate gradients over four minibatches.</p>
+  <div class="table-scroll"><table>
+    <caption>Recorded run settings, taken from the saved training summaries.</caption>
+    <thead><tr><th scope="col">Setting</th><th scope="col">U-Net</th><th scope="col">DeepLabV3</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">Run ID</th><td><code>suim_unet_seed42</code></td><td><code>suim_deeplabv3_ce_seed42_2gpu</code></td></tr>
+      <tr><th scope="row">GPU</th><td>RTX 4060 Laptop GPU</td><td>RTX 3090 recorded device; two GPU processes</td></tr>
+      <tr><th scope="row">Physical batch per GPU</th><td>4</td><td>4</td></tr>
+      <tr><th scope="row">Effective batch</th><td>16</td><td>32</td></tr>
+      <tr><th scope="row">Python</th><td>3.12.3</td><td>3.11.11</td></tr>
+      <tr><th scope="row">PyTorch / CUDA build</th><td>2.14.0+cu130 / 13.0</td><td>2.14.0+cu126 / 12.6</td></tr>
+      <tr><th scope="row">Recorded source</th><td><code>ae6d38e2cb00</code>, clean</td><td><code>c0c00eb640a1</code>, dirty working tree</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">The dataset and validation protocol match, but hardware, effective batch size, model size and pretraining differ. These are preliminary configuration comparisons, not an isolated test of pretraining or a controlled speed benchmark.</p>
+</section>
 
-  <section id="results">
-    <h2>Results</h2>
-    <p class="pending">(To be added)</p>
-  </section>
+<section id="results">
+  <h2>Preliminary validation results</h2>
+  <div class="table-scroll"><table>
+    <caption>Selected checkpoints on 287 validation images. mIoU and mean Dice are percentages over all eight classes.</caption>
+    <thead><tr><th scope="col">Model</th><th scope="col" class="num">Completed epochs</th><th scope="col" class="num">Best epoch</th><th scope="col" class="num">mIoU (%)</th><th scope="col" class="num">Mean Dice (%)</th></tr></thead>
+    <tbody>
+      <tr data-run="suim_unet_seed42"><th scope="row">U-Net</th><td class="num">40</td><td class="num">38</td><td class="num">36.94</td><td class="num">48.05</td></tr>
+      <tr data-run="suim_deeplabv3_ce_seed42_2gpu"><th scope="row">DeepLabV3</th><td class="num">40</td><td class="num">23</td><td class="num">61.05</td><td class="num">73.00</td></tr>
+    </tbody>
+  </table></div>
+  <p>DeepLabV3 exceeds the U-Net baseline by <strong>24.11 percentage points in mIoU</strong> and 24.95 points in mean Dice in these runs. Each configuration was trained once, so these differences have no across-seed uncertainty estimate.</p>
+  <div class="gallery">
+    <figure><a href="images/a2/m2/unet_learning_curves.png"><img src="images/a2/m2/unet_learning_curves.png" width="4745" height="1745" alt="U-Net training and validation loss and validation mIoU over 40 epochs, with the selected epoch 38 marked" loading="lazy"></a><figcaption>U-Net, seed 42. Epoch 38 has the highest validation mIoU; the final epoch is not the selected checkpoint.</figcaption></figure>
+    <figure><a href="images/a2/m2/deeplabv3_learning_curves.png"><img src="images/a2/m2/deeplabv3_learning_curves.png" width="4765" height="1762" alt="DeepLabV3 training and validation loss and validation mIoU over 40 epochs, with the selected epoch 23 marked" loading="lazy"></a><figcaption>DeepLabV3, seed 42. The validation-mIoU checkpoint is epoch 23. Continued reduction in training loss does not guarantee a better validation result.</figcaption></figure>
+  </div>
+  <p>At epoch 40, U-Net records train/validation cross-entropy of 0.7400/0.7526. DeepLabV3 ends at 0.0906/1.0193, with validation mIoU 60.65%, below its selected maximum of 61.05%. The DeepLabV3 loss gap is consistent with late overfitting, although the runs do not isolate its cause.</p>
+</section>
 
-  <section id="comparison">
-    <h2>Discussion</h2>
-    <p class="pending">(To be added)</p>
-  </section>
+<section id="comparison">
+  <h2>Class-level comparison</h2>
+  <div class="table-scroll"><table>
+    <caption>Per-class validation IoU at each model's selected checkpoint.</caption>
+    <thead><tr><th scope="col">Class</th><th scope="col" class="num">U-Net IoU (%)</th><th scope="col" class="num">DeepLabV3 IoU (%)</th></tr></thead>
+    <tbody><tr data-class="BW"><th scope="row">BW — Background waterbody</th><td class="num">80.62</td><td class="num">84.46</td></tr>
+<tr data-class="HD"><th scope="row">HD — Human divers</th><td class="num">30.83</td><td class="num">69.47</td></tr>
+<tr data-class="PF"><th scope="row">PF — Plants and sea-grass</th><td class="num">0.00</td><td class="num">10.36</td></tr>
+<tr data-class="WR"><th scope="row">WR — Wrecks and ruins</th><td class="num">41.16</td><td class="num">69.70</td></tr>
+<tr data-class="RO"><th scope="row">RO — Robots and instruments</th><td class="num">0.00</td><td class="num">66.70</td></tr>
+<tr data-class="RI"><th scope="row">RI — Reefs and invertebrates</th><td class="num">67.94</td><td class="num">72.95</td></tr>
+<tr data-class="FV"><th scope="row">FV — Fish and vertebrates</th><td class="num">33.14</td><td class="num">65.46</td></tr>
+<tr data-class="SR"><th scope="row">SR — Sea-floor and rocks</th><td class="num">41.85</td><td class="num">49.30</td></tr></tbody>
+  </table></div>
+  <p>U-Net scores zero IoU on PF and RO, despite both classes being present in validation. DeepLabV3 reaches 66.70% robot IoU, but plants remain difficult at 10.36%. Aggregate improvement therefore does not imply that every class is well segmented.</p>
+  <p>The larger pretrained model performs better in this observed comparison. Architecture, parameter count and effective batch also change, so the result cannot establish how much improvement is caused by pretraining alone.</p>
+</section>
 
-  <section id="error-analysis">
-    <h2>Error analysis</h2>
-    <p class="pending">(To be added)</p>
-  </section>
+<section id="examples">
+  <h2>Input and output examples</h2>
+  <p>Three saved <strong>DeepLabV3 validation predictions</strong> show what the trained model produces. Each row reads left to right: the input photograph, the ground-truth mask supplied by SUIM, and the model's predicted mask. Colours represent semantic classes, not prediction confidence; matching colours indicate matching class labels.</p>
+  <p>These are the saved best, worst and best robot-containing examples, ranked by per-image mIoU over classes present in either the target or prediction. They illustrate successful segmentation and failures; they are selected cases rather than a random sample or a replacement for the split-wide metrics.</p>
+  <div class="gallery">
+    <figure><a href="images/a2/m2/deeplabv3_example_best.png"><img src="images/a2/m2/deeplabv3_example_best.png" width="1920" height="592" alt="Validation image f_r_274_: underwater reef photograph, ground-truth water and reef mask, and closely matching DeepLabV3 prediction" loading="lazy"></a><figcaption><strong>Successful case — <code>f_r_274_</code>.</strong> The prediction follows the water/reef boundary closely. Black is waterbody (BW); magenta is reef (RI). This is the highest-ranked saved validation example.</figcaption></figure>
+    <figure><a href="images/a2/m2/deeplabv3_example_robot.png"><img src="images/a2/m2/deeplabv3_example_robot.png" width="1920" height="592" alt="Validation image d_r_404_: underwater robot photograph, ground-truth mask and DeepLabV3 prediction, with the robot shown in red" loading="lazy"></a><figcaption><strong>Robot case — <code>d_r_404_</code>.</strong> The red robot region (RO) is detected, although its outline is smoother than the annotation and some fine structure is missed. This is the highest-ranked robot-containing validation example.</figcaption></figure>
+    <figure><a href="images/a2/m2/deeplabv3_example_worst.png"><img src="images/a2/m2/deeplabv3_example_worst.png" width="1920" height="592" alt="Validation image w_r_162_: underwater ruins photograph; ground truth contains plants and wrecks, while DeepLabV3 incorrectly predicts mostly reef and water" loading="lazy"></a><figcaption><strong>Failure case — <code>w_r_162_</code>.</strong> The annotation contains plants (PF, green) and wrecks (WR, cyan), but the prediction labels most of the scene as reef (RI, magenta) and water (BW, black). This is the lowest-ranked saved validation example.</figcaption></figure>
+  </div>
+  <p>The colour key follows SUIM: BW = waterbody, HD = divers, PF = plants, WR = wrecks, RO = robots, RI = reefs, FV = fish, and SR = sea-floor. Open any figure to inspect it at full size. Equivalent U-Net prediction panels are not available in the current saved outputs, so these figures do not provide a paired visual comparison of the two models.</p>
+</section>
 
-  <section id="compute-cost">
-    <h2>Compute cost</h2>
-    <p class="pending">(To be added)</p>
-  </section>
+<section id="error-analysis">
+  <h2>Preliminary error analysis</h2>
+  <p>DeepLabV3's pixel confusion matrix covers 22,041,600 pixels, exactly 287 resized validation masks. Of the true PF pixels, 77.59% are classified as RI. Distinguishing aquatic plants from reefs is a priority for further inspection; colour, appearance and class imbalance are possible explanations, not causes established by this matrix.</p>
+  <div class="gallery">
+    <figure><a href="images/a2/m2/deeplabv3_confusion_matrix.png"><img src="images/a2/m2/deeplabv3_confusion_matrix.png" width="2358" height="2078" alt="DeepLabV3 eight-class validation confusion matrix with true classes in rows and predictions in columns" loading="lazy"></a><figcaption>DeepLabV3 validation confusion matrix. Colours show the fraction within each true class; annotations are pixel counts. The diagonal measures recall, not IoU.</figcaption></figure>
+  </div>
+  <p>On target-defined boundaries, DeepLabV3 mIoU is 29.12%, compared with 63.30% in the interior. U-Net records 18.04% and 37.88%, respectively. Boundaries include both sides of four-neighbour label transitions. These regional scores identify localization difficulty and are separate from the whole-mask mIoU.</p>
+  <p>The selected DeepLabV3 examples above show both a close reef boundary and a severe plants/wrecks failure. A paired qualitative comparison with U-Net on the same images remains to be completed.</p>
+</section>
 
-  <section id="limitations">
-    <h2>Limitations and conclusion</h2>
-    <p class="pending">(To be added)</p>
-  </section>
+<section id="compute-cost">
+  <h2>Recorded compute cost</h2>
+  <div class="table-scroll"><table>
+    <caption>Execution records on different hardware. Memory figures are MiB; validation inference covers 287 images at physical batch size four.</caption>
+    <thead><tr><th scope="col">Measurement</th><th scope="col" class="num">U-Net</th><th scope="col" class="num">DeepLabV3</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">Training wall time (s)</th><td class="num">894.97</td><td class="num">509.48</td></tr>
+      <tr><th scope="row">Peak allocated training memory (MiB)</th><td class="num">996.42</td><td class="num">2,106.98</td></tr>
+      <tr><th scope="row">Validation inference (s)</th><td class="num">1.390</td><td class="num">1.402</td></tr>
+    </tbody>
+  </table></div>
+  <p>U-Net used an RTX 4060 Laptop GPU; DeepLabV3 used a distributed two-GPU run with RTX 3090 recorded as the device. The memory figure is a process/device allocation measurement, not summed memory across both GPUs. Different devices, software and effective batches prevent a direct architecture speed ranking from these times.</p>
+</section>
 
-  <section id="links">
-    <h2>Links</h2>
-    <ul class="links">
-      <li><strong>Source code:</strong> <a href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder">GitHub repository</a></li>
-      <li><strong>Checkpoints / reproduction instructions:</strong> <span class="pending">(To be added)</span></li>
-      <li><strong>Draft report:</strong> <a href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder/blob/main/reports/assignment2-draft.md">M2 draft outline</a></li>
-      <li><strong>Slides:</strong> <span class="pending">(To be added)</span></li>
-      <li><strong>YouTube presentation:</strong> <span class="pending">(To be added)</span></li>
-    </ul>
-  </section>
+<section id="limitations">
+  <h2>Limitations and next steps</h2>
+  <p>M2 establishes a working baseline and fine-tuned pretrained model, together with EDA and preliminary validation results. The strongest recorded configuration is DeepLabV3, but one seed, different training environments and weak PF segmentation limit the conclusion. The low-resolution resize can obscure small objects, and duplicate filtering does not establish complete independence of underwater scenes.</p>
+  <p>For M3, the planned controlled experiment compares DeepLabV3 cross-entropy with an equal-weight cross-entropy/soft-Dice loss, keeping other settings fixed. This experiment has not yet been reported. Further work includes paired U-Net/DeepLabV3 qualitative comparisons, detailed failure inspection, checkpoint access and final report/presentation deliverables. The official test set will be evaluated after model configurations are fixed.</p>
+</section>
 
+<section id="links">
+  <h2>Evidence and reproduction</h2>
+  <ul class="links">
+    <li><strong>Source code:</strong> <a href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder/tree/a2/m1">a2/m1 branch</a></li>
+    <li><strong>Dataset proposal:</strong> <a href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder/blob/a2/m1/reports/a2_proposal.md">SUIM task, exclusions, splits and experiment plan</a></li>
+    <li><strong>EDA and split files:</strong> <a href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder/tree/a2/m1/results/a2/eda/suim">EDA outputs</a> · <a href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder/tree/a2/m1/results/a2/splits/suim">Committed train/validation lists</a></li>
+    <li><strong>U-Net run:</strong> <a href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder/blob/a2/m1/results/a2/suim_unet_seed42/training_summary.json">Training summary and resolved configuration</a></li>
+    <li><strong>DeepLabV3 run:</strong> <a href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder/blob/a2/m1/results/a2/suim_deeplabv3_ce_seed42_2gpu/training_summary.json">Training summary</a> · <a href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder/blob/a2/m1/results/a2/suim_deeplabv3_ce_seed42_2gpu/evaluation/metrics.json">Validation metrics and confusion counts</a> · <a href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder/blob/a2/m1/results/a2/suim_deeplabv3_ce_seed42_2gpu/launch-config.yaml">Run configuration</a></li>
+    <li><strong>Installation, training and evaluation:</strong> <a href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder/blob/a2/m1/README.md#segmentation">README reproduction commands</a></li>
+    <li><strong>Final deliverables:</strong> checkpoint downloads, the final PDF report, slides and presentation video are not linked in this M2 draft.</li>
+  </ul>
+  <p>The saved run summaries define the settings behind this page. The current U-Net YAML uses physical batch size eight, while the reported run used four. Reproducing the reported run requires its recorded configuration. DeepLabV3's effective batch of 32 additionally requires two GPU processes. Checkpoints and prediction tensors are excluded from Git; plotting the saved validation evidence requires obtaining or regenerating those local artifacts.</p>
+</section>
 
-
-  <section id="members">
-    <h2>Group members</h2>
-    <div class="table-scroll">
-      <table>
-        <thead>
-          <tr><th>Full name</th><th>Student ID</th><th>Role in Assignment 2</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>Vu Duc Viet Anh</td><td>2352074</td><td><span class="pending">(Not yet assigned)</span></td></tr>
-          <tr><td>Tran Lam Anh</td><td>2352067</td><td><span class="pending">(Not yet assigned)</span></td></tr>
-          <tr><td>Le Nguyen Khang</td><td>2352470</td><td><span class="pending">(Not yet assigned)</span></td></tr>
-          <tr><td>Tran Nguyen Giap</td><td>2352284</td><td><span class="pending">(Not yet assigned)</span></td></tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
-</article></main>
-
-<footer>
-  CO3133 - Deep Learning and Its Applications &middot; Semester 261 &middot; Group Placeholder
-</footer>
-
+<section id="members">
+  <h2>Group members</h2>
+  <div class="table-scroll"><table>
+    <caption>A2 responsibilities recorded in the group's planning notes.</caption>
+    <thead><tr><th scope="col">Full name</th><th scope="col">Student ID</th><th scope="col">Assignment 2 responsibility</th></tr></thead>
+    <tbody>
+      <tr><td>Vu Duc Viet Anh</td><td>2352074</td><td>SUIM data loader and augmentation, EDA and assignment page.</td></tr>
+      <tr><td>Tran Lam Anh</td><td>2352067</td><td>Pretrained DeepLabV3 implementation and fine-tuning.</td></tr>
+      <tr><td>Le Nguyen Khang</td><td>2352470</td><td>Segmentation metrics, preliminary evaluation and qualitative examples.</td></tr>
+      <tr><td>Tran Nguyen Giap</td><td>2352284</td><td>U-Net baseline implementation and training.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+</article>
+</main>
+<footer>CO3133 - Deep Learning and Its Applications · Semester 261 · Group Placeholder</footer>
 </body>
 </html>
