@@ -4,7 +4,7 @@ import pytest
 import torch
 import torch.nn as nn
 
-from src.models import GRU, LSTM, MLP, ImageClassifier, Linear, Transformer, build_model
+from src.models import CNN, GRU, LSTM, MLP, ImageClassifier, Linear, Transformer, build_model
 from src.models.gru import GRUCell
 from src.models.lstm import LSTMCell
 
@@ -173,3 +173,23 @@ def test_lstm_matches_nn_lstm() -> None:
     nn_features = hidden[-1]
 
     torch.testing.assert_close(our_features, nn_features)
+
+
+@pytest.mark.parametrize("channels,size", [(1, 28), (3, 32)])
+def test_cnn_spatial_classifier_trains_and_reloads(channels, size):
+    model = ImageClassifier(CNN(in_channels=channels, image_size=size))
+    images = torch.randn(3, channels, size, size)
+    logits = model(images)
+    assert logits.shape == (3, 10)
+    nn.CrossEntropyLoss()(logits, torch.tensor([0, 4, 9])).backward()
+    assert all(p.grad is not None and torch.isfinite(p.grad).all() for p in model.parameters())
+    restored = ImageClassifier(CNN(in_channels=channels, image_size=size))
+    restored.load_state_dict(model.state_dict())
+    model.eval()
+    restored.eval()
+    torch.testing.assert_close(model(images), restored(images))
+
+
+def test_cnn_rejects_wrong_image_size():
+    with pytest.raises(ValueError, match="28-by-28"):
+        CNN()(torch.randn(2, 1, 32, 32))

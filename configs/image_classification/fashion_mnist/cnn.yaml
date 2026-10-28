@@ -1,6 +1,7 @@
-name: fashion_mnist_cnn_seed42
+name: fashion_mnist_cnn_spatial_seed42
 model: cnn
 model_config:
+  image_size: 28
   in_channels: 1
 seed: 42
 batch_size: 128
