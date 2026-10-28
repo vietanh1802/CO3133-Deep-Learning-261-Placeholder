@@ -98,18 +98,28 @@ def plot_prediction_examples(
     plt.close(figure)
 
 
-def plot_comparative_learning_curves(histories, output_path, *, loss_max):
+def plot_comparative_learning_curves(histories, output_path, *, loss_max, loss_ceiling=None):
     """Compare architectures with shared train/validation axes and the preset palette."""
-    from src.plots.format import COLORS
+    from src.plots.format import COLORS, GREEN
 
     apply()
     figure, axes = plt.subplots(1, 2, figsize=(9, 3.6), sharex=True, sharey=True)
-    colors = COLORS
+    colors = (*COLORS, GREEN)
+    upper_loss = loss_max * 1.03 if loss_ceiling is None else loss_ceiling
+    if any(
+        value > upper_loss
+        for summary in histories.values()
+        for key in ("train_loss", "validation_loss")
+        for value in summary[key]
+    ):
+        raise ValueError("loss ceiling would hide recorded loss values")
     for index, (model, summary) in enumerate(histories.items()):
         color = colors[index % len(colors)]
         for axis, key in zip(axes, ("train_loss", "validation_loss"), strict=True):
             axis.plot(range(1, len(summary[key]) + 1), summary[key], color=color, label=model)
-            axis.set(xlim=(1, summary["epochs"]), ylim=(0, loss_max * 1.03), xlabel="Epoch")
+            axis.set(xlim=(1, summary["epochs"]), ylim=(0, upper_loss), xlabel="Epoch")
+            if loss_ceiling is not None:
+                axis.set_yticks(np.linspace(0, loss_ceiling, 4))
         axes[1].plot(
             summary["best_epoch"],
             summary["best_validation_loss"],

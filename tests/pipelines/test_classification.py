@@ -181,7 +181,14 @@ def test_fit_runs_training_validation_and_saves_best_checkpoint(tmp_path) -> Non
     actual = evaluate_model(selected, held_out, DEVICE)
     torch.testing.assert_close(actual.probabilities, expected.probabilities, rtol=0, atol=0)
     assert actual.metrics.confusion_matrix.sum().item() == 7
+    assert actual.probabilities.shape == (7, 3)
     assert torch.isfinite(actual.probabilities).all()
+    assert 0 <= actual.metrics.accuracy <= 1
+    assert 0 <= actual.metrics.macro_f1 <= 1
+    assert actual.parameter_count == sum(
+        p.numel() for p in selected.parameters() if p.requires_grad
+    )
+    assert actual.inference_seconds >= 0
     output = tmp_path / "curves.png"
     plot_learning_curves(
         [epoch.loss for epoch in result.training],

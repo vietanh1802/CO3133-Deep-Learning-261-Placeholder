@@ -4,8 +4,9 @@ import pytest
 import torch
 import torch.nn as nn
 
-from src.models import GRU, MLP, ImageClassifier, Linear, Transformer, build_model
+from src.models import GRU, LSTM, MLP, ImageClassifier, Linear, Transformer, build_model
 from src.models.gru import GRUCell
+from src.models.lstm import LSTMCell
 
 
 def test_model_factory_dispatches_to_named_model() -> None:
@@ -117,3 +118,58 @@ def test_transformer_accepts_rgb_image_rows() -> None:
     features = model(torch.randn(2, 3, 5, 4))
 
     assert features.shape == (2, 8)
+
+
+def test_lstm_produces_fixed_size_features() -> None:
+    model = LSTM(input_size=4, hidden_size=8, num_layers=1)
+
+    features = model(torch.randn(3, 1, 5, 4))
+
+    assert features.shape == (3, 8)
+    assert model.output_dim == 8
+
+
+def test_lstm_accepts_rgb_image_rows() -> None:
+    model = LSTM(input_size=12, hidden_size=8, num_layers=1)
+
+    features = model(torch.randn(2, 3, 5, 4))
+
+    assert features.shape == (2, 8)
+
+
+def test_lstm_classifier_produces_logits_and_gradients() -> None:
+    model = ImageClassifier(LSTM(input_size=4, hidden_size=8, num_layers=2), num_classes=3)
+    images = torch.randn(5, 1, 4, 4)
+    targets = torch.tensor([0, 1, 2, 1, 0])
+
+    logits = model(images)
+    loss = nn.CrossEntropyLoss()(logits, targets)
+    loss.backward()
+
+    assert logits.shape == (5, 3)
+    assert torch.isfinite(loss)
+    assert all(p.grad is not None and torch.isfinite(p.grad).all() for p in model.parameters())
+
+
+def test_lstm_matches_nn_lstm() -> None:
+    our_model = LSTM(input_size=4, hidden_size=6, num_layers=2, dropout=0.0)
+    nn_model = nn.LSTM(input_size=4, hidden_size=6, num_layers=2, batch_first=True)
+
+    with torch.no_grad():
+        for layer_index, module in enumerate(our_model.cells):
+            cell = cast(LSTMCell, module)
+            assert cell.project_input.bias is not None
+            assert cell.project_hidden.bias is not None
+            getattr(nn_model, f"weight_ih_l{layer_index}").copy_(cell.project_input.weight)
+            getattr(nn_model, f"bias_ih_l{layer_index}").copy_(cell.project_input.bias)
+            getattr(nn_model, f"weight_hh_l{layer_index}").copy_(cell.project_hidden.weight)
+            getattr(nn_model, f"bias_hh_l{layer_index}").copy_(cell.project_hidden.bias)
+
+    images = torch.randn(3, 1, 5, 4)
+    sequence = images.squeeze(1)
+
+    our_features = our_model(images)
+    _, (hidden, _) = nn_model(sequence)
+    nn_features = hidden[-1]
+
+    torch.testing.assert_close(our_features, nn_features)

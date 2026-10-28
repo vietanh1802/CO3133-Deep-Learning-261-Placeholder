@@ -1,6 +1,8 @@
 """Compare saved classification runs without mixing datasets or training budgets."""
 
 import argparse
+import csv
+import io
 import json
 import statistics
 from collections import defaultdict
@@ -202,6 +204,41 @@ def to_csv(rows: list[dict[str, Any]]) -> str:
     return "\n".join(lines)
 
 
+def to_full_csv(records: list[dict[str, Any]]) -> str:
+    """Export one row per evaluated run, including checkpoint selection metadata."""
+    fields = (
+        "dataset",
+        "model",
+        "seed",
+        "epochs",
+        "accuracy",
+        "macro_f1",
+        "parameter_count",
+        "best_epoch",
+        "best_validation_loss",
+        "run",
+    )
+    output = io.StringIO(newline="")
+    writer = csv.DictWriter(output, fieldnames=fields, lineterminator="\n")
+    writer.writeheader()
+    for record in sorted(records, key=lambda r: (r["dataset"], r["model"], r["seed"])):
+        writer.writerow(
+            {
+                "dataset": record["dataset"],
+                "model": record["model"],
+                "seed": record["seed"],
+                "epochs": record["config"]["epochs"],
+                "accuracy": record["metrics"]["accuracy"],
+                "macro_f1": record["metrics"]["macro_f1"],
+                "parameter_count": record["parameter_count"],
+                "best_epoch": record["checkpoint"]["epoch"],
+                "best_validation_loss": record["checkpoint"]["best_validation_loss"],
+                "run": record["name"],
+            }
+        )
+    return output.getvalue()
+
+
 def select_examples(targets, baseline, cnn):
     """Take the first two official test indices per disagreement category."""
     baseline_correct, cnn_correct = baseline == targets, cnn == targets
@@ -224,6 +261,7 @@ def make_figures(records, results_dir, output_dir):
         "mlp": "MLP",
         "cnn": "CNN",
         "gru": "GRU",
+        "lstm": "LSTM",
         "transformer": "Transformer",
     }
     for record in records:
@@ -270,6 +308,7 @@ def make_figures(records, results_dir, output_dir):
             {labels[m]: histories[group[m]["name"]] for m in ordered},
             output_dir / f"{dataset}_learning.png",
             loss_max=loss_max,
+            loss_ceiling=1.5 if dataset == "fashion_mnist" else None,
         )
         baseline = min(
             ("linear", "mlp"), key=lambda m: histories[group[m]["name"]]["best_validation_loss"]
@@ -368,9 +407,13 @@ def main() -> None:
     csv_path = output_dir / f"comparison_{args.split}.csv"
     csv_path.write_text(to_csv(rows) + "\n", encoding="utf-8")
 
+    full_csv_path = output_dir / f"comparison_full_{args.split}.csv"
+    full_csv_path.write_text(to_full_csv(records), encoding="utf-8", newline="\n")
+
     logger.info(ExperimentState.SAVING)
     logger.info("Wrote {}", markdown_path)
     logger.info("Wrote {}", csv_path)
+    logger.info("Wrote {}", full_csv_path)
     print(markdown)
 
     single_run_models = [row["model"] for row in rows if row["runs"] == 1]

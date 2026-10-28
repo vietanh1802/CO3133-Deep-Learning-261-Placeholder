@@ -50,6 +50,23 @@ uv run python -m scripts.evaluation.compare --results-dir results/a1 --epochs 50
 Use matching dataset and configuration paths for MNIST or CIFAR-10.
 Configurations live in `configs/image_classification/<dataset>/`.
 
+Train Linear, MLP, CNN, GRU, LSTM, and Transformer on all three datasets
+using the shared training entry point:
+
+```bash
+bash train.sh
+```
+
+Use the shared evaluation command above for each model and dataset.
+Place each `best.pt` at `checkpoints/<dataset>_<model>_seed42/best.pt` first.
+Evaluation loads the selected checkpoint and saves test outputs in `results/a1/<run-name>/`.
+
+After the evaluations finish, rebuild the comparison table:
+
+```bash
+uv run --no-sync python -m scripts.evaluation.compare --results-dir results/a1 --epochs 50
+```
+
 ## Segmentation
 
 Train the U-Net baseline or resume its latest checkpoint:

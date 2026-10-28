@@ -59,13 +59,13 @@
   },
   "parameter_count": 1191050,
   "training_seconds": 684.9730438810002,
-  "inference_seconds": 1.9469549130881205,
+  "inference_seconds": 0.26891757100020186,
   "sample_count": 10000,
-  "git_commit": "fcc1589f6dbd2c81ad7ecd3e72930c3663b0e1ba-dirty",
+  "git_commit": "41c2424436b4073b08cdf63b369986b36117c633-dirty",
   "environment": {
-    "python": "3.13.5",
-    "torch": "2.14.0",
-    "platform": "macOS-27.0.1-arm64-arm-64bit-Mach-O",
-    "device_name": "arm"
+    "python": "3.12.14",
+    "torch": "2.14.0+cu126",
+    "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+    "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU"
   }
 }
