@@ -1,0 +1,69 @@
+{
+  "name": "cifar10_lstm_seed42",
+  "model": "lstm",
+  "dataset": "cifar10",
+  "split": "test",
+  "seed": 42,
+  "config": {
+    "name": "cifar10_lstm_seed42",
+    "model": "lstm",
+    "model_config": {
+      "input_size": 96,
+      "hidden_size": 128,
+      "num_layers": 1,
+      "dropout": 0.0
+    },
+    "dataset": "cifar10",
+    "seed": 42,
+    "batch_size": 128,
+    "learning_rate": 0.001,
+    "epochs": 50,
+    "num_workers": 0,
+    "val_fraction": 0.1,
+    "data_dir": "data",
+    "checkpoint_dir": "checkpoints",
+    "results_dir": "results"
+  },
+  "checkpoint": {
+    "path": "checkpoints/cifar10_lstm_seed42/best.pt",
+    "selection_rule": "lowest validation loss",
+    "epoch": 48,
+    "global_step": 16896,
+    "best_validation_loss": 0.9825128555297852,
+    "config": {
+      "name": "cifar10_lstm_seed42",
+      "model": "lstm",
+      "model_config": {
+        "input_size": 96,
+        "hidden_size": 128,
+        "num_layers": 1,
+        "dropout": 0.0
+      },
+      "dataset": "cifar10",
+      "seed": 42,
+      "batch_size": 128,
+      "learning_rate": 0.001,
+      "epochs": 50,
+      "num_workers": 0,
+      "val_fraction": 0.1,
+      "data_dir": "data",
+      "checkpoint_dir": "checkpoints",
+      "results_dir": "results"
+    }
+  },
+  "metrics": {
+    "accuracy": 0.6442000269889832,
+    "macro_f1": 0.6431473501879659
+  },
+  "parameter_count": 117002,
+  "training_seconds": 437.46070256999974,
+  "inference_seconds": 0.21434705300089263,
+  "sample_count": 10000,
+  "git_commit": "c89aacfe7721c1bab3e510b99ccca12d8829cf9b-dirty",
+  "environment": {
+    "python": "3.12.14",
+    "torch": "2.14.0+cu126",
+    "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+    "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU"
+  }
+}

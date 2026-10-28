@@ -1,0 +1,65 @@
+{
+  "name": "mnist_cnn_spatial_seed42",
+  "model": "cnn",
+  "dataset": "mnist",
+  "split": "test",
+  "seed": 42,
+  "config": {
+    "name": "mnist_cnn_spatial_seed42",
+    "model": "cnn",
+    "model_config": {
+      "image_size": 28,
+      "in_channels": 1
+    },
+    "dataset": "mnist",
+    "seed": 42,
+    "batch_size": 128,
+    "learning_rate": 0.001,
+    "epochs": 50,
+    "num_workers": 0,
+    "val_fraction": 0.1,
+    "data_dir": "data",
+    "checkpoint_dir": "checkpoints",
+    "results_dir": "results"
+  },
+  "checkpoint": {
+    "path": "checkpoints/mnist_cnn_spatial_seed42/best.pt",
+    "selection_rule": "lowest validation loss",
+    "epoch": 34,
+    "global_step": 14348,
+    "best_validation_loss": 0.016985032642260194,
+    "config": {
+      "name": "mnist_cnn_spatial_seed42",
+      "model": "cnn",
+      "model_config": {
+        "image_size": 28,
+        "in_channels": 1
+      },
+      "dataset": "mnist",
+      "seed": 42,
+      "batch_size": 128,
+      "learning_rate": 0.001,
+      "epochs": 50,
+      "num_workers": 0,
+      "val_fraction": 0.1,
+      "data_dir": "data",
+      "checkpoint_dir": "checkpoints",
+      "results_dir": "results"
+    }
+  },
+  "metrics": {
+    "accuracy": 0.9940999746322632,
+    "macro_f1": 0.9940880300320833
+  },
+  "parameter_count": 421738,
+  "training_seconds": 1233.5267249650788,
+  "inference_seconds": 0.2777961762621999,
+  "sample_count": 10000,
+  "git_commit": "e6de6df2fff94109bbe4d0ba4950da80fd13d30a-dirty",
+  "environment": {
+    "python": "3.11.11",
+    "torch": "2.14.0+cu126",
+    "platform": "Linux-5.15.0-185-generic-x86_64-with-glibc2.35",
+    "device_name": "NVIDIA GeForce RTX 4060 Ti"
+  }
+}

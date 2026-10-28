@@ -11,13 +11,21 @@ from typing import Any
 import torch
 from loguru import logger
 
+from src.config.classification import load_config
 from src.data import build_dataloaders, class_names
 from src.error import ClassificationError, ClassificationErrorAnalyzer
-from src.evaluation import evaluate_model
-from src.evaluation.plots import plot_confusion_matrix, plot_prediction_examples
+from src.evaluation.classification import (
+    evaluate_model,
+)
 from src.models import ImageClassifier, build_model
+from src.plots.classification import (
+    plot_prediction_examples,
+)
+from src.plots.common import (
+    plot_confusion_matrix,
+)
 from src.training.checkpoint import load_checkpoint
-from src.utils import ExperimentState, load_config, seed_everything, setup_logging
+from src.utils import ExperimentState, seed_everything, setup_logging
 from src.utils.logging import log_config, log_timing
 
 
@@ -232,9 +240,7 @@ def main() -> None:
         "most_confused_pairs": [asdict(pair) for pair in error_report.most_confused_pairs],
         "confident_errors": [asdict(example) for example in error_report.confident_errors],
         "uncertain_errors": [asdict(example) for example in error_report.uncertain_errors],
-        "representative_correct": [
-            asdict(example) for example in error_report.representative_correct
-        ],
+        "confident_correct": [asdict(example) for example in error_report.confident_correct],
     }
     error_path = run_directory / f"{args.split}_error_analysis.json"
     error_path.write_text(json.dumps(error_record, indent=2), encoding="utf-8")
@@ -242,9 +248,9 @@ def main() -> None:
 
     for examples, filename, title in (
         (
-            error_report.representative_correct,
-            "representative_correct.png",
-            "Representative correct predictions",
+            error_report.confident_correct,
+            "confident_correct.png",
+            "Highest-confidence correct predictions",
         ),
         (error_report.confident_errors, "confident_errors.png", "Confident errors"),
         (error_report.uncertain_errors, "uncertain_errors.png", "Uncertain errors"),

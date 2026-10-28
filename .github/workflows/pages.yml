@@ -5,7 +5,7 @@ name: Deploy website
 # Add [no ci] to a commit message to skip a rebuild.
 on:
   push:
-    branches: [main, dev/a1]
+    branches: ["a2/m1"]
   workflow_dispatch:
 
 permissions:

@@ -1,6 +1,7 @@
-name: cifar10_cnn_seed42
+name: cifar10_cnn_spatial_seed42
 model: cnn
 model_config:
+  image_size: 32
   in_channels: 3
 seed: 42
 batch_size: 128

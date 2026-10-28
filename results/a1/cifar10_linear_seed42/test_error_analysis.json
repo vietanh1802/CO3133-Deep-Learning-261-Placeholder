@@ -1,0 +1,179 @@
+{
+  "per_class_accuracy": {
+    "airplane": 0.358,
+    "automobile": 0.449,
+    "bird": 0.233,
+    "cat": 0.206,
+    "deer": 0.22,
+    "dog": 0.264,
+    "frog": 0.444,
+    "horse": 0.415,
+    "ship": 0.435,
+    "truck": 0.503
+  },
+  "per_class_support": {
+    "airplane": 1000,
+    "automobile": 1000,
+    "bird": 1000,
+    "cat": 1000,
+    "deer": 1000,
+    "dog": 1000,
+    "frog": 1000,
+    "horse": 1000,
+    "ship": 1000,
+    "truck": 1000
+  },
+  "most_confused_pairs": [
+    {
+      "target": 0,
+      "prediction": 8,
+      "count": 259
+    },
+    {
+      "target": 8,
+      "prediction": 9,
+      "count": 213
+    },
+    {
+      "target": 9,
+      "prediction": 1,
+      "count": 182
+    },
+    {
+      "target": 1,
+      "prediction": 9,
+      "count": 181
+    },
+    {
+      "target": 4,
+      "prediction": 2,
+      "count": 168
+    }
+  ],
+  "confident_errors": [
+    {
+      "sample_index": 4724,
+      "target": 5,
+      "prediction": 8,
+      "confidence": 0.9981186985969543,
+      "true_class_probability": 0.00014482223195955157,
+      "margin": 0.9979738593101501
+    },
+    {
+      "sample_index": 4453,
+      "target": 0,
+      "prediction": 8,
+      "confidence": 0.9974861145019531,
+      "true_class_probability": 0.0023997530806809664,
+      "margin": 0.9950863718986511
+    },
+    {
+      "sample_index": 8877,
+      "target": 9,
+      "prediction": 6,
+      "confidence": 0.9955462217330933,
+      "true_class_probability": 5.886156941414811e-06,
+      "margin": 0.9955403208732605
+    },
+    {
+      "sample_index": 802,
+      "target": 4,
+      "prediction": 8,
+      "confidence": 0.9953987002372742,
+      "true_class_probability": 6.100332393543795e-05,
+      "margin": 0.995337724685669
+    },
+    {
+      "sample_index": 3672,
+      "target": 0,
+      "prediction": 8,
+      "confidence": 0.9885053038597107,
+      "true_class_probability": 0.009364211931824684,
+      "margin": 0.979141116142273
+    }
+  ],
+  "uncertain_errors": [
+    {
+      "sample_index": 9346,
+      "target": 7,
+      "prediction": 2,
+      "confidence": 0.12143643200397491,
+      "true_class_probability": 0.1127481684088707,
+      "margin": 0.008688263595104218
+    },
+    {
+      "sample_index": 9571,
+      "target": 6,
+      "prediction": 5,
+      "confidence": 0.13846108317375183,
+      "true_class_probability": 0.12994851171970367,
+      "margin": 0.008512571454048157
+    },
+    {
+      "sample_index": 9460,
+      "target": 3,
+      "prediction": 7,
+      "confidence": 0.14035403728485107,
+      "true_class_probability": 0.1346948742866516,
+      "margin": 0.005659162998199463
+    },
+    {
+      "sample_index": 1990,
+      "target": 4,
+      "prediction": 3,
+      "confidence": 0.1406053751707077,
+      "true_class_probability": 0.08486893028020859,
+      "margin": 0.055736444890499115
+    },
+    {
+      "sample_index": 4315,
+      "target": 6,
+      "prediction": 1,
+      "confidence": 0.14168229699134827,
+      "true_class_probability": 0.09595092386007309,
+      "margin": 0.04573137313127518
+    }
+  ],
+  "confident_correct": [
+    {
+      "sample_index": 2266,
+      "target": 8,
+      "prediction": 8,
+      "confidence": 0.9953836798667908,
+      "true_class_probability": 0.9953836798667908,
+      "margin": 0.0
+    },
+    {
+      "sample_index": 1080,
+      "target": 6,
+      "prediction": 6,
+      "confidence": 0.9894514679908752,
+      "true_class_probability": 0.9894514679908752,
+      "margin": 0.0
+    },
+    {
+      "sample_index": 4891,
+      "target": 6,
+      "prediction": 6,
+      "confidence": 0.9847773313522339,
+      "true_class_probability": 0.9847773313522339,
+      "margin": 0.0
+    },
+    {
+      "sample_index": 3223,
+      "target": 7,
+      "prediction": 7,
+      "confidence": 0.9813517928123474,
+      "true_class_probability": 0.9813517928123474,
+      "margin": 0.0
+    },
+    {
+      "sample_index": 2896,
+      "target": 8,
+      "prediction": 8,
+      "confidence": 0.977310299873352,
+      "true_class_probability": 0.977310299873352,
+      "margin": 0.0
+    }
+  ]
+}

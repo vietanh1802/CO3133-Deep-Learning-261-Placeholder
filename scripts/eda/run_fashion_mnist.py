@@ -4,8 +4,10 @@ from pathlib import Path
 
 from torchvision.datasets import FashionMNIST
 
-from src.data.eda_report import run_dataset_eda
 from src.data.fashion_mnist import class_names
+from src.eda.report import (
+    run_dataset_eda,
+)
 
 DATA_DIR = Path("data")
 OUTPUT_DIR = Path("results/a1/eda/fashion_mnist")

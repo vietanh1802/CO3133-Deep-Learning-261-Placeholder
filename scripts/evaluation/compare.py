@@ -1,17 +1,28 @@
-"""Build the common comparison table and figures for all A1 models."""
+"""Compare saved classification runs without mixing datasets or training budgets."""
 
 import argparse
+import csv
+import io
 import json
 import statistics
 from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
+import numpy as np
+import torch
 from loguru import logger
+from torchvision.datasets import CIFAR10, MNIST, FashionMNIST
 
+from src.data import build_dataloaders, class_names
+from src.evaluation.classification_metrics import compute_classification_metrics
+from src.plots.classification import plot_comparative_learning_curves, plot_shared_predictions
+from src.plots.common import plot_confusion_matrix
 from src.utils import ExperimentState, setup_logging
 
 TABLE_COLUMNS = (
+    "dataset",
+    "epochs",
     "model",
     "runs",
     "accuracy",
@@ -40,14 +51,30 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="where to write the comparison table (default: --results-dir)",
     )
+    parser.add_argument("--epochs", type=int, help="include only this training budget")
+    parser.add_argument(
+        "--figures-dir", type=Path, help="export comparison figures and sample indices"
+    )
     return parser.parse_args()
 
 
+def include_in_comparison(record: dict[str, Any]) -> bool:
+    """Use the group's spatial CNN variant, without falling back to legacy CNN runs."""
+    if record["model"] != "cnn":
+        return True
+    prefix = f"{record['dataset']}_cnn_spatial_"
+    return record.get("name", "").startswith(prefix)
+
+
 def load_records(results_dir: Path, split: str) -> list[dict[str, Any]]:
-    """Load every stored evaluation record written by ``evaluate.py``."""
+    """Load current comparison runs; legacy CNN records remain archived on disk."""
     records: list[dict[str, Any]] = []
     for path in sorted(results_dir.glob(f"*/{split}_result.json")):
-        records.append(json.loads(path.read_text(encoding="utf-8")))
+        record = json.loads(path.read_text(encoding="utf-8"))
+        if include_in_comparison(record):
+            records.append(record)
+        else:
+            logger.info("Excluded legacy CNN run: {}", record.get("name", path.parent.name))
     return records
 
 
@@ -63,13 +90,15 @@ def _mean_std(values: list[float]) -> tuple[float, float]:
 
 
 def aggregate(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Group records by architecture and summarise each group across seeds."""
-    grouped: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    """Summarise seeds within each dataset, training budget, and architecture."""
+    grouped: dict[tuple[str, int, str], list[dict[str, Any]]] = defaultdict(list)
     for record in records:
-        grouped[record["model"]].append(record)
+        if not include_in_comparison(record):
+            continue
+        grouped[(record["dataset"], record["config"]["epochs"], record["model"])].append(record)
 
     rows: list[dict[str, Any]] = []
-    for model, model_records in sorted(grouped.items()):
+    for (dataset, epochs, model), model_records in sorted(grouped.items()):
         accuracies = [record["metrics"]["accuracy"] for record in model_records]
         macro_f1s = [record["metrics"]["macro_f1"] for record in model_records]
         inference = [record["inference_seconds"] for record in model_records]
@@ -96,6 +125,8 @@ def aggregate(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
         rows.append(
             {
+                "dataset": dataset,
+                "epochs": epochs,
                 "model": model,
                 "runs": len(model_records),
                 "seeds": sorted(seeds),
@@ -133,6 +164,8 @@ def to_markdown(rows: list[dict[str, Any]]) -> str:
             "| "
             + " | ".join(
                 (
+                    str(row["dataset"]),
+                    str(row["epochs"]),
                     str(row["model"]),
                     str(row["runs"]),
                     _format_measurement(row["accuracy_mean"], row["accuracy_std"], 4),
@@ -154,6 +187,8 @@ def to_markdown(rows: list[dict[str, Any]]) -> str:
 def to_csv(rows: list[dict[str, Any]]) -> str:
     """Render the full aggregate with mean and deviation in separate columns."""
     fields = [
+        "dataset",
+        "epochs",
         "model",
         "runs",
         "seeds",
@@ -183,6 +218,174 @@ def to_csv(rows: list[dict[str, Any]]) -> str:
     return "\n".join(lines)
 
 
+def to_full_csv(records: list[dict[str, Any]]) -> str:
+    """Export one row per evaluated run, including checkpoint selection metadata."""
+    fields = (
+        "dataset",
+        "model",
+        "seed",
+        "epochs",
+        "accuracy",
+        "macro_f1",
+        "parameter_count",
+        "best_epoch",
+        "best_validation_loss",
+        "run",
+    )
+    output = io.StringIO(newline="")
+    writer = csv.DictWriter(output, fieldnames=fields, lineterminator="\n")
+    writer.writeheader()
+    for record in sorted(records, key=lambda r: (r["dataset"], r["model"], r["seed"])):
+        writer.writerow(
+            {
+                "dataset": record["dataset"],
+                "model": record["model"],
+                "seed": record["seed"],
+                "epochs": record["config"]["epochs"],
+                "accuracy": record["metrics"]["accuracy"],
+                "macro_f1": record["metrics"]["macro_f1"],
+                "parameter_count": record["parameter_count"],
+                "best_epoch": record["checkpoint"]["epoch"],
+                "best_validation_loss": record["checkpoint"]["best_validation_loss"],
+                "run": record["name"],
+            }
+        )
+    return output.getvalue()
+
+
+def select_examples(targets, baseline, cnn):
+    """Take the first two official test indices per disagreement category."""
+    baseline_correct, cnn_correct = baseline == targets, cnn == targets
+    return {
+        "CNN corrects baseline": np.flatnonzero(~baseline_correct & cnn_correct)[:2],
+        "Both miss": np.flatnonzero(~baseline_correct & ~cnn_correct)[:2],
+        "Baseline correct, CNN wrong": np.flatnonzero(baseline_correct & ~cnn_correct)[:2],
+    }
+
+
+def make_figures(records, results_dir, output_dir):
+    """Validate local test evidence and regenerate curves and paired error figures."""
+    if any(r["split"] != "test" for r in records):
+        raise ValueError("paired examples require the official unshuffled test split")
+    groups = defaultdict(dict)
+    histories = {}
+    evidence = {}
+    labels = {
+        "linear": "Linear",
+        "mlp": "MLP",
+        "cnn": "CNN",
+        "gru": "GRU",
+        "lstm": "LSTM",
+        "transformer": "Transformer",
+    }
+    for record in records:
+        dataset, model, name = record["dataset"], record["model"], record["name"]
+        if model in groups[dataset]:
+            raise ValueError("figures require one run per dataset/model; select a training budget")
+        groups[dataset][model] = record
+        directory = results_dir / name
+        summary = json.loads((directory / "training_summary.json").read_text())
+        stored = torch.load(directory / "test_evidence.pt", map_location="cpu", weights_only=True)
+        assert summary["name"] == name and summary["model"] == model
+        assert summary["dataset"] == dataset
+        assert summary["config"] == record["config"] == record["checkpoint"]["config"]
+        assert summary["best_epoch"] == record["checkpoint"]["epoch"]
+        assert np.isclose(
+            summary["best_validation_loss"], record["checkpoint"]["best_validation_loss"]
+        )
+        assert len(summary["train_loss"]) == len(summary["validation_loss"]) == summary["epochs"]
+        assert np.isfinite([summary["train_loss"], summary["validation_loss"]]).all()
+        assert np.isclose(min(summary["validation_loss"]), summary["best_validation_loss"])
+        assert torch.equal(stored["sample_indices"], torch.arange(record["sample_count"]))
+        assert torch.isfinite(stored["probabilities"]).all()
+        assert torch.equal(stored["predictions"], stored["probabilities"].argmax(1))
+        metrics = compute_classification_metrics(
+            stored["targets"], stored["predictions"], num_classes=10
+        )
+        assert np.isclose(metrics.accuracy, record["metrics"]["accuracy"])
+        assert np.isclose(metrics.macro_f1, record["metrics"]["macro_f1"])
+        assert torch.equal(metrics.confusion_matrix, stored["confusion_matrix"])
+        histories[name], evidence[name] = summary, stored
+    for group in groups.values():
+        if len({(r["seed"], r["config"]["epochs"]) for r in group.values()}) != 1:
+            raise ValueError("comparison figures require matching seeds and training budgets")
+        if not {"linear", "mlp", "cnn"} <= group.keys():
+            raise ValueError("paired comparison requires Linear, MLP, and CNN")
+    output_dir.mkdir(parents=True, exist_ok=True)
+    loss_max = max(
+        max(s[key]) for s in histories.values() for key in ("train_loss", "validation_loss")
+    )
+    selections = {}
+    for dataset, group in sorted(groups.items()):
+        ordered = [m for m in labels if m in group]
+        plot_comparative_learning_curves(
+            {labels[m]: histories[group[m]["name"]] for m in ordered},
+            output_dir / f"{dataset}_learning.png",
+            loss_max=loss_max,
+            loss_ceiling=1.5 if dataset == "fashion_mnist" else None,
+        )
+        baseline = min(
+            ("linear", "mlp"), key=lambda m: histories[group[m]["name"]]["best_validation_loss"]
+        )
+        config = group[baseline]["config"]
+        loaders = build_dataloaders(
+            dataset,
+            {
+                key: config[key]
+                for key in ("data_dir", "batch_size", "val_fraction", "seed", "num_workers")
+            },
+        )
+        test = loaders.test.dataset
+        assert isinstance(test, (MNIST, FashionMNIST, CIFAR10))
+        targets = evidence[group[baseline]["name"]]["targets"].numpy()
+        assert np.array_equal(targets, np.asarray(test.targets))
+        for record in group.values():
+            assert np.array_equal(targets, evidence[record["name"]]["targets"].numpy())
+        names = class_names(dataset)
+        for model in (baseline, "cnn"):
+            plot_confusion_matrix(
+                evidence[group[model]["name"]]["confusion_matrix"].numpy(),
+                names,
+                output_dir / f"{dataset}_{model}_confusion.png",
+            )
+        categories = select_examples(
+            targets,
+            evidence[group[baseline]["name"]]["predictions"].numpy(),
+            evidence[group["cnn"]["name"]]["predictions"].numpy(),
+        )
+        samples: list[dict[str, Any]] = []
+        for category, indices in categories.items():
+            for index in indices.tolist():
+                samples.append(
+                    {
+                        "category": category,
+                        "sample_index": index,
+                        "target": int(targets[index]),
+                        "predictions": {
+                            m: int(evidence[group[m]["name"]]["predictions"][index])
+                            for m in ordered
+                        },
+                    }
+                )
+        display_samples = [
+            {**s, "predictions": {labels[m]: p for m, p in s["predictions"].items()}}
+            for s in samples
+        ]
+        plot_shared_predictions(
+            [test.data[s["sample_index"]] for s in samples],
+            display_samples,
+            names,
+            output_dir / f"{dataset}_shared_images.png",
+        )
+        selections[dataset] = {
+            "baseline": baseline,
+            "rule": "lowest validation loss among Linear and MLP; ties favor Linear",
+            "categories": {key: indices.tolist() for key, indices in categories.items()},
+            "samples": samples,
+        }
+    (results_dir / "comparison_selection.json").write_text(json.dumps(selections, indent=2) + "\n")
+
+
 def main() -> None:
     """Wire stored run results into assignment comparison outputs."""
     args = parse_args()
@@ -194,6 +397,8 @@ def main() -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
 
     records = load_records(results_dir, args.split)
+    if args.epochs is not None:
+        records = [r for r in records if r["config"]["epochs"] == args.epochs]
     if not records:
         raise FileNotFoundError(
             f"no {args.split}_result.json files found under {results_dir}; "
@@ -201,14 +406,13 @@ def main() -> None:
         )
     logger.info("Loaded {} run record(s)", len(records))
 
-    datasets = {record["dataset"] for record in records}
-    if len(datasets) > 1:
-        raise ValueError(f"records mix datasets and are not comparable: {sorted(datasets)}")
     splits = {record["split"] for record in records}
     if len(splits) > 1:
         raise ValueError(f"records mix splits and are not comparable: {sorted(splits)}")
 
     rows = aggregate(records)
+    if args.figures_dir:
+        make_figures(records, results_dir, args.figures_dir)
 
     markdown = to_markdown(rows)
     markdown_path = output_dir / f"comparison_{args.split}.md"
@@ -217,9 +421,13 @@ def main() -> None:
     csv_path = output_dir / f"comparison_{args.split}.csv"
     csv_path.write_text(to_csv(rows) + "\n", encoding="utf-8")
 
+    full_csv_path = output_dir / f"comparison_full_{args.split}.csv"
+    full_csv_path.write_text(to_full_csv(records), encoding="utf-8", newline="\n")
+
     logger.info(ExperimentState.SAVING)
     logger.info("Wrote {}", markdown_path)
     logger.info("Wrote {}", csv_path)
+    logger.info("Wrote {}", full_csv_path)
     print(markdown)
 
     single_run_models = [row["model"] for row in rows if row["runs"] == 1]

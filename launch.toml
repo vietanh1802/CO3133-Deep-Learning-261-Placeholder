@@ -1,0 +1,27 @@
+[repo]
+name = "co3133"
+git_url = "https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder"
+ref = "a2/m1"
+
+[resources]
+num_gpus = 1
+max_hourly = 1
+disk = 40
+min_vram = 8
+min_cuda = 12.6
+min_download = 100
+
+[tasks.classification-cnn]
+download_checkpoints = false
+output_dirs = ["checkpoints"]
+timeout_seconds = 14400
+command = ["bash", "-lc", '''
+set -euo pipefail
+export MPLBACKEND=Agg OMP_NUM_THREADS=1 CUDA_VISIBLE_DEVICES=0
+uv run --locked python -c 'import torch; assert torch.cuda.is_available(), "A CUDA GPU is required"; print(torch.__version__, torch.cuda.get_device_name(0), flush=True)'
+for dataset in fashion_mnist mnist cifar10; do
+    config="configs/image_classification/$dataset/cnn.yaml"
+    uv run --locked python -m scripts.training.train_image_classification --data "$dataset" --config "$config"
+    uv run --locked python -m scripts.evaluation.evaluate --data "$dataset" --config "$config"
+done
+''']
