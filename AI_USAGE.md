@@ -101,6 +101,19 @@ Generate unit tests in tests/test_models.py to check whether the Assignment 1 mo
 - **AI contribution:** Drafted test cases and assertions to support validation of the existing models. The AI-generated code for this use concerns the tests.
 - **How the output was edited and verified:** The current test file includes checks for model-factory dispatch, output shapes, forward/backward behavior, finite loss and gradients, invalid inputs, checkpoint reloading, and comparisons of custom LSTM/GRU outputs with PyTorch under matched weights. No test-run result is recorded for this use.
 
+### Entry 8
+
+- **Tool / model:** Codex
+- **Used by:** Vu Duc Viet Anh (2352074)
+- **Date / development stage:** 2026-10-28 - Assignment 1 presentation and website preparation.
+- **Purpose:** Support slide updates, draft and revise the English YouTube narration for four speakers, and complete the Assignment 1 website using the final report, slides, and saved experiment results.
+- **Affected sections / files:** Assignment 1 PowerPoint and narration files; `web/index.html`; `web/assignment1.html`; `web/data/a1/`; `web/downloads/a1/`; website figures; `scripts/maintenance/build_a1_web.py`; `scripts/evaluation/compare.py`; `tests/components/test_comparison.py`.
+- **Representative prompt (translated):** "Complete the Assignment 1 website using Placeholder_A1_Report.pdf and Placeholder_A1_Slide.pptx in .tmp, and the YouTube link already provided."
+- **AI contribution:** Drafted and edited narration, assisted with slide result updates, generated website text and HTML, selected saved experiment records, and prepared downloadable evidence and figures. Completed the shared landing-page directory and changed comparison selection to exclude legacy CNN runs. This included content generation as well as review assistance.
+- **How the output was edited and verified:** Narration was revised according to the student’s speaker allocation and number-format instructions. Website figures and tables are built from an explicit list of 18 saved seed-42, 50-epoch runs, with the spatial CNN variant selected for every dataset. Automated checks validate record counts, checkpoint-selection losses, result values, links, and copied download checksums. These checks do not establish that a student has completed final review.
+- **Member responsible for final verification:** Vu Duc Viet Anh (2352074); final student review of these website and presentation changes is pending.
+- **Sources used for verification:** Saved test_result.json, training_summary.json, and test_error_analysis.json records; Fashion-MNIST EDA summary; model and evaluation source code; the supplied final report and slides.
+
 ## Assignment 2
 
 ### Entry 1

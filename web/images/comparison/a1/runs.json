@@ -1,35 +1,5 @@
 [
   {
-    "dataset": "mnist",
-    "model": "linear",
-    "name": "mnist_linear_seed42"
-  },
-  {
-    "dataset": "mnist",
-    "model": "mlp",
-    "name": "mnist_mlp_seed42"
-  },
-  {
-    "dataset": "mnist",
-    "model": "cnn",
-    "name": "mnist_cnn_spatial_seed42"
-  },
-  {
-    "dataset": "mnist",
-    "model": "gru",
-    "name": "mnist_gru_seed42"
-  },
-  {
-    "dataset": "mnist",
-    "model": "lstm",
-    "name": "mnist_lstm_seed42"
-  },
-  {
-    "dataset": "mnist",
-    "model": "transformer",
-    "name": "mnist_transformer_seed42"
-  },
-  {
     "dataset": "fashion_mnist",
     "model": "linear",
     "name": "fashion_mnist_linear_seed42"
@@ -60,6 +30,36 @@
     "name": "fashion_mnist_transformer_seed42"
   },
   {
+    "dataset": "mnist",
+    "model": "linear",
+    "name": "mnist_linear_seed42"
+  },
+  {
+    "dataset": "mnist",
+    "model": "mlp",
+    "name": "mnist_mlp_seed42"
+  },
+  {
+    "dataset": "mnist",
+    "model": "cnn",
+    "name": "mnist_cnn_spatial_seed42"
+  },
+  {
+    "dataset": "mnist",
+    "model": "gru",
+    "name": "mnist_gru_seed42"
+  },
+  {
+    "dataset": "mnist",
+    "model": "lstm",
+    "name": "mnist_lstm_seed42"
+  },
+  {
+    "dataset": "mnist",
+    "model": "transformer",
+    "name": "mnist_transformer_seed42"
+  },
+  {
     "dataset": "cifar10",
     "model": "linear",
     "name": "cifar10_linear_seed42"
@@ -68,6 +68,11 @@
     "dataset": "cifar10",
     "model": "mlp",
     "name": "cifar10_mlp_seed42"
+  },
+  {
+    "dataset": "cifar10",
+    "model": "cnn",
+    "name": "cifar10_cnn_spatial_seed42"
   },
   {
     "dataset": "cifar10",

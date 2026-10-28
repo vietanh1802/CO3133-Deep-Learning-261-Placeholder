@@ -58,11 +58,23 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def include_in_comparison(record: dict[str, Any]) -> bool:
+    """Use the group's spatial CNN variant, without falling back to legacy CNN runs."""
+    if record["model"] != "cnn":
+        return True
+    prefix = f"{record['dataset']}_cnn_spatial_"
+    return record.get("name", "").startswith(prefix)
+
+
 def load_records(results_dir: Path, split: str) -> list[dict[str, Any]]:
-    """Load every stored evaluation record written by ``evaluate.py``."""
+    """Load current comparison runs; legacy CNN records remain archived on disk."""
     records: list[dict[str, Any]] = []
     for path in sorted(results_dir.glob(f"*/{split}_result.json")):
-        records.append(json.loads(path.read_text(encoding="utf-8")))
+        record = json.loads(path.read_text(encoding="utf-8"))
+        if include_in_comparison(record):
+            records.append(record)
+        else:
+            logger.info("Excluded legacy CNN run: {}", record.get("name", path.parent.name))
     return records
 
 
@@ -81,6 +93,8 @@ def aggregate(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Summarise seeds within each dataset, training budget, and architecture."""
     grouped: dict[tuple[str, int, str], list[dict[str, Any]]] = defaultdict(list)
     for record in records:
+        if not include_in_comparison(record):
+            continue
         grouped[(record["dataset"], record["config"]["epochs"], record["model"])].append(record)
 
     rows: list[dict[str, Any]] = []

@@ -58,7 +58,9 @@ bash train.sh
 ```
 
 Use the shared evaluation command above for each model and dataset.
-Place each `best.pt` at `checkpoints/<dataset>_<model>_seed42/best.pt` first.
+Place each `best.pt` at the run path named by its configuration.
+CNN uses `checkpoints/<dataset>_cnn_spatial_seed42/best.pt`; the other models
+use `checkpoints/<dataset>_<model>_seed42/best.pt`.
 Evaluation loads the selected checkpoint and saves test outputs in `results/a1/<run-name>/`.
 
 After the evaluations finish, rebuild the comparison table:
@@ -66,6 +68,10 @@ After the evaluations finish, rebuild the comparison table:
 ```bash
 uv run --no-sync python -m scripts.evaluation.compare --results-dir results/a1 --epochs 50
 ```
+
+The comparison includes only `<dataset>_cnn_spatial_*` CNN runs. Archived
+`<dataset>_cnn_seed42` results are excluded even when they remain in `results/a1/`.
+There is no fallback to the old CNN when spatial results are unavailable.
 
 ## Segmentation
 
