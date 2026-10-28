@@ -1,0 +1,22 @@
+% Values verified against current CUDA test_result.json files, seed 42, 50 epochs.
+\begin{table}[htbp]
+\centering\small
+\caption[MNIST development and CIFAR-10 extension results]{MNIST development results and the optional CIFAR-10 extension.
+Each entry uses a minimum-validation-loss checkpoint from a 50-epoch run with
+seed 42, evaluated on 10,000 official test images. Both metrics are percentages.}
+\label{tab:additional-results}
+\begin{tabular}{lrrrr}
+\toprule
+& \multicolumn{2}{c}{MNIST development} & \multicolumn{2}{c}{CIFAR-10 extension}\\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}
+Model & Acc. (\%) & Macro-F1 (\%) & Acc. (\%) & Macro-F1 (\%)\\
+\midrule
+Linear & 85.68 & 85.45 & 35.27 & 34.61 \\
+MLP & 98.45 & 98.44 & 47.67 & 46.56 \\
+CNN & 97.78 & 97.76 & 63.84 & 63.66 \\
+GRU & 99.24 & 99.23 & 64.24 & 64.01 \\
+LSTM & 99.27 & 99.26 & 64.42 & 64.31 \\
+Transformer & 99.31 & 99.31 & 68.71 & 68.64 \\
+\bottomrule
+\end{tabular}
+\end{table}

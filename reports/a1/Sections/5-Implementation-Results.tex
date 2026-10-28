@@ -3,44 +3,91 @@
 
 \subsection{Test performance and model size}
 \label{sec:quantitative}
-\reporttodo{Add one table of test accuracy, macro-F1, and trainable parameters.
-Identify the dataset, seed count, training budget, and selected checkpoints.
-Check every value against its result JSON. Compare timing only under a documented,
-comparable protocol.}
+The main comparison uses Fashion-MNIST. Each of the six architectures was trained
+for 50 epochs with seed 42, the shared split and settings in
+Section~\ref{sec:methods}, and one configuration per model. The checkpoint with
+the lowest validation cross-entropy supplies predictions on all 10,000
+unaugmented official test images. The results use the saved CUDA test records in
+\codepath{results/a1/<dataset>_<model>_seed42/}; preliminary five-epoch runs and
+earlier Colab outputs are excluded. MNIST development results and the optional
+CIFAR-10 extension are reported separately in Section~\ref{sec:additional-results}.
+
+\input{Tables/comparison}
+
+Transformer has the highest observed Fashion-MNIST accuracy, 90.43\%, and
+macro-F1, 90.40\%. GRU follows at 89.88\% accuracy and 89.90\% macro-F1, with
+LSTM at 89.52\% for both rounded metrics. The 0.55-percentage-point accuracy
+difference between Transformer and GRU corresponds to 55 images in this test
+set. LSTM makes 36 more errors than GRU, a difference of 0.36 percentage points.
+These are measured differences from one training seed, not estimates of
+variation across repeated runs.
+
+The MLP improves on the linear classifier by 10.13 percentage points in accuracy,
+from 77.05\% to 87.18\%. CNN achieves 86.21\%, 0.97 percentage points below MLP,
+while using 19,562 rather than 235,146 trainable parameters. Thus, convolution
+alone does not make this CNN configuration superior on Fashion-MNIST. Accuracy
+and macro-F1 give the same ordering here, but neither reveals the class-specific
+differences examined in Section~\ref{sec:errors}.
 
 \subsection{Learning behavior}
-\reporttodo{Compare architectures in one learning-curve figure per dataset.
-Discuss convergence, instability, train--validation gaps, and checkpoint choice
-where the curves support those observations. Note relevant implementation issues.}
+\label{sec:learning-results}
+Figure~\ref{fig:fashion-learning} compares the complete 50-epoch loss histories.
+The linear classifier improves early, then remains near a training loss of
+0.77; its minimum validation loss is 0.6540 at epoch 14. The MLP continues to
+improve, ending at training loss 0.4388 and reaching minimum validation loss
+0.3413 at epoch 49. These histories and test results are consistent with
+limited performance from the affine pixel baseline under the present settings.
+They do not establish that a different schedule could not improve it.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth]{Images/fashion_mnist_learning.pdf}
+\caption[Fashion-MNIST learning curves]{Fashion-MNIST cross-entropy over 50 epochs for all six models, seed 42.
+Training uses augmentation and training mode; validation uses deterministic
+transforms and evaluation mode. Markers identify minimum validation loss.}
+\label{fig:fashion-learning}
+\end{figure}
+
+\input{Tables/checkpoint_summary}
+
+GRU, LSTM, and Transformer reach lower validation losses than MLP and CNN in
+these runs. Transformer reaches 0.2630 at epoch 44, GRU 0.2676 at epoch 49,
+and LSTM 0.2754 at epoch 46. LSTM training loss decreases from 0.9785 to
+0.2732 over the run, whereas validation loss ends at 0.2905, above its selected
+minimum. Later training updates do not guarantee improved validation performance.
+
+CNN validation loss fluctuates more strongly, with a minimum of 0.3597 at
+epoch 48 and a final value of 0.4841. Selecting the final epoch would discard
+the better validation checkpoint. This late deterioration motivates inspecting
+training stability, but the experiment does not isolate its cause. Training
+augmentation, dropout, and batch normalization differ from validation conditions,
+so the sign of a train--validation loss gap alone is insufficient to diagnose
+overfitting. All runs finish their 50-epoch budget; checkpoint selection is
+distinct from early stopping.
 
 \subsection{Per-class performance and error analysis}
 \label{sec:errors}
-
-The analysis uses the official Fashion-MNIST test set of 10,000 images, with
-1,000 images per class. Table~\ref{tab:class-recall} reports class recall for five
-architectures, each trained for 50 epochs with seed 42. Checkpoints were selected
-by validation loss. For the detailed comparison, we select the MLP as the
-flattened-pixel baseline because its minimum validation loss is lower than that
-of the linear classifier, 0.3413 against 0.6540. We compare this baseline with the
-CNN without using test performance to select the baseline.
+The official Fashion-MNIST test set contains 1,000 images per class.
+Table~\ref{tab:class-recall} reports recall for all six models. For detailed
+comparison, we select MLP as the flattened-pixel baseline because its minimum
+validation loss is lower than Linear's, 0.3413 against 0.6540. Test accuracy
+does not determine this baseline choice.
 
 \input{Tables/error_recall}
 
 \paragraph{Distribution of errors.}
-Shirt has the lowest recall for every model in Table~\ref{tab:class-recall}.
-Its recall increases from 40.3\% for the linear classifier to 62.1\% for the MLP,
-72.4\% for GRU, and 72.3\% for the Transformer. CNN attains 59.6\%.
-The difficulty therefore persists across representations, although its extent
-varies. By contrast, Bag recall lies between 97.1\% and 98.7\% for the four
-nonlinear models. Aggregate accuracy conceals this difference between classes.
+Shirt has the lowest recall for every model. Its recall rises from 40.3\% for
+Linear to 62.1\% for MLP, 72.4\% for GRU, and 72.3\% for Transformer. CNN
+attains 59.6\% and LSTM 70.9\%. In contrast, Bag recall lies between 97.1\%
+and 98.7\% for the five nonlinear models. Even the higher-scoring architectures
+retain a substantial weakness on Shirt.
 
-Figure~\ref{fig:paired-confusion} shows the directional errors of MLP and CNN.
-Of the 1,000 Shirt images, MLP assigns 179 to T-shirt/top, whereas CNN assigns
-191. Coat is another substantial source of disagreement. CNN assigns 175 Coat
-images to Pullover and 112 to Shirt, and correctly identifies 67.8\% of Coat
-images. MLP assigns 96 Coat images to Pullover and achieves 79.7\% Coat recall.
-CNN improves Pullover recall from 79.8\% to 86.3\%, but reduces Coat recall by
-11.9 percentage points. Its effect is thus class-dependent.
+Figure~\ref{fig:paired-confusion} shows directional errors for MLP and CNN.
+Of the 1,000 Shirt images, MLP assigns 179 to T-shirt/top and CNN assigns 191.
+CNN assigns 175 Coat images to Pullover and 112 to Shirt, achieving 67.8\%
+Coat recall. MLP assigns 96 Coat images to Pullover and achieves 79.7\%
+Coat recall. CNN improves Pullover recall from 79.8\% to 86.3\%, but reduces
+Coat recall by 11.9 percentage points. Its effect is class-dependent.
 
 \begin{figure}[htbp]
 \centering
@@ -54,76 +101,200 @@ CNN improves Pullover recall from 79.8\% to 86.3\%, but reduces Coat recall by
 \includegraphics[width=\linewidth]{Images/fashion_mnist_cnn_confusion.pdf}
 \par\small (b) CNN
 \end{minipage}
-\caption{Fashion-MNIST test confusion matrices. Rows denote true classes and
-columns predicted classes. Color gives the proportion within each true class;
+\caption[Fashion-MNIST MLP and CNN confusion matrices]{Fashion-MNIST test confusion matrices. Rows denote true classes and
+columns predicted classes. Colors give proportions within each true class;
 cell annotations give counts. Both panels use the same color scale.}
 \label{fig:paired-confusion}
 \end{figure}
 
-Errors between T-shirt/top, Pullover, Coat, and Shirt account for 811 of the
-MLP's 1,282 mistakes, 63.3\%, and 880 of the CNN's 1,379 mistakes, 63.8\%.
-Here, an error belongs to this group only when both its true and predicted
-labels are among these four classes. Similar garment outlines offer a plausible
-explanation for this concentration. The comparison does not isolate that
-explanation, nor establish that flattening causes the errors. In particular,
-convolution does not remove the dominant confusions in this configuration.
+Errors within the group T-shirt/top, Pullover, Coat, and Shirt account for
+811 of MLP's 1,282 mistakes (63.3\%) and 880 of CNN's 1,379 mistakes (63.8\%).
+An error belongs to this group only when both its true and predicted labels
+are among these four classes. The same group accounts for 667 of LSTM's
+1,048 errors (63.6\%) and 633 of Transformer's 957 errors (66.1\%). Similar
+garment outlines offer a plausible explanation for this concentration,
+consistent with the class-average similarities in Section~\ref{sec:eda}.
+The experiment does not establish that flattening or any particular
+architectural component causes these confusions.
+
+\paragraph{Confident and uncertain failures.}
+Figure~\ref{fig:cnn-confidence-errors} contrasts the five highest-confidence
+and five lowest-confidence incorrect CNN predictions. The highest-confidence
+mistake is Sneaker image 2914 predicted as Ankle boot with probability 99.82\%.
+T-shirt/top image 3919 is predicted as Bag with probability 99.38\%.
+The five lowest-confidence mistakes have maximum class probabilities between
+23.14\% and 27.90\%. High confidence can accompany an incorrect label.
+These selected extremes are diagnostic examples, not estimates of their
+frequency. A claim about calibration would require a separate analysis over
+the full test set.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth]{Images/fashion_mnist_cnn_confident_errors.pdf}
+\par\vspace{3mm}
+\includegraphics[width=\linewidth]{Images/fashion_mnist_cnn_uncertain_errors.pdf}
+\caption[Fashion-MNIST CNN confident and uncertain errors]{Fashion-MNIST CNN mistakes selected by prediction confidence: five
+highest-confidence errors (top) and five lowest-confidence errors (bottom).
+Each panel gives the true label, predicted label, and maximum class probability.}
+\label{fig:cnn-confidence-errors}
+\end{figure}
 
 \subsection{Predictions on shared images}
 \label{sec:qualitative}
-
 Across the complete test set, CNN correctly classifies 532 images that MLP
 misclassifies. Conversely, MLP correctly classifies 629 images that CNN
 misclassifies. Both models err on 750 images and correctly classify 8,089.
-The difference between the two disagreement counts gives CNN 97 additional
-errors, consistent with its 0.97-percentage-point accuracy deficit. Neither
-model's correct predictions contain all those of the other.
+The disagreement counts give CNN 97 additional errors, matching its
+0.97-percentage-point accuracy deficit. Neither model's correct predictions
+contain all those of the other.
 
-Figure~\ref{fig:shared-predictions} illustrates these three error categories.
-Within each category, we take the first two examples in official test-set order.
-Indices are zero-based. The selection is deterministic, but the equal number of
-examples per category does not represent their relative frequencies. Predictions
-from all five architectures are shown for each selected image.
+Figure~\ref{fig:shared-predictions} illustrates the three error categories.
+Within each category, we take the first two examples in official test-set
+order, using zero-based indices. This deterministic rule fixes the examples,
+but their equal number per category does not represent relative frequencies.
+Predictions from all six models are shown for each image.
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=\linewidth]{Images/fashion_mnist_shared_images.pdf}
-\caption{Shared Fashion-MNIST test images with their true labels and model
-predictions. Each row contains two examples from one category: CNN corrects an
-MLP error; both models err; MLP is correct and CNN errs. ``Baseline'' denotes MLP.
-The displayed indices specify the examples independently of their appearance.}
+\caption[Shared Fashion-MNIST test predictions]{Shared Fashion-MNIST test images with true labels and six-model
+predictions. Rows contain two examples from each category: CNN corrects an
+MLP error; both models err; MLP is correct and CNN errs. \textit{Baseline} denotes
+MLP. Category membership concerns MLP and CNN, not the other four models.}
 \label{fig:shared-predictions}
 \end{figure}
 
-For Coat image 51, both flattened-pixel models predict Pullover, while CNN,
-GRU, and Transformer predict Coat. For Coat image 6, however, MLP is correct
-and CNN predicts Pullover. The same pair of classes therefore contributes errors
-in both disagreement directions. Image 17 provides a further distinction:
-MLP and CNN predict Shirt for a Coat that GRU and Transformer classify correctly.
-In image 23, only the linear classifier identifies Ankle boot; all four nonlinear
-models predict Sandal. These examples illustrate differences in individual
-predictions and do not establish general superiority of any architecture.
-
-The measured errors suggest a focused follow-up: examine the garment pairs
-under a controlled change in spatial representation or augmentation, with the
-remaining training settings fixed and several seeds. Such an experiment would
-test a proposed explanation for the confusions. The present observations alone
-do not determine their cause. Likewise, confidence on selected mistakes cannot
-establish calibration without a separate analysis of predicted probabilities.
+For Coat image 51, Linear, MLP, and LSTM predict Pullover, while CNN, GRU,
+and Transformer predict Coat. For Coat image 6, however, MLP and LSTM are
+correct and CNN predicts Pullover. The same class pair contributes errors
+in both disagreement directions. Image 17 provides another distinction:
+MLP and CNN predict Shirt for a Coat that GRU, LSTM, and Transformer classify
+correctly. For image 23, only Linear identifies Ankle boot; all five nonlinear
+models predict Sandal. These examples demonstrate differences in individual
+predictions without establishing general superiority of an architecture.
 
 \subsection{Architecture trade-offs}
 \label{sec:discussion}
-\reporttodo{Answer the research question with measured differences in quality,
-model size, and verified compute cost. Discuss representation and inductive bias
-without claiming a causal explanation that the experiment did not test.}
+For accuracy and model size, GRU provides a useful compromise in the main
+comparison. Transformer uses 1,191,050 parameters against GRU's 61,962,
+approximately 19.2 times as many, for a 0.55-percentage-point accuracy gain.
+LSTM uses 82,186 parameters, 32.6\% more than GRU, and has slightly lower
+Fashion-MNIST accuracy in this run. CNN is smaller still, but its lower
+accuracy and Coat/Shirt errors limit the benefit of that reduction.
 
-\subsection{Additional experiments}
-\reporttodo{Report completed ablations or extensions separately, with their
-controls and findings. Remove this subsection if no additional experiment belongs here.}
+The representations offer possible explanations for these patterns. MLP
+introduces nonlinear pixel interactions. CNN shares local filters, while global
+average pooling removes explicit spatial coordinates from the final features.
+GRU and LSTM aggregate rows in order; Transformer connects row positions
+through attention. These are structural differences, not isolated experimental
+treatments. Capacity, regularization, and the chosen configuration also differ,
+so the results do not show that one inductive bias is universally better.
+
+\paragraph{Recorded computation cost.}
+Table~\ref{tab:comparison} retains training durations from the saved summaries.
+The measured fit interval covers the 50-epoch training/validation loop and
+checkpoint writes, excluding initial data/model preparation and final plotting.
+For example, LSTM records 620.1 s, GRU 652.5 s, and Transformer 685.0 s.
+The corresponding CUDA inference records are 0.230 s, 0.310 s, and 0.269 s
+for all 10,000 test images, respectively.
+
+All current test records identify the NVIDIA GeForce RTX 4060 Laptop GPU,
+Linux, Python 3.12.14, and PyTorch 2.14.0+cu126. Inference time sums synchronized
+forward passes in evaluation mode with batch size 128; data loading, host-to-device
+input transfer, softmax, metric computation, and figure generation are excluded.
+No separate warm-up or repeated timing trials are recorded. Older non-LSTM
+training logs identify CUDA but do not preserve the GPU model, while LSTM also
+has an explicit run-environment record. Thus, these durations document executions
+and should not be interpreted as a reliable hardware-controlled speed ranking.
+Parameter count alone does not specify latency.
+
+\subsection{Development results and optional extension}
+\label{sec:additional-results}
+\input{Tables/additional_results}
+
+\paragraph{MNIST development runs.}
+MNIST is retained as a development check rather than the primary benchmark.
+Transformer reaches 99.31\% test accuracy, LSTM 99.27\%, and GRU 99.24\%.
+The Transformer--LSTM difference is four of 10,000 images, and LSTM--GRU
+is three images. With one seed, these small differences provide no evidence
+of a stable ordering across repeated training runs. Figure~\ref{fig:additional-learning}
+shows that the nonlinear models reach much lower losses than Linear.
+
+\paragraph{CIFAR-10 extension.}
+Under the same epoch budget, CNN reaches 63.84\% accuracy versus MLP's 47.67\%,
+a gain of 16.17 percentage points. CNN uses 20,138 parameters compared with
+820,874 for MLP. This reverses the MLP--CNN ordering on Fashion-MNIST and
+shows that the observed trade-off depends on the dataset and configuration.
+LSTM reaches 64.42\%, slightly above GRU's 64.24\%; Transformer reaches
+68.71\% accuracy and 68.64\% macro-F1. The recurrent models do not have a
+consistent ordering across the three datasets.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.96\linewidth]{Images/mnist_learning.pdf}
+\par\small (a) MNIST development runs\par\vspace{3mm}
+\includegraphics[width=0.96\linewidth]{Images/cifar10_learning.pdf}
+\par\small (b) CIFAR-10 extension
+\caption[MNIST and CIFAR-10 learning curves]{Training and validation cross-entropy for the development and extension
+datasets. Each panel compares six models trained for 50 epochs with seed 42;
+markers identify minimum validation loss. The vertical scale differs from
+Figure~\ref{fig:fashion-learning}.}
+\label{fig:additional-learning}
+\end{figure}
+
+The CIFAR-10 Transformer reaches minimum validation loss 0.9063 at epoch 30,
+then ends at 1.0668 at epoch 50. Continued training does not improve validation
+loss throughout the budget. Its selected checkpoint still struggles with
+animal categories: Cat recall is 49.4\% and Dog recall is 62.2\%.
+Figure~\ref{fig:cifar-transformer-confusion} shows 211 cats predicted as dogs
+and 165 dogs predicted as cats, or 21.1\% and 16.5\% of their respective true
+classes. Its higher aggregate score therefore leaves substantial class-level
+errors. No component ablation was performed; the CIFAR-10 runs are an
+extension comparison, not an ablation study.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.76\linewidth]{Images/cifar10_transformer_confusion.pdf}
+\caption[CIFAR-10 Transformer confusion matrix]{CIFAR-10 Transformer test confusion matrix at the validation-selected
+epoch-30 checkpoint. Rows are true labels and columns are predictions;
+annotations show counts and colors show proportions within each true class.
+Each class has 1,000 test images.}
+\label{fig:cifar-transformer-confusion}
+\end{figure}
 
 \subsection{Limitations}
-\reporttodo{State the limits from seed count, tuning, unequal budgets, timing,
-and dataset representativeness. Explain which conclusions the evidence cannot support.}
+Only one seed and one configuration per model are available. There are no
+across-run uncertainty estimates or significance tests. Equal epochs and
+optimizer settings do not match parameter capacity, regularization, or total
+compute, and no systematic hyperparameter search was conducted. The experiment
+compares complete configurations rather than isolating the causal effect of
+architectural components.
+
+The synchronized CUDA evaluations make the current test environment explicit,
+but single-pass inference measurements lack warm-up and repeated trials.
+Incomplete hardware records for older training runs limit interpretation of
+training-time differences. Saved evaluation revisions are marked as dirty
+working trees, so a commit hash alone does not identify every source change;
+configurations, checkpoints, and prediction evidence must be retained together.
+
+The qualitative analysis concentrates on Fashion-MNIST, and selected examples
+are not a random sample of failures. Class-average similarity and individual
+errors motivate explanations but do not verify their causes. Neither robustness
+to distribution shift nor confidence calibration was tested. These small,
+fixed-category datasets do not establish performance on unfamiliar clothing,
+natural scenes, or deployment data.
 
 \subsection{Conclusion}
-\reporttodo{Give a short answer to the research question and the practical
-trade-off supported by the results. End with one useful next experiment.}
+For the tested Fashion-MNIST configurations, Transformer achieves the highest
+accuracy and macro-F1, while GRU gives a smaller model with a modest reduction
+in accuracy. LSTM is close to GRU, and their ranking changes with the dataset.
+CNN offers a compact representation, but its benefits are class- and
+dataset-dependent. Across architectures, similar upper-body garments remain
+a major source of mistakes, so aggregate scores must be read alongside class
+recall and shared-image predictions.
+
+A useful next experiment is a controlled comparison of row-sequence and spatial
+representations across several seeds, with an explicit parameter or compute
+budget. Repeating the timings after warm-up would separately test execution
+cost. These follow-ups would assess whether the observed accuracy, size, and
+error trade-offs persist beyond the present runs.

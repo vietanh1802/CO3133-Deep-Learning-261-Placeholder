@@ -1,22 +1,23 @@
 \begin{table}[htbp]
 \centering\small
-\caption{Fashion-MNIST test recall by class, in percent. Each class contains
-1,000 test images. All entries refer to seed 42 and validation-selected checkpoints
-from 50-epoch runs.}
+\caption[Fashion-MNIST recall by class]{Fashion-MNIST test recall by class, in percent. Each class contains
+1,000 test images. All six models use seed 42 and validation-selected
+checkpoints from 50-epoch runs.}
 \label{tab:class-recall}
-\begin{tabular}{lrrrrr}
+\begin{tabular}{lrrrrrr}
 \toprule
-Class & Linear & MLP & CNN & GRU & Transformer\\\midrule
-T-shirt/top & 75.5 & 84.4 & 86.7 & 85.1 & 81.8\\
-Trouser & 90.7 & 97.0 & 96.2 & 97.3 & 98.0\\
-Pullover & 62.8 & 79.8 & 86.3 & 81.6 & 84.0\\
-Dress & 77.0 & 87.5 & 80.3 & 89.5 & 93.2\\
-Coat & 68.1 & 79.7 & 67.8 & 85.4 & 85.6\\
-Sandal & 89.0 & 95.3 & 96.5 & 96.7 & 96.6\\
-Shirt & 40.3 & 62.1 & 59.6 & 72.4 & 72.3\\
-Sneaker & 84.4 & 93.7 & 95.8 & 95.5 & 97.2\\
-Bag & 89.2 & 97.1 & 97.4 & 98.1 & 98.7\\
-Ankle boot & 93.5 & 95.2 & 95.5 & 97.2 & 96.9\\
+Class & Linear & MLP & CNN & GRU & LSTM & Transformer\\
+\midrule
+T-shirt/top & 75.5 & 84.4 & 86.7 & 85.1 & 83.0 & 81.8 \\
+Trouser & 90.7 & 97.0 & 96.2 & 97.3 & 98.3 & 98.0 \\
+Pullover & 62.8 & 79.8 & 86.3 & 81.6 & 81.6 & 84.0 \\
+Dress & 77.0 & 87.5 & 80.3 & 89.5 & 88.7 & 93.2 \\
+Coat & 68.1 & 79.7 & 67.8 & 85.4 & 84.6 & 85.6 \\
+Sandal & 89.0 & 95.3 & 96.5 & 96.7 & 95.8 & 96.6 \\
+Shirt & 40.3 & 62.1 & 59.6 & 72.4 & 70.9 & 72.3 \\
+Sneaker & 84.4 & 93.7 & 95.8 & 95.5 & 98.7 & 97.2 \\
+Bag & 89.2 & 97.1 & 97.4 & 98.1 & 98.2 & 98.7 \\
+Ankle boot & 93.5 & 95.2 & 95.5 & 97.2 & 95.4 & 96.9 \\
 \bottomrule
 \end{tabular}
 \end{table}

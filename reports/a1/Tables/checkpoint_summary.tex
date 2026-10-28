@@ -1,17 +1,19 @@
-\begin{table}[htbp]
+\begin{table}[H]
 \centering\small
-\caption{Imported checkpoint selection records. Epochs and loss are taken from
-saved training summaries; final epoch is not automatically the best epoch.}
+\caption[Fashion-MNIST selected checkpoints]{Fashion-MNIST checkpoint selection from 50-epoch training histories,
+seed 42. Epochs minimize validation cross-entropy; the final epoch is not
+necessarily selected.}
 \label{tab:checkpoints}
 \begin{tabular}{lrrr}
 \toprule
-Model & Training epochs & Best epoch & Best validation loss\\\midrule
-LINEAR & 50 & 14 & 0.6540 \\
+Model & Training epochs & Best epoch & Best validation loss\\
+\midrule
+Linear & 50 & 14 & 0.6540 \\
 MLP & 50 & 49 & 0.3413 \\
 CNN & 50 & 48 & 0.3597 \\
 GRU & 50 & 49 & 0.2676 \\
-LSTM & 50 & 50 & 0.2734 \\
-TRANSFORMER & 50 & 44 & 0.2630 \\
+LSTM & 50 & 46 & 0.2754 \\
+Transformer & 50 & 44 & 0.2630 \\
 \bottomrule
 \end{tabular}
 \end{table}

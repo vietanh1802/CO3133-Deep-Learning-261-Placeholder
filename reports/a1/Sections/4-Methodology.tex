@@ -115,13 +115,13 @@ to $h_t$, it maintains a cell state $c_t$. With zero initial states, the updates
 \end{align*}
 where $q_t\in\mathbb{R}^{512}$ is divided into four 128-dimensional vectors.
 The input, forget, and output gates control the cell update and hidden output.
-This architecture is documented for completeness. No saved LSTM run is
-available for the reported test comparison.
+The LSTM is trained and evaluated alongside the other five models on all
+three datasets; its saved checkpoints supply the reported test predictions.
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.95\linewidth]{Images/models/lstm.png}
-\caption{Implemented LSTM cell and row-sequence classifier. No LSTM test result is reported.}
+\caption{LSTM cell and row-sequence classifier used in the six-model test comparison.}
 \label{fig:model-lstm}
 \end{figure}
 
@@ -257,17 +257,19 @@ flip. Its channel means are $(0.4914,0.4822,0.4465)$ and standard deviations
 $(0.2470,0.2435,0.2616)$. Validation and test transforms retain scaling and
 normalization and omit random augmentation.
 
-Training logs record CUDA execution but do not identify the GPU model.
-The saved test evaluations record a separate macOS ARM environment with
-Python 3.13.5 and PyTorch 2.14.0. These records do not establish comparable
-hardware conditions for a speed ranking. Augmentation, dropout, and batch
+All current saved test evaluations record the NVIDIA GeForce RTX 4060 Laptop
+GPU under Linux, Python 3.12.14, and PyTorch 2.14.0+cu126. Training logs record
+CUDA execution; only the LSTM runs additionally preserve explicit GPU model
+metadata. The single-pass timings do not establish a reliable speed ranking. Augmentation, dropout, and batch
 normalization also make training and validation losses measurements under
 different conditions.
 
 \subsection{Comparison protocol}
 \label{sec:experiment-design}
-The main comparison includes Linear, MLP, CNN, GRU, and Transformer on all
-three datasets, giving 15 runs of 50 epochs with seed 42. Earlier five-epoch
+The experiment includes Linear, MLP, CNN, GRU, LSTM, and Transformer on all
+three datasets, giving 18 runs of 50 epochs with seed 42. Fashion-MNIST is
+the main comparison; MNIST development and CIFAR-10 extension results are
+reported separately. Earlier five-epoch
 Fashion-MNIST runs are preliminary and are excluded. The reported settings
 specify one configuration per model; no systematic hyperparameter search or
 component ablation is documented.
