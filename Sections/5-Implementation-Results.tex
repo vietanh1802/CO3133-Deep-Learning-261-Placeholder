@@ -15,16 +15,100 @@ where the curves support those observations. Note relevant implementation issues
 
 \subsection{Per-class performance and error analysis}
 \label{sec:errors}
-\reporttodo{Compare selected models using class recall and normalized confusion
-matrices. Quantify important error groups with counts or rates. Connect patterns
-to data properties, and distinguish observations from proposed explanations.}
+
+The analysis uses the official Fashion-MNIST test set of 10,000 images, with
+1,000 images per class. Table~\ref{tab:class-recall} reports class recall for five
+architectures, each trained for 50 epochs with seed 42. Checkpoints were selected
+by validation loss. For the detailed comparison, we select the MLP as the
+flattened-pixel baseline because its minimum validation loss is lower than that
+of the linear classifier, 0.3413 against 0.6540. We compare this baseline with the
+CNN without using test performance to select the baseline.
+
+\input{Tables/error_recall}
+
+\paragraph{Distribution of errors.}
+Shirt has the lowest recall for every model in Table~\ref{tab:class-recall}.
+Its recall increases from 40.3\% for the linear classifier to 62.1\% for the MLP,
+72.4\% for GRU, and 72.3\% for the Transformer. CNN attains 59.6\%.
+The difficulty therefore persists across representations, although its extent
+varies. By contrast, Bag recall lies between 97.1\% and 98.7\% for the four
+nonlinear models. Aggregate accuracy conceals this difference between classes.
+
+Figure~\ref{fig:paired-confusion} shows the directional errors of MLP and CNN.
+Of the 1,000 Shirt images, MLP assigns 179 to T-shirt/top, whereas CNN assigns
+191. Coat is another substantial source of disagreement. CNN assigns 175 Coat
+images to Pullover and 112 to Shirt, and correctly identifies 67.8\% of Coat
+images. MLP assigns 96 Coat images to Pullover and achieves 79.7\% Coat recall.
+CNN improves Pullover recall from 79.8\% to 86.3\%, but reduces Coat recall by
+11.9 percentage points. Its effect is thus class-dependent.
+
+\begin{figure}[htbp]
+\centering
+\begin{minipage}[t]{0.49\linewidth}
+\centering
+\includegraphics[width=\linewidth]{Images/fashion_mnist_mlp_confusion.pdf}
+\par\small (a) MLP
+\end{minipage}\hfill
+\begin{minipage}[t]{0.49\linewidth}
+\centering
+\includegraphics[width=\linewidth]{Images/fashion_mnist_cnn_confusion.pdf}
+\par\small (b) CNN
+\end{minipage}
+\caption{Fashion-MNIST test confusion matrices. Rows denote true classes and
+columns predicted classes. Color gives the proportion within each true class;
+cell annotations give counts. Both panels use the same color scale.}
+\label{fig:paired-confusion}
+\end{figure}
+
+Errors between T-shirt/top, Pullover, Coat, and Shirt account for 811 of the
+MLP's 1,282 mistakes, 63.3\%, and 880 of the CNN's 1,379 mistakes, 63.8\%.
+Here, an error belongs to this group only when both its true and predicted
+labels are among these four classes. Similar garment outlines offer a plausible
+explanation for this concentration. The comparison does not isolate that
+explanation, nor establish that flattening causes the errors. In particular,
+convolution does not remove the dominant confusions in this configuration.
 
 \subsection{Predictions on shared images}
 \label{sec:qualitative}
-\reporttodo{Show the same images with true labels and predictions from several
-models. Include corrected errors, shared mistakes, and the reverse disagreement.
-State the selection rule and include difficult correct predictions where useful.
-Do not infer calibration from confident errors alone.}
+
+Across the complete test set, CNN correctly classifies 532 images that MLP
+misclassifies. Conversely, MLP correctly classifies 629 images that CNN
+misclassifies. Both models err on 750 images and correctly classify 8,089.
+The difference between the two disagreement counts gives CNN 97 additional
+errors, consistent with its 0.97-percentage-point accuracy deficit. Neither
+model's correct predictions contain all those of the other.
+
+Figure~\ref{fig:shared-predictions} illustrates these three error categories.
+Within each category, we take the first two examples in official test-set order.
+Indices are zero-based. The selection is deterministic, but the equal number of
+examples per category does not represent their relative frequencies. Predictions
+from all five architectures are shown for each selected image.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth]{Images/fashion_mnist_shared_images.pdf}
+\caption{Shared Fashion-MNIST test images with their true labels and model
+predictions. Each row contains two examples from one category: CNN corrects an
+MLP error; both models err; MLP is correct and CNN errs. ``Baseline'' denotes MLP.
+The displayed indices specify the examples independently of their appearance.}
+\label{fig:shared-predictions}
+\end{figure}
+
+For Coat image 51, both flattened-pixel models predict Pullover, while CNN,
+GRU, and Transformer predict Coat. For Coat image 6, however, MLP is correct
+and CNN predicts Pullover. The same pair of classes therefore contributes errors
+in both disagreement directions. Image 17 provides a further distinction:
+MLP and CNN predict Shirt for a Coat that GRU and Transformer classify correctly.
+In image 23, only the linear classifier identifies Ankle boot; all four nonlinear
+models predict Sandal. These examples illustrate differences in individual
+predictions and do not establish general superiority of any architecture.
+
+The measured errors suggest a focused follow-up: examine the garment pairs
+under a controlled change in spatial representation or augmentation, with the
+remaining training settings fixed and several seeds. Such an experiment would
+test a proposed explanation for the confusions. The present observations alone
+do not determine their cause. Likewise, confidence on selected mistakes cannot
+establish calibration without a separate analysis of predicted probabilities.
 
 \subsection{Architecture trade-offs}
 \label{sec:discussion}

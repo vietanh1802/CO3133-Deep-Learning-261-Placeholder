@@ -1,0 +1,17 @@
+\begin{table}[htbp]
+\centering\small
+\caption{Classifier dimensions and trainable parameters. MNIST and Fashion-MNIST share the same shapes. LSTM counts describe the implemented configuration only.}
+\label{tab:arch-comparison}
+\begin{tabular}{lrrr}
+\toprule
+Model & Feature dimension $d$ & MNIST / Fashion-MNIST & CIFAR-10\\
+\midrule
+Linear & 784 / 3072 & 7,850 & 30,730\\
+MLP & 128 & 235,146 & 820,874\\
+CNN & 64 & 19,562 & 20,138\\
+GRU & 128 & 61,962 & 88,074\\
+LSTM & 128 & 82,186 & \textemdash\\
+Transformer & 128 & 1,191,050 & 1,199,754\\
+\bottomrule
+\end{tabular}
+\end{table}

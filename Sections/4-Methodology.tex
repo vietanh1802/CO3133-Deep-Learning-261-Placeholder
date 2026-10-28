@@ -2,293 +2,288 @@
 \label{sec:methods}
 
 \subsection{Training and evaluation pipeline}
-\reporttodo{Add one pipeline diagram. Explain data loading, model output, loss,
-parameter updates, checkpoint selection, and test evaluation. Distinguish training
-mode from evaluation mode.}
+The study compares classifiers trained from scratch on MNIST, Fashion-MNIST,
+and CIFAR-10. For each dataset, a seeded random permutation reserves 10\% of
+its official training set for validation. The split is shared across models
+and is not stratified. This gives 54,000 training and 6,000 validation images
+for each grayscale dataset, and 45,000 training and 5,000 validation images for
+CIFAR-10. Each official test set contains 10,000 images.
+
+During training, minibatches pass through the encoder and a linear
+classification head. Cross-entropy supplies the gradients for parameter
+updates. Dropout and batch normalization use training mode. After each epoch,
+the model is evaluated on the validation set with dropout disabled and batch
+normalization using its running statistics. The checkpoint with the lowest
+validation loss supplies the test predictions. The test set is excluded from
+checkpoint selection.
 
 \subsection{Model architectures}
 \label{sec:architectures}
-\reporttodo{Use the same format for each model: input representation, layers and
-shapes, output head, parameter count, and design rationale. Identify custom code
-and library components. Explain shared loss and settings once below.}
+Each model maps an image to a feature vector $h\in\mathbb{R}^{d}$ and then
+computes ten logits, $z=Wh+b$. The following descriptions use Fashion-MNIST
+shapes. MNIST uses the same dimensions; CIFAR-10 supplies three-channel
+$32\times32$ images. Table~\ref{tab:arch-comparison} summarizes feature
+dimensions and parameter counts.
 
-\subsubsection{Linear / softmax classifier}
-\paragraph{Input representation.} Each $1\times28\times28$ image is flattened
-into a vector $x_{\rm flat}\in\mathbb{R}^{784}$, so the model sees the pixels as
-an unordered list of 784 values.
-
-\paragraph{Layers and shapes.} The registered \codepath{linear} encoder
-(\codepath{src/models/linear.py}) only applies \texttt{nn.Flatten} and checks
-that each sample has $784$ features. There is no hidden layer and no
-nonlinearity (Figure~\ref{fig:model-linear}).
+\subsubsection{Linear classifier}
+The linear model flattens an image to $x\in\mathbb{R}^{784}$ and computes
+$z=Wx+b$, where $W\in\mathbb{R}^{10\times784}$ and $b\in\mathbb{R}^{10}$.
+Each class score is an affine function of the pixels. Flattening preserves
+their fixed coordinate order; the model imposes no local connectivity or
+spatial weight sharing. It provides the simplest baseline in the study.
 
 \begin{figure}[htbp]
 \centering
-\includesvg[width=0.8\linewidth]{Images/models/linear}
-\caption{Linear / softmax classifier: the flattened image is mapped directly
-to ten logits.}
+\includegraphics[width=0.75\linewidth]{Images/models/linear.png}
+\caption{Linear classifier. The flattened image is mapped to ten class logits.}
 \label{fig:model-linear}
 \end{figure}
 
-\paragraph{Output head.} The shared \texttt{ImageClassifier} head
-(\codepath{src/models/classifier.py}) applies a single
-\texttt{nn.Linear(784, 10)}, so the whole model is $z=Wx_{\rm flat}+b$ with
-$W\in\mathbb{R}^{10\times784}$ and $b\in\mathbb{R}^{10}$. The ten outputs are
-raw logits, and the prediction is $\hat y=\arg\max_k z_k$. The model has no
-softmax layer; the loss is defined in Section~\ref{sec:metrics}.
-
-\paragraph{Parameters.} $784\times10+10=7{,}850$ trainable parameters on
-Fashion-MNIST ($3072\times10+10=30{,}730$ for the $3\times32\times32$ CIFAR-10
-extension).
-
-\paragraph{Design rationale.} The linear model is the baseline of the
-comparison. Each class score $z_k=w_k^\top x+b_k$ is a weighted sum of pixels,
-so each row $w_k$ acts as a single $28\times28$ template for class $k$. The
-boundary between classes $j$ and $k$ is the hyperplane
-$(w_j-w_k)^\top x+(b_j-b_k)=0$, and every decision region is a convex polytope
-in pixel space. The model has no spatial inductive bias: flattening discards
-which pixels are neighbours, so applying the same fixed permutation to all
-pixels would not change what it can learn.
-
-\paragraph{Strengths and limitations.} It is the cheapest model, and its
-cross-entropy loss is convex in $W$ and $b$. Its weights can be read directly as
-class templates, which makes it a useful lower bound. It cannot represent
-interactions between pixels. A class whose images look different from each
-other (e.g.\ shirts with and without visible buttons or collars) must still
-share one template, and a small shift of a garment changes many input
-coordinates at once. Classes that differ by local shape details rather than
-overall silhouette are therefore expected to be the main source of errors.
-
-\paragraph{Ownership.} The encoder and the composition with the shared head are
-written by the group; \texttt{nn.Flatten} and \texttt{nn.Linear} are PyTorch
-library layers.
-
 \subsubsection{Multilayer perceptron}
-\reporttodo{Give hidden widths, activations, dropout, and the output head.
-Explain what nonlinear layers add to the linear baseline.}
-
-\subsubsection{Self-designed convolutional neural network}
-\paragraph{Input representation.} The CNN (\codepath{src/models/cnn.py}) keeps
-the image as a $1\times28\times28$ grid ($3\times32\times32$ on CIFAR-10), so
-each filter sees the 2D neighbourhood of a pixel.
-
-\paragraph{Layers and shapes.} The network is designed by the group and trained
-from scratch. It has two convolutional stages, each made of a $3\times3$
-convolution (stride 1, padding 1, no bias), batch normalization, ReLU and
-$2\times2$ max-pooling. They take the input from $1\times28\times28$ to
-$32\times14\times14$ and then to $64\times7\times7$, and global average pooling
-reduces the result to a 64-dimensional vector (Figure~\ref{fig:model-cnn},
-Table~\ref{tab:cnn-layers}).
+The MLP applies two hidden affine layers of widths 256 and 128 to the flattened
+image. Each hidden layer is followed by ReLU and dropout with probability
+$0.2$. A linear head maps the 128-dimensional features to ten logits. The
+nonlinear layers allow interactions between pixel values, while connections
+remain fully connected without spatial weight sharing.
 
 \begin{figure}[htbp]
 \centering
-\includesvg[width=0.9\linewidth]{Images/models/cnn}
-\caption{Self-designed CNN: two convolution blocks (convolution, batch
-normalization, ReLU, max pooling), global average pooling and a linear head.}
+\includegraphics[width=0.95\linewidth]{Images/models/mlp.png}
+\caption{MLP with hidden widths 256 and 128, ReLU, and dropout.}
+\label{fig:model-mlp}
+\end{figure}
+
+\subsubsection{Convolutional neural network}
+The CNN retains the image grid and applies two convolutional blocks. Each
+block contains a $3\times3$ convolution with stride 1 and padding 1, batch
+normalization, ReLU, and $2\times2$ max pooling with stride 2. Convolution
+biases are disabled. The channel widths are 32 and 64, giving block outputs
+$32\times14\times14$ and $64\times7\times7$. Global average pooling reduces
+the second output to 64 features for the linear head.
+
+Convolution restricts each filter to a local neighbourhood and shares its
+weights across spatial positions. Max pooling reduces spatial resolution;
+global average pooling removes the explicit spatial coordinates from the final
+feature vector. These choices define the model's spatial structure. Their
+effect on classification errors is assessed in Section~\ref{sec:errors}.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\linewidth]{Images/models/cnn.png}
+\caption{CNN with two convolutional blocks, global average pooling, and a linear head.}
 \label{fig:model-cnn}
 \end{figure}
 
-\begin{table}[htbp]
-\centering\small
-\caption{Self-designed CNN on Fashion-MNIST. Shapes are per sample
-(channels $\times$ height $\times$ width).}
-\label{tab:cnn-layers}
-\begin{tabular}{llrr}
-\toprule
-Layer & Configuration & Output shape & Parameters\\\midrule
-Input & grayscale image & $1\times28\times28$ & 0\\
-Conv 1 & $3\times3$, 32 filters, stride 1, padding 1, no bias & $32\times28\times28$ & 288\\
-BatchNorm + ReLU & 32 channels & $32\times28\times28$ & 64\\
-MaxPool & $2\times2$, stride 2 & $32\times14\times14$ & 0\\
-Conv 2 & $3\times3$, 64 filters, stride 1, padding 1, no bias & $64\times14\times14$ & 18,432\\
-BatchNorm + ReLU & 64 channels & $64\times14\times14$ & 128\\
-MaxPool & $2\times2$, stride 2 & $64\times7\times7$ & 0\\
-Global avg.\ pool + flatten & mean over $7\times7$ positions & $64$ & 0\\
-Linear head & $64\to10$ & $10$ & 650\\\midrule
-Total & & & 19,562\\
-\bottomrule
-\end{tabular}
-\end{table}
+\subsubsection{Gated recurrent unit}
+The GRU reads the image rows from top to bottom. An input of shape
+$C\times H\times W$ becomes a sequence of $H$ vectors in
+$\mathbb{R}^{CW}$. Thus, Fashion-MNIST gives 28 steps with 28 values per step;
+CIFAR-10 gives 32 steps with 96 values per step.
 
-\paragraph{Output head.} The shared \texttt{ImageClassifier} head applies
-\texttt{nn.Linear(64, 10)} to the pooled features and returns ten logits.
-
-\paragraph{Parameters.} 19,562 trainable parameters on Fashion-MNIST, of which
-18,432 are in Conv~2 (Table~\ref{tab:cnn-layers}). For the CIFAR-10 extension
-only the input channels change ($C_{\rm in}=3$, $32\to16\to8$ spatially),
-giving 20,138 parameters.
-
-\paragraph{Design rationale.} Convolution and pooling give the model locality
-and shift tolerance, which the Linear and MLP baselines do not have. The
-convolution bias is disabled because the following batch normalization
-subtracts the channel mean and adds its own learned shift, which would cancel
-the bias anyway. Global average pooling keeps the head at 650 parameters;
-flattening the $64\times7\times7$ map instead would need
-$3136\times10+10=31{,}370$ head parameters, more than the rest of the network.
-
-\paragraph{Convolution and feature maps.} A convolutional layer slides each
-$3\times3\times C_{\rm in}$ filter over the input and computes, at every
-position $(i,j)$,
-$y_{c,i,j}=\sum_{c'}\sum_{u,v=-1}^{1}K_{c,c',u,v}\,x_{c',i+u,j+v}$.
-The result for one filter is a feature map that is large wherever the local
-pattern matches the filter (an edge, a corner, a texture). With stride 1 and
-padding 1 the spatial size is preserved, $H_{\rm out}=(H+2\cdot1-3)/1+1=H$.
-
-\paragraph{Pooling.} Each $2\times2$ max-pooling keeps the strongest response
-in a window and halves the height and width ($28\to14\to7$). This reduces
-computation and makes the response tolerant to shifts of about one pixel.
-After two stages, each position of the $7\times7$ map has a receptive field of
-$10\times10$ input pixels. Global average pooling then averages each of the 64
-maps over all positions, so the head sees which patterns are present but not
-where they are.
-
-\paragraph{Local connectivity and parameter sharing.} Each output depends only on
-a $3\times3$ neighbourhood, and the same filter weights are reused at every
-position. Conv~2 therefore needs $32\times64\times3\times3=18{,}432$ weights,
-whereas a fully connected map between the same $32\times14\times14$ and
-$64\times14\times14$ tensors would need about $7.9\times10^{7}$. This gives the
-CNN the strongest spatial inductive bias of the five families (locality and
-translation equivariance) with the second-smallest parameter count.
-
-\paragraph{Strengths and limitations.} The design is compact but shallow: only two stages and 64
-output features, and global average pooling discards the position of a pattern,
-which can matter when two garments share local textures but differ in global
-layout (for example, where the sleeves are).
-
-\paragraph{Ownership.} Channel widths, depth, kernel sizes, normalization,
-pooling and the pooling-based head are our choices; \texttt{nn.Conv2d},
-\texttt{nn.BatchNorm2d}, \texttt{nn.MaxPool2d} and
-\texttt{nn.AdaptiveAvgPool2d} are PyTorch layers.
-
-\subsubsection{Recurrent family: LSTM or GRU}
-The GRU (\codepath{src/models/gru.py}) is the core recurrent model used in the
-main comparison. The LSTM (\codepath{src/models/lstm.py}) is an additional
-Fashion-MNIST comparison and is described at the end of this subsection.
-
-\paragraph{Input representation.} Both models read the image as a sequence of
-rows from top to bottom. A batch $[B,C,H,W]$ is reshaped to $[B,H,C\cdot W]$, so
-on Fashion-MNIST there are $T=28$ timesteps and each input
-$x_t\in\mathbb{R}^{28}$ is the $t$-th pixel row. On CIFAR-10 the three colour
-channels of a row are concatenated, giving $T=32$ and $x_t\in\mathbb{R}^{96}$.
-
-\paragraph{Layers and shapes.} The GRU has one layer with hidden size $128$ and
-starts from $h_0=\mathbf{0}$. Each timestep computes
+The model has one recurrent layer with hidden size 128 and initial state
+$h_0=0$. Its updates are
 \begin{align*}
- r_t&=\sigma(W_{ir}x_t+b_{ir}+W_{hr}h_{t-1}+b_{hr}),\\
- u_t&=\sigma(W_{iu}x_t+b_{iu}+W_{hu}h_{t-1}+b_{hu}),\\
- \tilde h_t&=\tanh\bigl(W_{in}x_t+b_{in}+r_t\odot(W_{hn}h_{t-1}+b_{hn})\bigr),\\
- h_t&=(1-u_t)\odot\tilde h_t+u_t\odot h_{t-1}.
+ r_t &= \sigma(W_{ir}x_t+b_{ir}+W_{hr}h_{t-1}+b_{hr}),\\
+ u_t &= \sigma(W_{iu}x_t+b_{iu}+W_{hu}h_{t-1}+b_{hu}),\\
+ \widetilde h_t &= \tanh\!\left(W_{in}x_t+b_{in}
+                 +r_t\odot(W_{hn}h_{t-1}+b_{hn})\right),\\
+ h_t &= (1-u_t)\odot\widetilde h_t+u_t\odot h_{t-1}.
 \end{align*}
-The reset gate $r_t$ decides how much of the previous state enters the candidate
-$\tilde h_t$, and the update gate $u_t$ interpolates between keeping the old
-state and writing the new candidate. In Figure~\ref{fig:model-gru}, $a$ and $b$
-denote the stacked input and hidden projections.
+Here, $\sigma$ is the sigmoid function and $\odot$ denotes elementwise
+multiplication. The reset gate $r_t$ controls the recurrent contribution to
+the candidate state; the update gate $u_t$ controls retention of the preceding
+state. All steps share the same parameters. The final state $h_H$ supplies
+the linear classifier. No recurrent dropout is used in the evaluated configuration.
 
 \begin{figure}[htbp]
 \centering
-\includesvg[width=0.9\linewidth]{Images/models/gru}
-\caption{GRU (core recurrent model): the 28 image rows are read top to bottom
-and the final hidden state is classified.}
+\includegraphics[width=0.95\linewidth]{Images/models/gru.png}
+\caption{GRU cell and row-sequence classifier. The final hidden state supplies the class logits.}
 \label{fig:model-gru}
 \end{figure}
 
-\paragraph{Output head.} The final hidden state $h_{28}\in\mathbb{R}^{128}$ is
-passed to the shared \texttt{nn.Linear(128, 10)} head, which returns ten logits.
+\subsubsection{Long short-term memory}
+The repository also implements a one-layer LSTM with hidden size 128, using
+the same row sequence and a linear head on the final hidden state. In addition
+to $h_t$, it maintains a cell state $c_t$. With zero initial states, the updates are
+\begin{align*}
+ q_t &= W_xx_t+b_x+W_hh_{t-1}+b_h,\\
+ (i_t,f_t,g_t,o_t) &=
+   \bigl(\sigma(q_{t,i}),\sigma(q_{t,f}),\tanh(q_{t,g}),\sigma(q_{t,o})\bigr),\\
+ c_t &= f_t\odot c_{t-1}+i_t\odot g_t,\\
+ h_t &= o_t\odot\tanh(c_t),
+\end{align*}
+where $q_t\in\mathbb{R}^{512}$ is divided into four 128-dimensional vectors.
+The input, forget, and output gates control the cell update and hidden output.
+This architecture is documented for completeness. No saved LSTM run is
+available for the reported test comparison.
 
-\paragraph{Parameters.} The three gates share two projections:
-$x_t\mapsto\mathbb{R}^{384}$ ($28\times384+384=11{,}136$) and
-$h_{t-1}\mapsto\mathbb{R}^{384}$ ($128\times384+384=49{,}536$). With the
-$1{,}290$-parameter head the model has 61,962 parameters (88,074 on CIFAR-10,
-where the input projection grows to $96\times384+384$).
-
-\paragraph{Design rationale.} Using one pixel row per timestep gives 28 steps
-of 28 values, which matches \texttt{input\_size: 28} in the configuration. The
-same weights are applied to every row, and vertical structure is captured only
-through the order in which rows update the state. Horizontal structure inside a
-row is seen only through one linear projection of the 28 pixels. Because only
-the last state is classified, information from the top of the image has to
-survive up to 27 further updates; the gates are meant to preserve it across
-these steps, although a plain $\tanh$ RNN was not trained for comparison. Of the
-two gated cells, the GRU is the smaller one at the same hidden size.
-
-\paragraph{LSTM (additional comparison).} The LSTM uses the same row sequence,
-input size 28, hidden size 128 and one layer, but keeps a separate cell state
-$c_t$ controlled by input, forget and output gates:
-$c_t=f_t\odot c_{t-1}+i_t\odot g_t$ and $h_t=o_t\odot\tanh(c_t)$. Its four
-gates need $28\times512+512=14{,}848$ input and $128\times512+512=66{,}048$
-recurrent parameters, for 82,186 in total. The two cells are therefore
-\emph{not} parameter-matched: the LSTM has about 33\% more parameters than the
-GRU at the same hidden size, so the LSTM--GRU difference is an additional
-comparison, not a controlled ablation.
-
-\paragraph{Strengths and limitations.} The recurrent models are smaller than the
-MLP and the Transformer and can model dependencies between distant rows. They
-are sequential in $T$, so the 28 steps cannot be parallelized within a sample,
-and the result depends on the chosen scan order (row-wise, top to bottom);
-column or patch orderings were not evaluated.
-
-\paragraph{Ownership.} The GRU and LSTM cells, the stacking over layers with
-inter-layer dropout, and the timestep loop are written by the group; only the
-gate projections use \texttt{nn.Linear}. The repository also contains a
-vanilla RNN encoder (\codepath{src/models/rnn.py}, a wrapper around PyTorch
-\texttt{nn.RNN} with $\tanh$), which is not part of the reported experiments.
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\linewidth]{Images/models/lstm.png}
+\caption{Implemented LSTM cell and row-sequence classifier. No LSTM test result is reported.}
+\label{fig:model-lstm}
+\end{figure}
 
 \subsubsection{Transformer}
-\reporttodo{Define image tokens, projection, positions, attention heads, layers,
-pooling, and the classifier. Include the attention equation and define its dimensions.}
+The Transformer uses the same row tokens as the recurrent models. Each token
+is projected to 128 dimensions and receives a sinusoidal positional encoding.
+Embedding dropout has probability $0.1$. Two encoder layers each apply
+four-head self-attention and a feed-forward network of widths
+$128\to2048\to128$, with ReLU. Each sublayer uses a residual connection
+followed by layer normalization; encoder dropout is $0.1$.
+
+For a sequence representation $S\in\mathbb{R}^{H\times128}$, one attention
+head computes
+\begin{equation}
+ Q=SW_Q,\quad K=SW_K,\quad V=SW_V,\qquad
+ \operatorname{Attention}(Q,K,V)
+ =\operatorname{softmax}\!\left(\frac{QK^\top}{\sqrt{32}}\right)V,
+\end{equation}
+where $W_Q,W_K,W_V\in\mathbb{R}^{128\times32}$ and the softmax acts across
+key positions. Projection biases are omitted from this notation. The four
+head outputs are concatenated and projected to 128 dimensions. The mean of
+the encoded row vectors supplies the linear classifier. Attention connects
+all row positions, while positional encoding supplies their order.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\linewidth]{Images/models/transformer.png}
+\caption{Transformer with row embeddings, positional encoding, two encoder layers, and mean pooling.}
+\label{fig:model-transformer}
+\end{figure}
 
 \subsection{Architecture comparison}
 \label{sec:architecture-comparison}
-All models share the same \texttt{ImageClassifier} interface: a registered
-encoder maps the image to a feature vector of size $d$, and one
-\texttt{nn.Linear(d, 10)} head produces the logits. The families therefore
-differ only in how the encoder represents the image (Table~\ref{tab:arch-comparison}).
+\input{Tables/architecture_summary}
+The models differ in representation, connectivity, and parameter count.
+Equal epoch counts therefore do not constitute matched capacity or compute.
+The comparison evaluates these complete configurations. It does not isolate
+the causal effect of any individual architectural component.
 
-\begin{table}[htbp]
-\centering\small
-\caption[Architecture comparison on Fashion-MNIST]{Architecture comparison on Fashion-MNIST (configurations in
-\codepath{configs/image_classification/fashion_mnist/}). Parameter counts
-include the classification head.}
-\label{tab:arch-comparison}
-\begin{tabularx}{\linewidth}{p{17mm}p{25mm}p{12mm}rY}
-\toprule
-Model & Image representation & $d$ & Params & Main inductive bias\\\midrule
-Linear & flattened 784-vector & 784 & 7,850 & none; one linear template per class\\
-MLP & flattened 784-vector & 128 & 235,146 & none spatial; nonlinear pixel combinations (784--256--128, ReLU, dropout 0.2)\\
-CNN & $1\times28\times28$ grid & 64 & 19,562 & locality, weight sharing, translation equivariance; pooling for shift tolerance\\
-GRU (core) & 28 rows $\times$ 28 pixels & 128 & 61,962 & ordered top-to-bottom scan; weights shared across rows\\
-LSTM (extra) & 28 rows $\times$ 28 pixels & 128 & 82,186 & as GRU, with a separate cell state\\
-Transformer & 28 row tokens, 128-dim + sinusoidal position & 128 & 1,191,050 & global attention between all rows; order only via positional encoding\\
-\bottomrule
-\end{tabularx}
-\end{table}
-
-Two observations follow from the table before any result is considered. First,
-the families form a progression in how much image structure they assume: the
-Linear and MLP models see an unordered vector, the recurrent models see an
-ordered sequence of rows, the Transformer sees a set of row tokens whose order
-is supplied by positional encoding, and only the CNN uses the 2D neighbourhood
-of each pixel. Second, capacity is far from matched: parameter counts span more
-than two orders of magnitude, from 7,850 (Linear) to 1,191,050 (Transformer).
-Most of the Transformer's parameters come from its two feed-forward blocks,
-which use the PyTorch default width of 2048. Training every model for the same
-number of epochs therefore does not give equal capacity or compute, and
-differences in Section~\ref{sec:results} must be read together with these counts.
+The group implements the model assembly, row-sequence processing, and GRU and
+LSTM cell updates. Affine layers, convolution, normalization, pooling, and the
+Transformer encoder use PyTorch modules. All classifiers are trained from scratch.
 
 \subsection{Loss and evaluation metrics}
 \label{sec:metrics}
-\reporttodo{Define cross-entropy from logits, accuracy, macro-F1, and per-class
-recall. State the zero-division policy and parameter-counting rule. Define timing
-boundaries and hardware before reporting speed comparisons.}
+
+Let $\mathcal{D}=\{(x_i,y_i)\}_{i=1}^{N}$ denote a labelled sample, where
+$y_i\in\{0,\ldots,K-1\}$ and $K=10$. For an input $x_i$, the model produces
+a vector of logits $z_i=f_\theta(x_i)\in\mathbb{R}^{K}$. The corresponding
+class probabilities and predicted label are
+\begin{equation}
+ p_{ik}=\frac{\exp(z_{ik})}{\sum_{j=0}^{K-1}\exp(z_{ij})},
+ \qquad
+ \hat y_i=\operatorname*{arg\,max}_{k}z_{ik}.
+\end{equation}
+
+\paragraph{Training objective.}
+All models minimize the mean categorical cross-entropy,
+\begin{equation}
+ \mathcal{L}_{\mathrm{CE}}(\theta;\mathcal{D})
+ =-\frac{1}{N}\sum_{i=1}^{N}\log p_{i,y_i}
+ =\frac{1}{N}\sum_{i=1}^{N}
+ \left[\log\sum_{k=0}^{K-1}\exp(z_{ik})-z_{i,y_i}\right].
+\end{equation}
+The implementation evaluates this loss directly from logits, without a preceding
+softmax operation. Each optimization step uses the mean loss of its minibatch.
+Epoch losses weight each minibatch by its sample count, so a smaller final batch
+does not receive disproportionate weight. The checkpoint with the lowest
+validation cross-entropy supplies the final test predictions. Test labels do not
+enter this selection.
+
+\paragraph{Classification performance.}
+Define the confusion matrix $C$ by
+\begin{equation}
+ C_{ab}=\sum_{i=1}^{N}\mathbf{1}\{y_i=a,\ \hat y_i=b\},
+\end{equation}
+where rows correspond to true classes and columns to predicted classes.
+Accuracy is the proportion of correct predictions,
+\begin{equation}
+ \mathrm{Accuracy}=\frac{1}{N}\sum_{k=0}^{K-1}C_{kk}.
+\end{equation}
+Accuracy summarizes overall classification performance but does not identify
+which classes account for the errors.
+
+For class $k$, let
+$\mathrm{TP}_k=C_{kk}$,
+$\mathrm{FP}_k=\sum_{a\ne k}C_{ak}$, and
+$\mathrm{FN}_k=\sum_{b\ne k}C_{kb}$.
+We report the unweighted mean of the class F1 scores,
+\begin{equation}
+ F_{1,k}=\frac{2\mathrm{TP}_k}
+ {2\mathrm{TP}_k+\mathrm{FP}_k+\mathrm{FN}_k},
+ \qquad
+ \mathrm{Macro\text{-}F1}=\frac{1}{K}\sum_{k=0}^{K-1}F_{1,k}.
+\end{equation}
+A class with a zero denominator receives an F1 score of zero and remains in the
+average. Macro-F1 gives every class equal weight, irrespective of its frequency.
+We compute accuracy and macro-F1 from predictions over the complete evaluation
+split, rather than averaging scores computed separately for each minibatch.
+
+\paragraph{Class-level analysis.}
+Per-class recall measures the fraction of examples of a true class that the
+model identifies correctly,
+\begin{equation}
+ R_k=\frac{C_{kk}}{\sum_b C_{kb}}.
+\end{equation}
+For a class with nonzero support, the row-normalized confusion matrix is
+$\widetilde C_{ab}=C_{ab}/\sum_j C_{aj}$.
+Its diagonal entries equal class recall; its off-diagonal entries give the
+fractions assigned to particular incorrect classes. Rows with no true examples
+are displayed as zero and provide no estimate of recall. Counts and normalized
+rates are distinguished throughout the error analysis.
+
+\paragraph{Model size and computation.}
+Model size is the number of trainable scalar parameters in the encoder and
+classification head. This count excludes buffers and optimizer state. It measures
+model size, not the number of operations required for a prediction. The evaluation
+code also records the cumulative duration of model forward passes, excluding data
+loading, input transfer, and subsequent probability and metric computation. These
+single-pass measurements have no separate warm-up or repeated-trial protocol.
+They are retained as execution records, not as evidence for a reliable speed
+ranking across architectures.
 
 \subsection{Training configuration}
 \label{sec:training-setup}
-\reporttodo{Use one table for optimizer, learning rate, batch size, epochs, seed,
-scheduler, regularization, precision, and hardware. List model-specific differences.
-State how hyperparameters and checkpoints were selected.}
+\input{Tables/training_setup}
+Training uses the dataset-specific transforms shared by all architectures.
+For MNIST and Fashion-MNIST, pixel values are scaled to $[0,1]$, randomly
+rotated within $[-10^\circ,10^\circ]$, translated by up to 10\% of each image
+dimension, and normalized with mean and standard deviation $0.5$. CIFAR-10
+uses a random $32\times32$ crop after four-pixel padding and a random horizontal
+flip. Its channel means are $(0.4914,0.4822,0.4465)$ and standard deviations
+$(0.2470,0.2435,0.2616)$. Validation and test transforms retain scaling and
+normalization and omit random augmentation.
+
+Training logs record CUDA execution but do not identify the GPU model.
+The saved test evaluations record a separate macOS ARM environment with
+Python 3.13.5 and PyTorch 2.14.0. These records do not establish comparable
+hardware conditions for a speed ranking. Augmentation, dropout, and batch
+normalization also make training and validation losses measurements under
+different conditions.
 
 \subsection{Comparison protocol}
 \label{sec:experiment-design}
-\reporttodo{State the hypotheses, changed factors, fixed settings, and selection
-rules before discussing results. Separate preliminary runs and dataset extensions.
-Explain unequal parameter or compute budgets. Describe an ablation only if one ran.}
+The main comparison includes Linear, MLP, CNN, GRU, and Transformer on all
+three datasets, giving 15 runs of 50 epochs with seed 42. Earlier five-epoch
+Fashion-MNIST runs are preliminary and are excluded. The reported settings
+specify one configuration per model; no systematic hyperparameter search or
+component ablation is documented.
+
+Within each dataset, models share the split, preprocessing, augmentation,
+optimizer settings, epoch budget, and checkpoint rule. Model-specific
+regularization and parameter counts remain unequal. Results describe the
+observed configurations under one seed; repeated runs are required to assess
+variation across initializations and training randomness.
+
+For detailed Fashion-MNIST error analysis, the flattened-pixel baseline is
+selected by the lower minimum validation loss among Linear and MLP, with a tie
+resolved in favour of Linear. The selected baseline is compared with CNN on
+the same official test images. Confusion matrices and class recall describe
+all test predictions. Qualitative examples use the first two test indices in
+each of three categories: CNN correct and baseline wrong, both wrong, and
+baseline correct and CNN wrong. This rule fixes the examples independently
+of visual appearance. Category frequencies are computed over the full test
+set and reported separately from the selected images.

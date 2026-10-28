@@ -1,0 +1,22 @@
+\begin{table}[htbp]
+\centering\small
+\caption{Training settings for the 15 evaluated runs.}
+\label{tab:training-setup}
+\begin{tabular}{ll}
+\toprule
+Setting & Value\\
+\midrule
+Optimizer & Adam, $\beta_1=0.9$, $\beta_2=0.999$, $\epsilon=10^{-8}$\\
+Learning rate & $10^{-3}$, constant\\
+Batch size & 128\\
+Epochs / seed & 50 / 42\\
+Validation fraction & 0.1 of the official training split\\
+Weight decay & 0\\
+Arithmetic & Float32, no mixed precision\\
+Checkpoint rule & Minimum validation cross-entropy\\
+MLP dropout & 0.2 after each hidden activation\\
+Transformer dropout & 0.1 in embeddings and encoder layers\\
+CNN normalization & Batch normalization after each convolution\\
+\bottomrule
+\end{tabular}
+\end{table}
