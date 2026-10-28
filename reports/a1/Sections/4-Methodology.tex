@@ -2,35 +2,29 @@
 \label{sec:methods}
 
 \subsection{Training and evaluation pipeline}
-The study compares classifiers trained from scratch on MNIST, Fashion-MNIST,
-and CIFAR-10. For each dataset, a seeded random permutation reserves 10\% of
-its official training set for validation. The split is shared across models
-and is not stratified. This gives 54,000 training and 6,000 validation images
-for each grayscale dataset, and 45,000 training and 5,000 validation images for
-CIFAR-10. Each official test set contains 10,000 images.
-
-During training, minibatches pass through the encoder and a linear
-classification head. Cross-entropy supplies the gradients for parameter
-updates. Dropout and batch normalization use training mode. After each epoch,
-the model is evaluated on the validation set with dropout disabled and batch
-normalization using its running statistics. The checkpoint with the lowest
-validation loss supplies the test predictions. The test set is excluded from
-checkpoint selection.
+We train all classifiers from scratch using the shared data splits in
+Section~\ref{sec:splits}. Each training batch passes through the model to produce
+ten class scores, and we update the weights to minimize cross-entropy.
+After each epoch, we evaluate validation loss with dropout disabled and batch
+normalization using its running statistics. We use the checkpoint with the
+lowest validation loss for testing. This allows the selected model to come
+from an earlier epoch if validation performance deteriorates before training
+ends. Every model still receives the same 50-epoch training budget.
 
 \subsection{Model architectures}
 \label{sec:architectures}
 Each model maps an image to a feature vector $h\in\mathbb{R}^{d}$ and then
 computes ten logits, $z=Wh+b$. The following descriptions use Fashion-MNIST
-shapes. MNIST uses the same dimensions; CIFAR-10 supplies three-channel
+shapes. MNIST uses the same dimensions. CIFAR-10 has three-channel
 $32\times32$ images. Table~\ref{tab:arch-comparison} summarizes feature
 dimensions and parameter counts.
 
 \subsubsection{Linear classifier}
 The linear model flattens an image to $x\in\mathbb{R}^{784}$ and computes
 $z=Wx+b$, where $W\in\mathbb{R}^{10\times784}$ and $b\in\mathbb{R}^{10}$.
-Each class score is an affine function of the pixels. Flattening preserves
-their fixed coordinate order; the model imposes no local connectivity or
-spatial weight sharing. It provides the simplest baseline in the study.
+Each class score is an affine function of the pixels. Flattening keeps the pixel
+order. The model has no convolution or shared spatial filters and is our baseline. It tests how far class-specific weighted sums of pixels can go before adding
+nonlinear layers or explicitly modelling spatial relationships.
 
 \begin{figure}[htbp]
 \centering
@@ -43,8 +37,10 @@ spatial weight sharing. It provides the simplest baseline in the study.
 The MLP applies two hidden affine layers of widths 256 and 128 to the flattened
 image. Each hidden layer is followed by ReLU and dropout with probability
 $0.2$. A linear head maps the 128-dimensional features to ten logits. The
-nonlinear layers allow interactions between pixel values, while connections
-remain fully connected without spatial weight sharing.
+MLP learns nonlinear combinations of pixels but does not share weights across
+image positions. Comparing it with Linear tests whether nonlinear pixel
+combinations improve classification, while its comparison with CNN also
+introduces local connectivity and shared filters.
 
 \begin{figure}[htbp]
 \centering
@@ -78,11 +74,11 @@ images and 545,194 for CIFAR-10.
 \subsubsection{Gated recurrent unit}
 The GRU reads the image rows from top to bottom. An input of shape
 $C\times H\times W$ becomes a sequence of $H$ vectors in
-$\mathbb{R}^{CW}$. Thus, Fashion-MNIST gives 28 steps with 28 values per step;
+$\mathbb{R}^{CW}$. Fashion-MNIST gives 28 steps with 28 values per step.
 CIFAR-10 gives 32 steps with 96 values per step.
 
 The model has one recurrent layer with hidden size 128 and initial state
-$h_0=0$. Its updates are
+$h_0=0$. The updates follow the GRU equations in PyTorch documentation \cite{pytorch-gru},
 \begin{align*}
  r_t &= \sigma(W_{ir}x_t+b_{ir}+W_{hr}h_{t-1}+b_{hr}),\\
  u_t &= \sigma(W_{iu}x_t+b_{iu}+W_{hu}h_{t-1}+b_{hu}),\\
@@ -91,22 +87,25 @@ $h_0=0$. Its updates are
  h_t &= (1-u_t)\odot\widetilde h_t+u_t\odot h_{t-1}.
 \end{align*}
 Here, $\sigma$ is the sigmoid function and $\odot$ denotes elementwise
-multiplication. The reset gate $r_t$ controls the recurrent contribution to
-the candidate state; the update gate $u_t$ controls retention of the preceding
-state. All steps share the same parameters. The final state $h_H$ supplies
-the linear classifier. No recurrent dropout is used in the evaluated configuration.
+multiplication. The reset gate controls how the previous state contributes to
+the candidate state. The update gate controls how much of the previous state is
+kept. All steps share the same parameters. The final state $h_H$ feeds a linear
+classifier. We do not use recurrent dropout. Reading rows in sequence lets the
+model combine information from the top and bottom of a product, but all rows
+must ultimately be summarized in the final 128-dimensional state.
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.95\linewidth]{Images/models/gru.png}
-\caption{GRU cell and row-sequence classifier. The final hidden state supplies the class logits.}
+\caption{GRU cell and row-sequence classifier. The final hidden state feeds a linear classifier.}
 \label{fig:model-gru}
 \end{figure}
 
 \subsubsection{Long short-term memory}
-The repository also implements a one-layer LSTM with hidden size 128, using
-the same row sequence and a linear head on the final hidden state. In addition
-to $h_t$, it maintains a cell state $c_t$. With zero initial states, the updates are
+The LSTM has one layer with hidden size 128. It reads the same row sequence as
+the GRU and applies a linear head to the final hidden state. It also maintains
+a cell state $c_t$. Both states start at zero, and the updates follow the LSTM
+equations in PyTorch documentation \cite{pytorch-lstm},
 \begin{align*}
  q_t &= W_xx_t+b_x+W_hh_{t-1}+b_h,\\
  (i_t,f_t,g_t,o_t) &=
@@ -115,13 +114,15 @@ to $h_t$, it maintains a cell state $c_t$. With zero initial states, the updates
  h_t &= o_t\odot\tanh(c_t),
 \end{align*}
 where $q_t\in\mathbb{R}^{512}$ is divided into four 128-dimensional vectors.
-The input, forget, and output gates control the cell update and hidden output.
-The LSTM is included in the measured comparisons.
+The forget gate scales the existing cell state, the input gate controls the
+candidate information added to it, and the output gate controls which part of
+the updated cell state reaches the hidden state. This separates stored memory
+from the state passed to the classifier, whereas the GRU uses one state for both.
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.95\linewidth]{Images/models/lstm.png}
-\caption{Implemented LSTM cell and row-sequence classifier.}
+\caption{LSTM cell and row-sequence classifier.}
 \label{fig:model-lstm}
 \end{figure}
 
@@ -131,7 +132,7 @@ is projected to 128 dimensions and receives a sinusoidal positional encoding.
 Embedding dropout has probability $0.1$. Two encoder layers each apply
 four-head self-attention and a feed-forward network of widths
 $128\to2048\to128$, with ReLU. Each sublayer uses a residual connection
-followed by layer normalization; encoder dropout is $0.1$.
+followed by layer normalization. Encoder dropout is $0.1$ \cite{pytorch-transformer}.
 
 For a sequence representation $S\in\mathbb{R}^{H\times128}$, one attention
 head computes
@@ -143,8 +144,11 @@ head computes
 where $W_Q,W_K,W_V\in\mathbb{R}^{128\times32}$ and the softmax acts across
 key positions. Projection biases are omitted from this notation. The four
 head outputs are concatenated and projected to 128 dimensions. The mean of
-the encoded row vectors supplies the linear classifier. Attention connects
-all row positions, while positional encoding supplies their order.
+the encoded row vectors feeds a linear classifier. Attention connects
+all row positions, while positional encoding supplies their order. Unlike the
+recurrent models, attention relates rows directly rather than passing information
+through every intervening row. Mean pooling then combines the encoded rows into
+one vector for classification.
 
 \begin{figure}[htbp]
 \centering
@@ -156,14 +160,12 @@ all row positions, while positional encoding supplies their order.
 \subsection{Architecture comparison}
 \label{sec:architecture-comparison}
 \input{Tables/architecture_summary}
-The models differ in representation, connectivity, and parameter count.
-Equal epoch counts therefore do not constitute matched capacity or compute.
-The comparison evaluates these complete configurations. It does not isolate
-the causal effect of any individual architectural component.
+The models use the same epoch budget but differ in representation, size, and
+regularization.
 
 The group implements the model assembly, row-sequence processing, and GRU and
 LSTM cell updates. Affine layers, convolution, normalization, pooling, and the
-Transformer encoder use PyTorch modules. All classifiers are trained from scratch.
+Transformer encoder use PyTorch modules \cite{pytorch-nn}.
 
 \subsection{Loss and evaluation metrics}
 \label{sec:metrics}
@@ -186,12 +188,11 @@ All models minimize the mean categorical cross-entropy,
  =\frac{1}{N}\sum_{i=1}^{N}
  \left[\log\sum_{k=0}^{K-1}\exp(z_{ik})-z_{i,y_i}\right].
 \end{equation}
-The implementation evaluates this loss directly from logits, without a preceding
-softmax operation. Each optimization step uses the mean loss of its minibatch.
-Epoch losses weight each minibatch by its sample count, so a smaller final batch
-does not receive disproportionate weight. The checkpoint with the lowest
-validation cross-entropy supplies the final test predictions. Test labels do not
-enter this selection.
+We compute cross-entropy directly from logits without applying softmax first.
+Each optimization step uses the mean loss of its minibatch. Cross-entropy
+penalizes a low probability for the true class, so two predictions with the same
+argmax can contribute different losses. Validation loss therefore considers
+confidence in addition to whether the predicted label is correct.
 
 \paragraph{Classification performance.}
 Define the confusion matrix $C$ by
@@ -203,8 +204,6 @@ Accuracy is the proportion of correct predictions,
 \begin{equation}
  \mathrm{Accuracy}=\frac{1}{N}\sum_{k=0}^{K-1}C_{kk}.
 \end{equation}
-Accuracy summarizes overall classification performance but does not identify
-which classes account for the errors.
 
 For class $k$, let
 $\mathrm{TP}_k=C_{kk}$,
@@ -217,10 +216,11 @@ We report the unweighted mean of the class F1 scores,
  \qquad
  \mathrm{Macro\text{-}F1}=\frac{1}{K}\sum_{k=0}^{K-1}F_{1,k}.
 \end{equation}
-A class with a zero denominator receives an F1 score of zero and remains in the
-average. Macro-F1 gives every class equal weight, irrespective of its frequency.
-We compute accuracy and macro-F1 from predictions over the complete evaluation
-split, rather than averaging scores computed separately for each minibatch.
+Macro-F1 gives each class equal weight. We compute both metrics over the full
+evaluation split. Accuracy measures how often the predicted label is correct,
+while macro-F1 combines precision and recall for each class before averaging.
+Since Fashion-MNIST is balanced, differences between these metrics reflect the
+pattern of class errors rather than unequal numbers of test images.
 
 \paragraph{Class-level analysis.}
 Per-class recall measures the fraction of examples of a true class that the
@@ -228,62 +228,37 @@ model identifies correctly,
 \begin{equation}
  R_k=\frac{C_{kk}}{\sum_b C_{kb}}.
 \end{equation}
-For a class with nonzero support, the row-normalized confusion matrix is
-$\widetilde C_{ab}=C_{ab}/\sum_j C_{aj}$.
-Its diagonal entries equal class recall; its off-diagonal entries give the
-fractions assigned to particular incorrect classes. Rows with no true examples
-are displayed as zero and provide no estimate of recall. Counts and normalized
-rates are distinguished throughout the error analysis.
+We normalize each row as $\widetilde C_{ab}=C_{ab}/\sum_j C_{aj}$.
+The diagonal gives class recall. Off-diagonal values show the fraction of each
+true class assigned to an incorrect class.
 
 \paragraph{Model size and computation.}
-Model size is the number of trainable scalar parameters in the encoder and
-classification head. This count excludes buffers and optimizer state. It measures
-model size, not the number of operations required for a prediction. The evaluation
-code also records the cumulative duration of model forward passes, excluding data
-loading, input transfer, and subsequent probability and metric computation. These
-single-pass measurements have no separate warm-up or repeated-trial protocol.
-They are retained as execution records, not as evidence for a reliable speed
-ranking across architectures.
+We count trainable parameters in the encoder and classification head, excluding
+buffers and optimizer state. Parameter count measures storage for model weights,
+not the operations needed for a prediction.
 
 \subsection{Training configuration}
 \label{sec:training-setup}
 \input{Tables/training_setup}
-Training uses the dataset-specific transforms shared by all architectures.
-For MNIST and Fashion-MNIST, pixel values are scaled to $[0,1]$, randomly
-rotated within $[-10^\circ,10^\circ]$, translated by up to 10\% of each image
-dimension, and normalized with mean and standard deviation $0.5$. CIFAR-10
-uses a random $32\times32$ crop after four-pixel padding and a random horizontal
-flip. Its channel means are $(0.4914,0.4822,0.4465)$ and standard deviations
-$(0.2470,0.2435,0.2616)$. Validation and test transforms retain scaling and
-normalization and omit random augmentation.
-
-Saved evaluations record different environments. CNN evaluation uses an
-NVIDIA GeForce RTX 4060 Ti with Python 3.11.11 and PyTorch 2.14.0+cu126.
-Other runs include macOS ARM and CUDA environments. These records do not
-establish comparable conditions for a speed ranking. Augmentation, dropout, and batch
-normalization also make training and validation losses measurements under
-different conditions.
+All models use the preprocessing and augmentation in
+Section~\ref{sec:preprocessing}. CNN evaluation uses an NVIDIA GeForce RTX 4060 Ti
+with Python 3.11.11 and PyTorch 2.14.0+cu126. Other runs use macOS ARM and CUDA
+environments.
 
 \subsection{Comparison protocol}
 \label{sec:experiment-design}
-The main comparison includes Linear, MLP, CNN, GRU, LSTM, and Transformer
-on Fashion-MNIST. MNIST is development data and CIFAR-10 is an extension.
-Only completed evaluations enter the comparisons. Each reported run uses
-50 epochs and seed 42. No systematic hyperparameter search or component
-ablation is documented.
+We compare Linear, MLP, CNN, GRU, LSTM, and Transformer on Fashion-MNIST.
+Within each dataset, all models share the split, preprocessing, augmentation,
+optimizer settings, epoch budget, and checkpoint rule. This compares the models
+under one common training recipe. It does not give each architecture a separately
+tuned optimizer or schedule, so the ranking applies to this recipe rather than
+the best result each architecture could achieve.
 
-Within each dataset, models share the split, preprocessing, augmentation,
-optimizer settings, epoch budget, and checkpoint rule. Model-specific
-regularization and parameter counts remain unequal. Results describe the
-observed configurations under one seed; repeated runs are required to assess
-variation across initializations and training randomness.
-
-For detailed Fashion-MNIST error analysis, the flattened-pixel baseline is
-selected by the lower minimum validation loss among Linear and MLP, with a tie
-resolved in favour of Linear. The selected baseline is compared with CNN on
-the same official test images. Confusion matrices and class recall describe
-all test predictions. Qualitative examples use the first two test indices in
-each of three categories: CNN correct and baseline wrong, both wrong, and
-baseline correct and CNN wrong. This rule fixes the examples independently
-of visual appearance. Category frequencies are computed over the full test
-set and reported separately from the selected images.
+For the detailed comparison with CNN, we choose the flattened-pixel baseline
+with the lower minimum validation loss among Linear and MLP. A tie favours
+Linear. This selects MLP. Both models are evaluated on the same official test
+images. Confusion matrices and class recall use all test predictions.
+For the qualitative comparison, we show the first two test images in each of
+three categories: CNN correct and MLP wrong, both wrong, and MLP correct and CNN
+wrong. We count the full test set separately to measure how often each outcome
+occurs.

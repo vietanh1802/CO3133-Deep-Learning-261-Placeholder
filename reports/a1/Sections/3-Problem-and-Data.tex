@@ -2,64 +2,83 @@
 \label{sec:data}
 
 \subsection{Task and research question}
-The task is supervised image classification: assign one clothing category to
-each image. Category prediction can help organize online product catalogs.
-The study asks how linear, multilayer, convolutional, recurrent, and Transformer
-models differ in accuracy and class confusions on the same data splits.
+We classify each image into one of ten clothing categories. This task can help
+organize online product catalogs. We compare the models on the same data splits
+to identify differences in accuracy and common errors.
 
 For Fashion-MNIST, the model receives a normalized grayscale tensor
 $x\in\mathbb{R}^{1\times28\times28}$ and returns ten class scores
 $f_\theta(x)\in\mathbb{R}^{10}$. Its prediction is
 $\hat y=\arg\max_{k\in\{0,\ldots,9\}} f_\theta(x)_k$.
-The prediction unit is one image. Low resolution and similar garment outlines
+Low resolution and similar garment outlines
 make some categories difficult to separate.
 
 \subsection{Dataset and study scope}
 Fashion-MNIST contains 70,000 Zalando product images with supplied category
 labels: 60,000 official training images and 10,000 official test images
-\cite{fashionmnist}. Labels 0--9 denote T-shirt/top, Trouser, Pullover, Dress,
-Coat, Sandal, Shirt, Sneaker, Bag, and Ankle boot, respectively.
+\cite{fashionmnist}. Figure~\ref{fig:data-samples} shows the ten categories.
 
-We use the standard IDX distribution from the authors' MIT-licensed repository
-\cite{fashionmnist-data}. The four cached gzip files total 30.88 MB and match
-the published MD5 checksums. Images are unsigned 8-bit arrays; labels are
-integer class IDs. No samples are removed or relabelled. The small, isolated
-product images and fixed category set limit how far results extend to full
-scenes or unfamiliar products.
+We use the authors' MIT-licensed dataset in compressed IDX format (30.88 MB)
+\cite{fashionmnist-data}. These results apply to small product images from ten
+known categories. We do not evaluate full scenes or unseen categories.
 
 Fashion-MNIST is the main comparison dataset. MNIST handwritten digits are used
 for development, and CIFAR-10 colour images provide a separate extension
-\cite{mnist-data,cifar10-data}. Their roles and working splits appear in
-Table~\ref{tab:data-splits}.
+\cite{mnist-data,cifar10-data}. Table~\ref{tab:data-splits} lists the dataset splits.
 \input{Tables/data_splits}
 
 \clearpage
 \subsection{Exploratory data analysis}
 \label{sec:eda}
-The following statistics use the full, unaugmented official Fashion-MNIST
-training set, before the train/validation split. Every image is $28\times28$
-pixels. Each class has 6,000 images, so the largest-to-smallest class ratio is
-1.00. The official test set has 1,000 images per class.
-Figure~\ref{fig:data-samples} shows one real example per class.
+We analyze the 60,000 original Fashion-MNIST training images. Each image is
+$28\times28$ pixels, and each class has 6,000 images, so the dataset is balanced.
+The official test set has 1,000 images per class.
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.90\linewidth]{Images/fashion_mnist_samples.png}
-  \caption{Fashion-MNIST: the first image of each class in official training
-  order, selected without using model predictions.}
+  \caption{The first training image from each Fashion-MNIST class.}
   \label{fig:data-samples}
 \end{figure}
 
-Pixel intensity has mean 72.94 and standard deviation 90.02 on the 0--255 scale.
-About 53.0\% of pixels fall in the lowest histogram bin (intensities 0--7),
-reflecting the dark background. Defining foreground as intensity above 32 gives
-average coverage from 24.5\% for Sandal to 59.8\% for Pullover.
+Figure~\ref{fig:class-means} shows the average image for each class.
+Pullover, Coat, and Shirt share a broad torso and sleeve outline, while Trouser
+and the footwear classes have more distinct shapes. Averaging keeps features
+that recur in similar positions but blurs details that vary between products.
+The shared sleeve and torso shapes are therefore easier to see here than in
+a single example, while individual collars or textures are less visible.
 
-Figure~\ref{fig:data-similarity} compares class-average images after subtracting
-the average across classes. Cosine similarity is 0.86 for Pullover--Coat and
-0.82 for both Sandal--Sneaker and Pullover--Shirt. These pairs motivate later
-inspection of class confusions; prototype similarity does not measure model
-errors.
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.90\linewidth]{Images/fashion_mnist_class_means.png}
+  \caption{Average image for each Fashion-MNIST class, using all 6,000 official
+  training images per class.}
+  \label{fig:class-means}
+\end{figure}
+
+\clearpage
+About 53.0\% of pixels have intensities below 8 because much of each image is dark background.
+Figure~\ref{fig:foreground-coverage} shows how much of each image the product
+occupies, counting pixels with intensity above 32 as foreground. Average coverage
+ranges from 24.5\% for Sandal to 59.8\% for Pullover. Shirt and Coat have similar
+average coverage, about 56\%.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.80\linewidth]{Images/fashion_mnist_foreground_coverage.png}
+  \caption{Average foreground fraction by Fashion-MNIST class, using the
+  official training set and an intensity threshold of 32 on the 0--255 scale.}
+  \label{fig:foreground-coverage}
+\end{figure}
+
+The heatmap in Figure~\ref{fig:data-similarity} puts these shape similarities
+into numbers. Pullover and Coat have the highest cosine similarity at 0.86,
+while Sandal and Sneaker reach 0.82. The closest pairs therefore extend beyond
+upper-body garments.
+This comparison uses centred class averages, so it describes typical shapes
+rather than variation within each class. Subtracting the mean image across
+classes reduces the common background and overall product layout, making the
+comparison focus on how each class differs from that shared pattern.
 
 \begin{figure}[H]
   \centering
@@ -76,27 +95,30 @@ For each dataset, a random permutation with seed 42 reserves 10\% of the officia
 training set for validation. The split unit is one image, and sampling is not
 stratified. For Fashion-MNIST, class counts therefore range from 5,353 to 5,445
 in training and from 555 to 647 in validation. All models use the same indices
-for a given dataset.
+for a given dataset. Using identical splits ensures that models do not receive different training
+or validation images. The small differences in class counts come from random
+sampling rather than class-based selection.
 
-The official test sets remain separate from training and validation. Validation
-loss selects checkpoints; test results are reserved for reporting. Training and
-validation indices are disjoint. No additional duplicate-image or product-level
-audit is recorded, so this separation does not establish independence between
-all images.
+We use validation loss to select checkpoints, while the official test sets are
+reserved for final evaluation. Although training and validation indices do not
+overlap, we have not checked for duplicate images or images of the same product
+across splits.
 
 \subsection{Preprocessing and augmentation}
 \label{sec:preprocessing}
 MNIST and Fashion-MNIST keep their native resolution. Pixels are converted to
 float32 in $[0,1]$, then normalized as $x'=(x-0.5)/0.5$. Training adds random
-rotation within $\pm10^\circ$ and translation up to 10\% of image size.
+rotation within $\pm10^\circ$ and translation up to 10\% of image size. These transformations vary the position and orientation of a product without
+changing its target label, reducing reliance on its exact pixel location.
+Normalization maps the original intensity range to $[-1,1]$.
 
 CIFAR-10 uses four-pixel padding, a $32\times32$ random crop, and a random
-horizontal flip for training. We normalize its RGB channels using mean
-$(0.4914,0.4822,0.4465)$ and standard deviation $(0.2470,0.2435,0.2616)$.
-Validation and test data receive conversion and normalization only.
+horizontal flip for training. We normalize the red, green, and blue channels using the fixed means
+$(0.4914,0.4822,0.4465)$ and standard deviations $(0.2470,0.2435,0.2616)$.
+These are channel statistics of the original 50,000-image CIFAR-10 training
+set after scaling pixels to $[0,1]$. For each channel, we subtract its mean and
+divide by its standard deviation to centre and rescale the input. Validation
+and test images use the same constants without random augmentation.
 
-An inspected Fashion-MNIST validation batch has float32 image shape
-$[128,1,28,28]$ and values from $-1$ to $1$. Its int64 labels have shape $[128]$;
-the first eight IDs are $[9,2,5,0,5,1,3,5]$. In the shared $[B,C,H,W]$ convention,
-$B$ is batch size, $C$ is channels, and $H,W$ are image height and width.
-CIFAR-10 batches use shape $[B,3,32,32]$.
+For example, a Fashion-MNIST validation batch has 128 grayscale images of
+$28\times28$ pixels, with one class label per image.

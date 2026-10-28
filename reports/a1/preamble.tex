@@ -27,3 +27,11 @@
       Evidence not yet supplied.\\[4pt]\codepath{#1}}}}
     \caption{#2}\label{#3}
   \end{figure}}
+
+% Keep consecutive floats together instead of stretching gaps to fill a page.
+\raggedbottom
+\makeatletter
+\setlength{\@fptop}{0pt}
+\setlength{\@fpsep}{16pt plus 2pt minus 2pt}
+\setlength{\@fpbot}{0pt plus 1fil}
+\makeatother
