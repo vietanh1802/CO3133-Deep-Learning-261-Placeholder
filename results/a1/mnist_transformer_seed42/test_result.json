@@ -1,0 +1,71 @@
+{
+  "name": "mnist_transformer_seed42",
+  "model": "transformer",
+  "dataset": "mnist",
+  "split": "test",
+  "seed": 42,
+  "config": {
+    "name": "mnist_transformer_seed42",
+    "model": "transformer",
+    "model_config": {
+      "token_dim": 28,
+      "embedding_dim": 128,
+      "num_heads": 4,
+      "num_layers": 2,
+      "dropout": 0.1
+    },
+    "dataset": "mnist",
+    "seed": 42,
+    "batch_size": 128,
+    "learning_rate": 0.001,
+    "epochs": 50,
+    "num_workers": 0,
+    "val_fraction": 0.1,
+    "data_dir": "data",
+    "checkpoint_dir": "checkpoints",
+    "results_dir": "results"
+  },
+  "checkpoint": {
+    "path": "checkpoints/mnist_transformer_seed42/best.pt",
+    "selection_rule": "lowest validation loss",
+    "epoch": 48,
+    "global_step": 20256,
+    "best_validation_loss": 0.021361644240717095,
+    "config": {
+      "name": "mnist_transformer_seed42",
+      "model": "transformer",
+      "model_config": {
+        "token_dim": 28,
+        "embedding_dim": 128,
+        "num_heads": 4,
+        "num_layers": 2,
+        "dropout": 0.1
+      },
+      "dataset": "mnist",
+      "seed": 42,
+      "batch_size": 128,
+      "learning_rate": 0.001,
+      "epochs": 50,
+      "num_workers": 0,
+      "val_fraction": 0.1,
+      "data_dir": "data",
+      "checkpoint_dir": "checkpoints",
+      "results_dir": "results"
+    }
+  },
+  "metrics": {
+    "accuracy": 0.9930999875068665,
+    "macro_f1": 0.9930572016160868
+  },
+  "parameter_count": 1191050,
+  "training_seconds": 693.734451417,
+  "inference_seconds": 0.28023124000264943,
+  "sample_count": 10000,
+  "git_commit": "41c2424436b4073b08cdf63b369986b36117c633-dirty",
+  "environment": {
+    "python": "3.12.14",
+    "torch": "2.14.0+cu126",
+    "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+    "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU"
+  }
+}

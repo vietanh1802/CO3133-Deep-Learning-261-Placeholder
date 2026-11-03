@@ -9,11 +9,16 @@ import torch
 from loguru import logger
 from torch import nn
 
+from src.config.classification import load_config
 from src.data import build_dataloaders
-from src.evaluation.plots import plot_learning_curves
 from src.models import ImageClassifier, build_model
-from src.training.engine import fit
-from src.utils import ExperimentState, load_config, seed_everything, setup_logging
+from src.plots.classification import (
+    plot_learning_curves,
+)
+from src.training.classification import (
+    fit,
+)
+from src.utils import ExperimentState, seed_everything, setup_logging
 from src.utils.logging import log_config
 
 

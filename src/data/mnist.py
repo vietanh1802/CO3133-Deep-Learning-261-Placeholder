@@ -6,10 +6,10 @@ from torchvision.datasets import MNIST
 
 from src.data.base import (
     DataLoaders,
-    ImageClassificationBatch,
-    build_image_classification_loaders,
+    ImageBatch,
     register_dataset,
 )
+from src.data.classification import build_image_classification_loaders
 from src.data.transform import build_eval_transform, build_train_transform
 
 
@@ -21,7 +21,7 @@ def build_mnist_loaders(
     val_fraction: float,
     seed: int,
     num_workers: int = 0,
-) -> DataLoaders[ImageClassificationBatch]:
+) -> DataLoaders[ImageBatch]:
     """Build MNIST loaders using a reproducible split."""
     return build_image_classification_loaders(
         train_dataset=MNIST(

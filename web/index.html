@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="landing-page">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -12,129 +12,84 @@
 </head>
 <body>
 
-<header class="letterhead">
-  <img class="crest" src="logo.png" width="512" height="512"
-       alt="Ho Chi Minh City University of Technology emblem">
-  <div class="institution">
-    <p class="line-vnu">Vietnam National University Ho Chi Minh City</p>
-    <p class="line-university">Ho Chi Minh City University of Technology</p>
-    <p class="line-faculty">Faculty of Computer Science and Engineering</p>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header"><div class="header-inner">
+  <a class="brand" href="index.html"><img src="logo.png" width="32" height="32" alt="HCMUT"><span>Placeholder <small>Deep Learning Project</small></span></a>
+  <nav aria-label="Main navigation"><a href="index.html" aria-current="page">Overview</a><a href="assignment1.html">Assignment 1</a><a href="assignment2.html">Assignment 2</a><a href="assignment3.html">Assignment 3</a></nav>
+</div></header><main id="main" class="home-main">
+<section class="home-hero" aria-labelledby="project-title">
+  <div><p class="eyebrow">CO3133 · Semester 261 · Group Placeholder</p>
+  <h1 id="project-title">Experiments in<br>deep learning<span>.</span></h1>
+  <p class="hero-description">Three projects exploring how models learn: image classification, underwater segmentation, and multimodal learning. Our methods, results, and lessons along the way.</p>
+  <div class="hero-actions"><a class="button" href="#assignments">Explore the projects <span aria-hidden="true">↓</span></a><a class="text-link" href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder/tree/a2/m1">Code repository ↗</a></div>
   </div>
-</header>
-
-<div class="banner">
-  <h1>Deep Learning and Its Applications</h1>
-  <p class="course-code">CO3133 &middot; Semester 261</p>
-  <div class="badges">
-    <span class="badge">Group: Placeholder</span>
-    <span class="badge">Instructor: Le Thanh Sach</span>
+  <div class="hero-study dataset-study" aria-label="Project datasets">
+    <div class="figure-label"><span>DATASETS</span><span>Across the projects</span></div>
+    <dl class="dataset-list">
+      <div><dt>MNIST</dt><dd>Handwritten digits <span>Classification</span></dd></div>
+      <div><dt>Fashion-MNIST</dt><dd>Clothing images <span>Classification</span></dd></div>
+      <div><dt>CIFAR-10</dt><dd>Everyday objects <span>Classification</span></dd></div>
+      <div><dt>SUIM</dt><dd>Underwater scenes <span>Segmentation</span></dd></div>
+    </dl>
   </div>
-</div>
-
-<main>
-
-  <section id="course">
-    <h2>Course Information</h2>
-    <dl class="meta">
-      <dt>University</dt>
-      <dd>Ho Chi Minh City University of Technology (HCMUT), VNU-HCM</dd>
-      <dt>Faculty</dt>
-      <dd>Faculty of Computer Science and Engineering</dd>
-      <dt>Course</dt>
-      <dd>Deep Learning and Its Applications</dd>
-      <dt>Course code</dt>
-      <dd>CO3133</dd>
-      <dt>Semester</dt>
-      <dd>261</dd>
-      <dt>Instructor</dt>
-      <dd>Le Thanh Sach</dd>
-    </dl>
-  </section>
-
-  <section id="group">
-    <h2>Group Information</h2>
-    <dl class="meta">
-      <dt>Group name</dt>
-      <dd>Placeholder</dd>
-      <dt>Code repository</dt>
-      <dd><a href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder">vietanh1802/CO3133-Deep-Learning-261-Placeholder</a></dd>
-    </dl>
-
-    <h3>Members and Contributions</h3>
-    <div class="table-scroll">
-      <table>
-        <thead>
-          <tr>
-            <th>Full name</th>
-            <th>Student ID</th>
-            <th>Role / Contribution</th>
-            <th>GitHub</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Vu Duc Viet Anh</td>
-            <td>2352074</td>
-            <td>Website and UI &middot; Training pipeline &middot; LSTM model</td>
-            <td><a href="https://github.com/vietanh1802">vietanh1802</a></td>
-          </tr>
-          <tr>
-            <td>Tran Lam Anh</td>
-            <td>2352067</td>
-            <td>Data loader, preprocessing and EDA (MNIST, Fashion-MNIST) &middot; Transformer model &middot; Metrics</td>
-            <td><a href="https://github.com/lamanhhh">lamanhhh</a></td>
-          </tr>
-          <tr>
-            <td>Le Nguyen Khang</td>
-            <td>2352470</td>
-            <td>Error analysis &middot; GRU model &middot; Shared utilities &middot; Review</td>
-            <td><a href="https://github.com/khenm">khenm</a></td>
-          </tr>
-          <tr>
-            <td>Tran Nguyen Giap</td>
-            <td>2352284</td>
-            <td>Linear, Recurrent and CNN models &middot; Shared utilities &middot; Evaluation pipeline</td>
-            <td><a href="https://github.com/nguyenzap">nguyenzap</a></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
-
-  <section id="assignments">
-    <h2>Assignments</h2>
-    <div class="assignments">
-      <a class="card" href="assignment1.html">
-        <span class="tag">40% &middot; Assignment 1</span>
-        <strong>Foundations of Deep Learning Pipelines and Architectures</strong>
-        <span>From linear models to modern sequence models: a comparative study for image classification.</span>
-      </a>
-      <a class="card" href="assignment2.html">
-        <span class="tag">30% &middot; Assignment 2</span>
-        <strong>Deep Learning on Large-Scale Data and Specialized Tasks</strong>
-        <span>Deep learning on large-scale data for specialized computer vision or language tasks.</span>
-      </a>
-      <a class="card" href="assignment3.html">
-        <span class="tag">30% &middot; Assignment 3</span>
-        <strong>Multimodal Deep Learning</strong>
-        <span>Multimodal deep learning: representation, fusion, and evaluation.</span>
-      </a>
-    </div>
-  </section>
-
-  <section id="ai-usage">
-    <h2>AI Usage Disclosure</h2>
-    <p>
-      This section summarizes AI tool use across all three assignments. A detailed per-use log is
-      kept in
-      <a href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder/blob/main/AI_USAGE.md">AI_USAGE.md</a>
-      in the code repository, and each assignment page carries its own disclosure.
-    </p>
-    <p class="note">
-      This disclosure will be updated as each assignment is completed.
-    </p>
-  </section>
-
+</section>
+<section id="course" class="landing-course" aria-labelledby="course-title">
+  <div><p class="eyebrow">Course information</p><h2 id="course-title">Deep Learning and Its Applications</h2><p>Ho Chi Minh City University of Technology – VNU-HCM<br>Faculty of Computer Science and Engineering</p></div>
+  <dl class="meta"><dt>Course code</dt><dd>CO3133</dd><dt>Semester</dt><dd>Semester-261</dd><dt>Instructor</dt><dd>Lê Thành Sách</dd><dt>Group</dt><dd>Placeholder</dd></dl>
+</section>
+<section id="assignments" class="project-section">
+  <div class="section-heading"><div><p class="eyebrow">The project notebook</p><h2>Questions, experiments, findings.</h2></div><span class="section-count">01 — 03</span></div>
+  <div class="project-grid">
+    <a class="project-card featured" href="assignment1.html"><div class="project-number">01 <span>Classification</span></div><h3>How much model<br>does an image need?</h3><p>From linear models to modern sequence models. Fashion-MNIST is the main study; MNIST supports development and CIFAR-10 extends the comparison.</p><div class="card-bottom"><span>Assignment 1 · 40%</span><span>View assignment ↗</span></div></a>
+    <a class="project-card" href="assignment2.html"><div class="project-number">02 <span>Segmentation</span></div><h3>Reading the<br>underwater scene.</h3><p>Pixel-level understanding of underwater imagery with the SUIM dataset.</p><div class="card-bottom"><span>Assignment 2 · 30%</span><span>View draft ↗</span></div></a>
+    <a class="project-card" href="assignment3.html"><div class="project-number">03 <span>Multimodal learning</span></div><h3>Learning across<br>modalities.</h3><p>Representation, fusion, and evaluation. The next chapter of the project.</p><div class="card-bottom"><span>Assignment 3 · 30%</span><span>Project outline ↗</span></div></a>
+  </div>
+</section>
+<section id="deliverables" class="project-section" aria-labelledby="deliverables-title">
+  <div class="section-heading"><div><p class="eyebrow">Materials and evidence</p><h2 id="deliverables-title">Reports, presentations, and code.</h2></div></div>
+  <div class="deliverable-grid">
+    <article class="deliverable-card"><p class="eyebrow">Assignment 1 · Classification</p><h3>Final materials</h3><ul class="links">
+      <li><a href="assignment1.html">Assignment page and results</a></li>
+      <li><a href="downloads/a1/Placeholder_A1_Report.pdf">Final report (PDF)</a></li>
+      <li><a href="downloads/a1/Placeholder_A1_Slide.pptx" download>Presentation slides (PowerPoint)</a></li>
+      <li><a href="https://www.youtube.com/watch?v=nQdd3HrIEeE">YouTube presentation ↗</a></li>
+      <li><a href="assignment1.html#limitations">Checkpoint reconstruction</a></li>
+      <li><a href="assignment1.html#ai-usage">Assignment 1 AI disclosure</a></li>
+    </ul></article>
+    <article class="deliverable-card"><p class="eyebrow">Assignment 2 · Segmentation</p><h3>Draft and experiments</h3><ul class="links">
+      <li><a href="assignment2.html">Assignment page and draft results</a></li>
+      <li><a href="assignment2.html#proposal">Dataset proposal and approval record</a></li>
+      <li><a href="assignment2.html#links">Code, experiment evidence, and reproduction</a></li>
+      <li><a href="data/AI_USAGE.md" download>AI usage log — Assignment 2 section</a></li>
+    </ul><p class="material-status">Final report, slides, video, and checkpoint downloads will be linked when available.</p></article>
+    <article class="deliverable-card"><p class="eyebrow">Assignment 3 · Multimodal learning</p><h3>Project planning</h3><ul class="links">
+      <li><a href="assignment3.html">Assignment outline</a></li>
+      <li><a href="assignment3.html#proposal">Dataset proposal planning</a></li>
+      <li><a href="assignment3.html#links">Deliverable status</a></li>
+    </ul><p class="material-status">Final materials and an assignment-specific AI disclosure will be added as work progresses.</p></article>
+  </div>
+  <p class="landing-source"><a href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder/tree/a2/m1">Current integration code ↗</a> · <a href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder/blob/a2/m1/README.md">Installation and reproduction instructions</a></p>
+</section>
+<section id="members" class="project-section" aria-labelledby="members-title">
+  <div class="section-heading"><div><p class="eyebrow">The group</p><h2 id="members-title">Group members</h2></div></div>
+  <div class="table-scroll"><table><caption>Group Placeholder — members and main contributions recorded in the project.</caption><thead><tr><th scope="col">Member</th><th scope="col">Student ID</th><th scope="col">Main contribution</th><th scope="col">GitHub</th></tr></thead><tbody>
+    <tr><td>Vũ Đức Việt Anh</td><td>2352074</td><td>Website; training pipeline and LSTM; SUIM data loading, augmentation, and EDA.</td><td><a href="https://github.com/vietanh1802">vietanh1802 ↗</a></td></tr>
+    <tr><td>Trần Lâm Anh</td><td>2352067</td><td>Data preprocessing, EDA, metrics, and Transformer; pretrained DeepLabV3 integration.</td><td>—</td></tr>
+    <tr><td>Lê Nguyên Khang</td><td>2352470</td><td>Error analysis, GRU, shared utilities, and review; segmentation evaluation and qualitative analysis.</td><td>—</td></tr>
+    <tr><td>Trần Nguyên Giáp</td><td>2352284</td><td>Linear/CNN models and evaluation pipeline; U-Net baseline implementation and training.</td><td>—</td></tr>
+  </tbody></table></div>
+</section>
+<section id="ai-usage" class="project-section" aria-labelledby="ai-title">
+  <div class="section-heading"><div><p class="eyebrow">AI Usage Disclosure</p><h2 id="ai-title">Tools, contributions, and verification.</h2></div></div>
+  <p>The group uses AI for coding support, explanations, debugging, review, test generation, EDA, writing, and presentation preparation. Some uses generate code or text. Members remain responsible for understanding their contributions and verifying submitted results.</p>
+  <div class="table-scroll"><table><thead><tr><th scope="col">Assignment</th><th scope="col">Recorded tools and uses</th><th scope="col">Disclosure</th></tr></thead><tbody>
+    <tr><td>Assignment 1</td><td>Codex/GPT and Claude: scaffolding, pipeline integration, EDA, model checks, tests, report text, slides, video narration, and website preparation.</td><td><a href="assignment1.html#ai-usage">Detailed entries and verification</a></td></tr>
+    <tr><td>Assignment 2</td><td>Codex: segmentation explanations, DeepLabV3 implementation, fine-tuning configuration, and supporting tests.</td><td><a href="data/AI_USAGE.md" download>Assignment 2 log entry</a></td></tr>
+    <tr><td>Assignment 3</td><td>No AI-use entries recorded yet. This section will be updated as work is documented.</td><td><a href="assignment3.html">Project status</a></td></tr>
+  </tbody></table></div>
+  <p><a class="button" href="data/AI_USAGE.md" download>Download complete AI usage log</a></p>
+  <p class="material-status">The log records the tool/model, user, development stage, purpose, affected work, representative prompts, and verification. Recorded checks and pending student review are identified in the entries.</p>
+</section>
 </main>
 
 <footer>

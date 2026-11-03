@@ -1,0 +1,16 @@
+\begin{table}[htbp]
+\centering\small
+\caption{Fashion-MNIST test results. Each model trains for 50 epochs with seed 42. We evaluate the checkpoint with the lowest validation loss.}
+\label{tab:comparison}
+\begin{tabular}{lrrr}
+\toprule
+Model & Accuracy (\%) & Macro-F1 & Parameters\\\midrule
+Linear & 77.05 & 0.7694 & 7,850\\
+MLP & 87.18 & 0.8711 & 235,146\\
+CNN & 92.59 & 0.9261 & 421,738\\
+GRU & 89.88 & 0.8990 & 61,962\\
+LSTM & 89.52 & 0.8952 & 82,186\\
+Transformer & 90.43 & 0.9040 & 1,191,050\\
+\bottomrule
+\end{tabular}
+\end{table}

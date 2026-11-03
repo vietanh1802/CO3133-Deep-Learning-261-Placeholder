@@ -1,0 +1,179 @@
+{
+  "per_class_accuracy": {
+    "T-shirt/top": 0.844,
+    "Trouser": 0.97,
+    "Pullover": 0.798,
+    "Dress": 0.875,
+    "Coat": 0.797,
+    "Sandal": 0.953,
+    "Shirt": 0.621,
+    "Sneaker": 0.937,
+    "Bag": 0.971,
+    "Ankle boot": 0.952
+  },
+  "per_class_support": {
+    "T-shirt/top": 1000,
+    "Trouser": 1000,
+    "Pullover": 1000,
+    "Dress": 1000,
+    "Coat": 1000,
+    "Sandal": 1000,
+    "Shirt": 1000,
+    "Sneaker": 1000,
+    "Bag": 1000,
+    "Ankle boot": 1000
+  },
+  "most_confused_pairs": [
+    {
+      "target": 6,
+      "prediction": 0,
+      "count": 179
+    },
+    {
+      "target": 0,
+      "prediction": 6,
+      "count": 96
+    },
+    {
+      "target": 4,
+      "prediction": 2,
+      "count": 96
+    },
+    {
+      "target": 2,
+      "prediction": 4,
+      "count": 92
+    },
+    {
+      "target": 6,
+      "prediction": 4,
+      "count": 85
+    }
+  ],
+  "confident_errors": [
+    {
+      "sample_index": 3532,
+      "target": 2,
+      "prediction": 6,
+      "confidence": 0.9989314675331116,
+      "true_class_probability": 2.994648639287334e-05,
+      "margin": 0.9989015460014343
+    },
+    {
+      "sample_index": 787,
+      "target": 1,
+      "prediction": 3,
+      "confidence": 0.9981096982955933,
+      "true_class_probability": 0.0012672741431742907,
+      "margin": 0.9968424439430237
+    },
+    {
+      "sample_index": 722,
+      "target": 5,
+      "prediction": 7,
+      "confidence": 0.9967535138130188,
+      "true_class_probability": 0.0032321971375495195,
+      "margin": 0.9935213327407837
+    },
+    {
+      "sample_index": 5338,
+      "target": 0,
+      "prediction": 8,
+      "confidence": 0.9966577291488647,
+      "true_class_probability": 0.002071307273581624,
+      "margin": 0.9945864081382751
+    },
+    {
+      "sample_index": 1953,
+      "target": 5,
+      "prediction": 7,
+      "confidence": 0.9960653185844421,
+      "true_class_probability": 0.003912399988621473,
+      "margin": 0.9921529293060303
+    }
+  ],
+  "uncertain_errors": [
+    {
+      "sample_index": 3973,
+      "target": 3,
+      "prediction": 2,
+      "confidence": 0.22321967780590057,
+      "true_class_probability": 0.20448459684848785,
+      "margin": 0.01873508095741272
+    },
+    {
+      "sample_index": 9251,
+      "target": 0,
+      "prediction": 3,
+      "confidence": 0.22916632890701294,
+      "true_class_probability": 0.18809674680233002,
+      "margin": 0.04106958210468292
+    },
+    {
+      "sample_index": 2106,
+      "target": 2,
+      "prediction": 6,
+      "confidence": 0.2296663075685501,
+      "true_class_probability": 0.11323186755180359,
+      "margin": 0.11643444001674652
+    },
+    {
+      "sample_index": 2814,
+      "target": 3,
+      "prediction": 4,
+      "confidence": 0.23056764900684357,
+      "true_class_probability": 0.16974018514156342,
+      "margin": 0.06082746386528015
+    },
+    {
+      "sample_index": 9449,
+      "target": 2,
+      "prediction": 3,
+      "confidence": 0.24404220283031464,
+      "true_class_probability": 0.2149249017238617,
+      "margin": 0.029117301106452942
+    }
+  ],
+  "confident_correct": [
+    {
+      "sample_index": 2,
+      "target": 1,
+      "prediction": 1,
+      "confidence": 1.0,
+      "true_class_probability": 1.0,
+      "margin": 0.0
+    },
+    {
+      "sample_index": 3,
+      "target": 1,
+      "prediction": 1,
+      "confidence": 1.0,
+      "true_class_probability": 1.0,
+      "margin": 0.0
+    },
+    {
+      "sample_index": 24,
+      "target": 1,
+      "prediction": 1,
+      "confidence": 1.0,
+      "true_class_probability": 1.0,
+      "margin": 0.0
+    },
+    {
+      "sample_index": 41,
+      "target": 1,
+      "prediction": 1,
+      "confidence": 1.0,
+      "true_class_probability": 1.0,
+      "margin": 0.0
+    },
+    {
+      "sample_index": 64,
+      "target": 1,
+      "prediction": 1,
+      "confidence": 1.0,
+      "true_class_probability": 1.0,
+      "margin": 0.0
+    }
+  ]
+}

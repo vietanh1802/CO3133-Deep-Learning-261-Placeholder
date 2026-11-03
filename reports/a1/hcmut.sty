@@ -1,0 +1,28 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{hcmut}[2026/10/26 HCMUT course report style]
+% Retains the university identity while keeping only packages used by this report.
+\RequirePackage[T1,T5]{fontenc}
+\RequirePackage[utf8]{inputenc}
+\RequirePackage{amsmath,amssymb}
+\RequirePackage{graphicx,array,tabularx}
+\RequirePackage{geometry,setspace}
+\RequirePackage{fancyhdr,lastpage}
+\RequirePackage{xcolor,listings,tikz}
+\RequirePackage{caption}
+\RequirePackage{hyperref}
+\newcommand{\thesislayout}{\geometry{a4paper,left=25mm,right=25mm,top=28mm,bottom=25mm,headheight=34pt,headsep=8mm}}
+\setlength{\parindent}{0pt}
+\hypersetup{colorlinks=true,urlcolor=blue!60!black,linkcolor=black,citecolor=black}
+\AtBeginDocument{\renewcommand*\contentsname{Table of Contents}}
+\AtBeginDocument{\renewcommand*\refname{References}}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\begin{minipage}[c]{9mm}\includegraphics[width=8mm]{Images/bachkhoa_logo.png}\end{minipage}\hspace{2mm}%
+\begin{minipage}[c]{0.84\textwidth}\scriptsize\sffamily
+\textbf{Ho Chi Minh City University of Technology, VNU-HCM}\\
+Faculty of Computer Science and Engineering\end{minipage}}
+\fancyfoot[L]{\scriptsize\ttfamily CO3133 / Assignment 1}
+\fancyfoot[R]{\scriptsize Page \thepage}
+\renewcommand{\headrulewidth}{0.3pt}
+\renewcommand{\footrulewidth}{0.3pt}
+\endinput

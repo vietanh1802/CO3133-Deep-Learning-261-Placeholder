@@ -5,7 +5,9 @@ from pathlib import Path
 from torchvision.datasets import MNIST
 
 from src.data import class_names
-from src.data.eda_report import run_dataset_eda
+from src.eda.report import (
+    run_dataset_eda,
+)
 
 DATA_DIR = Path("data")
 OUTPUT_DIR = Path("results/a1/eda/mnist")

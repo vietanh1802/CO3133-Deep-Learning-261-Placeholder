@@ -1,6 +1,5 @@
-"""Configuration, logging, and reproducibility helpers."""
+"""Logging and reproducibility helpers."""
 
-from src.utils.config import ExperimentConfig, load_config
 from src.utils.logging import ExperimentState, progress_bar, setup_logging
 from src.utils.seed import (
     capture_rng_state,
@@ -11,10 +10,8 @@ from src.utils.seed import (
 )
 
 __all__ = [
-    "ExperimentConfig",
     "ExperimentState",
     "capture_rng_state",
-    "load_config",
     "make_generator",
     "progress_bar",
     "restore_rng_state",
