@@ -1,0 +1,64 @@
+\section{Methodology}
+\label{sec:method}
+
+\subsection{Training and evaluation pipeline}
+\reporttodo{Add a diagram of the form raw data, preprocessing, data loader,
+model, loss, optimization, prediction, post-processing, evaluation (Handbook
+Section 3.2). Explain each stage in one or two sentences and name the main
+source files.}
+
+\reportfigure{Images/a2_pipeline.png}{Training and evaluation pipeline for SUIM
+segmentation.}{fig:pipeline}
+
+\subsection{Model architectures}
+\label{sec:models}
+
+\subsubsection{U-Net baseline}
+\reporttodo{Describe the encoder and decoder depth, channel widths, skip
+connections, normalization, and output head. Give the parameter count. State
+that the model is implemented by the group and trained from scratch. List its
+strengths and limits for this task.}
+
+\subsubsection{Pretrained DeepLabV3}
+\reporttodo{Describe the ResNet backbone, atrous convolution, the ASPP module,
+the output stride, and the new eight-class head. Name the pretrained weights
+(torchvision \codepath{COCO_WITH_VOC_LABELS_V1}) and the library. Give the
+parameter count and state which parts come from torchvision and which were
+written by the group.}
+
+\input{Tables/model_summary}
+
+\subsection{Fine-tuning procedure}
+\label{sec:finetune}
+\reporttodo{Explain how the pretrained model is adapted: replaced classifier
+head, which layers are trained, separate learning rates for the backbone and the
+head, and why this choice was made.}
+
+\subsection{Loss and evaluation metrics}
+\label{sec:metrics}
+\reporttodo{Define pixel-wise cross-entropy and the class-averaged soft Dice
+loss, and the combined loss $\mathcal{L}=0.5\,\mathcal{L}_{\mathrm{CE}}
++0.5\,\mathcal{L}_{\mathrm{Dice}}$. Define per-class IoU
+$\mathrm{IoU}_k=\mathrm{TP}_k/(\mathrm{TP}_k+\mathrm{FP}_k+\mathrm{FN}_k)$ and
+Dice $=2\mathrm{TP}_k/(2\mathrm{TP}_k+\mathrm{FP}_k+\mathrm{FN}_k)$, with
+confusion counts accumulated over the whole split. State how mIoU and mean Dice
+average over the eight classes and how absent classes are treated.}
+
+\subsection{Training configuration}
+\label{sec:training}
+\reporttodo{Fill Table~\ref{tab:training-setup} from the configs in
+\codepath{configs/segmentation/suim/} and the saved launch configs. Explain how
+hyperparameters were chosen. Note any difference between a config file and the
+reported run, such as batch size.}
+
+\input{Tables/training_setup}
+
+\subsection{Experimental design}
+\label{sec:experiments}
+\reporttodo{For each experiment, state the hypothesis, the changed factor, the
+fixed factors, the metrics, and the decision criterion (Handbook Section 21).
+The comparisons are U-Net against DeepLabV3, and the controlled experiment of
+cross-entropy against cross-entropy plus Dice on DeepLabV3. Define in advance
+what counts as a meaningful difference given a single seed.}
+
+\input{Tables/experiment_design}
