@@ -1,0 +1,69 @@
+\section{Problem and data description}
+\label{sec:data}
+
+\subsection{Task and research question}
+\reporttodo{Give the real-world motivation for underwater scene segmentation
+(for example, robot navigation and marine survey). Define the input as an RGB
+image $x\in\mathbb{R}^{3\times H\times W}$, the output as a mask
+$\hat y\in\{0,\ldots,7\}^{H\times W}$, and the prediction unit as one pixel.
+Write $\hat y_{uv}=\arg\max_k f_\theta(x)_{k,uv}$. State the research question
+and the main difficulties: colour cast, turbidity, small objects, and class
+imbalance.}
+
+\subsection{Dataset and study scope}
+\reporttodo{Describe SUIM \cite{suim}: source URL, version, licence status
+(MIT software licence; no separate dataset licence stated), collection and
+labelling process, the eight classes with their RGB codes, number of image and
+mask pairs, file formats, and storage size. Note the source overlap with EUVP,
+USR-248 and UFO-120 as a bias and limitation.}
+
+\subsection{Dataset proposal and approval}
+\label{sec:proposal}
+\reporttodo{Summarize the Dataset Proposal submitted at Milestone 1
+(\codepath{reports/a2_proposal.md}). Record the approval status (Approved,
+Approved with conditions, or Rejected), the approval date, and any conditions.
+State whether the segmentation thresholds (at least three foreground classes and
+about 1,000 masked images) are met.}
+
+\subsection{Exploratory data analysis}
+\label{sec:eda}
+\reporttodo{Cover the segmentation EDA items in Handbook Section 22: pixel
+distribution per class, region size, and mask quality. Use
+\codepath{results/a2/eda/suim/summary.json}. Report pixel share, number of images
+containing each class, and median region area. Explain what each figure shows
+and why it matters for the models.}
+
+\input{Tables/eda_classes}
+
+\reportfigure{Images/suim_class_distribution.png}{Pixel share and image count
+for each SUIM class, computed on the usable train and validation pairs.}{fig:class-distribution}
+
+\reportfigure{Images/suim_region_area_distribution.png}{Distribution of region
+area per class, as a fraction of the image, for images that contain the
+class.}{fig:region-area}
+
+\reportfigure{Images/suim_resolution_distribution.png}{Distribution of native
+image resolutions in the train and validation pool.}{fig:resolutions}
+
+\reporttodo{Describe mask quality: size mismatches between image and mask,
+pixels whose colour is not one of the eight class codes, and how many pairs were
+excluded or repaired. Add a figure of example masks if it helps.}
+
+\subsection{Splits and leakage prevention}
+\label{sec:splits}
+\reporttodo{State the split rule: the official test set is held out, and the
+remaining usable pairs are split into train and validation with seed 42. Give
+the split unit, whether sampling is stratified, and the saved split files
+(\codepath{results/a2/splits/suim/}). Explain how leakage is prevented and what
+has not been checked, such as near-duplicate frames from the same video or
+source dataset.}
+
+\input{Tables/data_splits}
+
+\subsection{Preprocessing and augmentation}
+\label{sec:preprocessing}
+\reporttodo{Describe the conversion from RGB mask to class index, handling of
+off-code pixels and size mismatches, resizing to $240\times320$ (image with
+bilinear and mask with nearest-neighbour interpolation), normalization constants,
+and training augmentation (horizontal flip). Give the input tensor shapes and
+describe one example batch after preprocessing.}
