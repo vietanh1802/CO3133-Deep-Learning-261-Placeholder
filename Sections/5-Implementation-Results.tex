@@ -1,0 +1,78 @@
+\section{Implementation results}
+\label{sec:results}
+
+\subsection{Training behavior}
+\label{sec:training-behavior}
+\reporttodo{Describe the loss and validation mIoU curves for each run: the
+selected epoch, signs of overfitting or underfitting, and training time.
+Record implementation issues found during training and how they were fixed.}
+
+\reportfigure{Images/unet_learning_curves.png}{U-Net training loss and
+validation mIoU on SUIM, seed 42.}{fig:unet-curves}
+
+\reportfigure{Images/deeplabv3_ce_learning_curves.png}{DeepLabV3 with
+cross-entropy: training loss and validation mIoU on SUIM, seed 42.}{fig:deeplab-curves}
+
+\reportfigure{Images/deeplabv3_dice_learning_curves.png}{DeepLabV3 with
+cross-entropy plus Dice: training loss and validation mIoU on SUIM, seed 42.}{fig:dice-curves}
+
+\subsection{Quantitative results}
+\label{sec:quantitative}
+\reporttodo{Report test mIoU and mean Dice for every model, using the
+checkpoint selected on validation. Give per-class IoU, parameter counts,
+training time, and inference cost. State that each configuration uses one seed,
+or give mean and standard deviation if more seeds are run.}
+
+\input{Tables/test_results}
+\input{Tables/per_class_iou}
+
+\subsection{Compute cost}
+\label{sec:compute}
+\reporttodo{Compare parameters, training time, inference latency, throughput,
+and peak memory. Name the hardware for each run (RTX 4060 Laptop or
+$2\times$ RTX 3090). Explain why time measured on different hardware cannot be
+compared directly, and remeasure inference on one device if possible.}
+
+\input{Tables/compute_cost}
+
+\subsection{Qualitative results}
+\label{sec:qualitative}
+\reporttodo{Show test images with ground truth and predictions from each model:
+correct predictions, difficult but correct cases, and failures. State the rule
+used to select the examples so the selection is reproducible.}
+
+\reportfigure{Images/a2_test_examples.png}{Test images, ground truth, and
+predictions from U-Net and DeepLabV3. State the selection rule.}{fig:examples}
+
+\subsection{Controlled experiment: loss function}
+\label{sec:ablation}
+\reporttodo{Report the cross-entropy against cross-entropy plus Dice result on
+DeepLabV3. Compare mIoU, mean Dice, and the IoU of the rare classes RO, PF and
+WR. State whether the hypothesis is supported under the decision criterion in
+Section~\ref{sec:experiments}.}
+
+\input{Tables/ablation}
+
+\subsection{Error analysis}
+\label{sec:errors}
+\reporttodo{Group the errors, for example PF predicted as RI, boundary errors,
+small objects missed, and background confusion. For each group give a
+description, its frequency or rate from the confusion matrix, examples, a
+hypothesized cause, and an improvement idea.}
+
+\reportfigure{Images/deeplabv3_test_confusion_matrix.png}{Row-normalized
+confusion matrix of the best model on the SUIM test set.}{fig:confusion}
+
+\subsection{Comparison and discussion}
+\label{sec:discussion}
+\reporttodo{Explain which model is better and by how much, where the
+differences appear (which classes and region sizes), and likely causes in data,
+architecture, loss, or training. Discuss accuracy, speed, and parameter
+trade-offs. Say which conclusions cannot yet be drawn. Listing the highest score
+is not enough.}
+
+\subsection{Limitations and conclusion}
+\label{sec:conclusion}
+\reporttodo{List data, method, and experimental limits (single seed, different
+hardware, source overlap, resizing). Discuss generalization and future work.
+End with a short answer to the research question.}
