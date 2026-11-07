@@ -22,7 +22,7 @@ uv run --locked python -c 'import torch; assert torch.cuda.is_available(), "A CU
 for dataset in fashion_mnist mnist cifar10; do
     config="configs/image_classification/$dataset/cnn.yaml"
     uv run --locked python -m scripts.training.train_image_classification --data "$dataset" --config "$config"
-    uv run --locked python -m scripts.evaluation.evaluate --data "$dataset" --config "$config"
+    uv run --locked python -m scripts.evaluation.evaluate_image_classification --data "$dataset" --config "$config"
 done
 ''']
 

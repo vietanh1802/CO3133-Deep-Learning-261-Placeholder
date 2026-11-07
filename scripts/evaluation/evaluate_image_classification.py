@@ -1,4 +1,4 @@
-"""Evaluate a selected checkpoint on the held-out test split."""
+"""Evaluate an A1 image-classification checkpoint on a validation or test split."""
 
 import argparse
 import json

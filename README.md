@@ -42,8 +42,8 @@ SUIM training reads the committed splits in `results/a2/splits/suim/`.
 
 ```bash
 uv run python -m scripts.training.train_image_classification --data fashion_mnist --config configs/image_classification/fashion_mnist/linear.yaml
-uv run python -m scripts.evaluation.evaluate --data fashion_mnist --config configs/image_classification/fashion_mnist/linear.yaml
-uv run python -m scripts.evaluation.compare --results-dir results/a1 --epochs 50 \
+uv run python -m scripts.evaluation.evaluate_image_classification --data fashion_mnist --config configs/image_classification/fashion_mnist/linear.yaml
+uv run python -m scripts.evaluation.compare_image_classification --results-dir results/a1 --epochs 50 \
   --figures-dir web/images/comparison/a1
 ```
 
@@ -66,7 +66,7 @@ Evaluation loads the selected checkpoint and saves test outputs in `results/a1/<
 After the evaluations finish, rebuild the comparison table:
 
 ```bash
-uv run --no-sync python -m scripts.evaluation.compare --results-dir results/a1 --epochs 50
+uv run --no-sync python -m scripts.evaluation.compare_image_classification --results-dir results/a1 --epochs 50
 ```
 
 The comparison includes only `<dataset>_cnn_spatial_*` CNN runs. Archived
@@ -164,7 +164,8 @@ teal, and gray colors. Exports retain their dimensions and write PNG and PDF.
 ## Checks
 
 ```bash
-uv run --locked python -m scripts.check
+uv run --locked pre-commit run --all-files
+MPLBACKEND=Agg OMP_NUM_THREADS=1 uv run --locked pytest -q
 ```
 
 - `tests/contracts`: configuration, imports, data, and package boundaries.
