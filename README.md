@@ -154,16 +154,18 @@ Data loading stays independent of EDA, plotting, training, and evaluation.
 
 Call `src.plots.format.apply()` before creating a figure. Save with
 `src.plots.common.save_figure(figure, output_path)` for 400-dpi PNG and PDF exports.
-The shared style uses DejaVu Sans and requires no LaTeX installation.
+Edit `configs/plotting.toml` to change the shared style. Typography, thin lines,
+full frames, and faint grids follow the detachable decomposition theme. Courier New
+falls back to DejaVu Sans Mono on servers. No LaTeX installation is required.
+Use plasma for ordered magnitudes, PuOr_r for signed values around zero, twilight
+for cyclic values, and tab10 for classes. Method curves use the reference purple,
+teal, and gray colors. Exports retain their dimensions and write PNG and PDF.
 
 ## Checks
 
 ```bash
 uv run --locked python -m scripts.check
 ```
-
-Runs lint, formatting, types, and the CPU test suite. GitHub Actions runs the same
-command on pushes and pull requests. Tests use synthetic data without dataset downloads.
 
 - `tests/contracts`: configuration, imports, data, and package boundaries.
 - `tests/components`: models, metrics, analysis, plots, and shared training behavior.

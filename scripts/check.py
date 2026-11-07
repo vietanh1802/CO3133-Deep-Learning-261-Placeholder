@@ -1,4 +1,4 @@
-"""Run the same checks locally and in CI."""
+"""Run all local checks: lint, formatting, types, and CPU tests."""
 
 import os
 import subprocess

@@ -18,7 +18,10 @@ from src.data.suim import SuimSegmentation, build_suim_loaders
 from src.training import segmentation
 
 
-def test_deeplab_cli_resumes_two_rates_and_exports_validation(tmp_path, monkeypatch, tiny_deeplab):
+@pytest.mark.parametrize("ablation", [False, True])
+def test_deeplab_cli_resumes_two_rates_and_exports_validation(
+    tmp_path, monkeypatch, tiny_deeplab, ablation
+):
     data = tmp_path / "data"
     splits = tmp_path / "splits"
     splits.mkdir()
@@ -66,6 +69,17 @@ def test_deeplab_cli_resumes_two_rates_and_exports_validation(tmp_path, monkeypa
         results_dir=tmp_path / "results",
         checkpoint_dir=tmp_path / "checkpoints",
     )
+    if ablation:
+        config = replace(
+            config,
+            model_config={**config.model_config, "backbone": "resnet101", "freeze_backbone": True},
+            loss="ce_dice",
+            augment=False,
+            image_height=8,
+            image_width=12,
+            evaluation_height=16,
+            evaluation_width=24,
+        )
     config_path = tmp_path / "config.yaml"
     config_path.write_text(yaml.safe_dump(config.to_dict()), encoding="utf-8")
     argv = ["train_segmentation", "--config", str(config_path)]

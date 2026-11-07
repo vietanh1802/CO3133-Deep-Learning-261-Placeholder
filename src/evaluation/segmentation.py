@@ -11,6 +11,14 @@ from dataclasses import dataclass
 
 import torch
 from torch import Tensor, nn
+from torch.nn import functional
+
+
+def resize_logits(logits: Tensor, size: tuple[int, int]) -> Tensor:
+    """Resize scores before argmax so evaluation retains one common target grid."""
+    if logits.shape[-2:] != size:
+        return functional.interpolate(logits, size=size, mode="bilinear", align_corners=False)
+    return logits
 
 
 @dataclass(frozen=True)
@@ -233,10 +241,12 @@ def evaluate_model(
             if (
                 not isinstance(logits, Tensor)
                 or targets.ndim != 3
-                or logits.shape != (targets.shape[0], num_classes, *targets.shape[1:])
+                or logits.ndim != 4
+                or logits.shape[:2] != (targets.shape[0], num_classes)
                 or not torch.isfinite(logits).all()
             ):
                 raise ValueError("model must return finite logits (N,C,H,W) matching targets")
+            logits = resize_logits(logits, (targets.shape[-2], targets.shape[-1]))
             regional = evaluate_predictions(targets, logits.argmax(1), num_classes=num_classes)
             for name, metrics in regional.items():
                 counts[name] += metrics.confusion_matrix

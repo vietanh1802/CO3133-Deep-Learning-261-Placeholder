@@ -77,3 +77,25 @@ def test_loaders_follow_split_files(suim_tree):
     (splits / "val.txt").write_text("c\nmissing\n")
     with pytest.raises(FileNotFoundError, match="missing"):
         SuimSegmentation(data_dir, "val", split_dir=splits)
+
+
+def test_ablation_loader_disables_flips_and_preserves_common_validation_grid(suim_tree):
+    data_dir, splits, _ = suim_tree
+    loaders = build_suim_loaders(
+        data_dir=data_dir,
+        batch_size=2,
+        seed=42,
+        image_height=8,
+        image_width=12,
+        augment=False,
+        evaluation_height=16,
+        evaluation_width=24,
+        split_dir=splits,
+    )
+    assert isinstance(loaders.train.dataset, SuimSegmentation)
+    assert not loaders.train.dataset.augment
+    images, targets = next(iter(loaders.train))
+    assert images.shape[-2:] == targets.shape[-2:] == (8, 12)
+    images, targets = next(iter(loaders.validation))
+    assert images.shape[-2:] == (8, 12)
+    assert targets.shape[-2:] == (16, 24)

@@ -26,10 +26,12 @@ class SegmentationDataset(Dataset[ImageBatch], ABC):
         augment: bool,
         mean: tuple[float, float, float],
         std: tuple[float, float, float],
+        target_size: tuple[int, int] | None = None,
     ) -> None:
         self.pairs = pairs
         self.stems = [image.stem for image, _ in pairs]
         self.image_size = image_size
+        self.target_size = target_size or image_size
         self.augment = augment
         self.mean = torch.tensor(mean).view(3, 1, 1)
         self.std = torch.tensor(std).view(3, 1, 1)
@@ -49,7 +51,10 @@ class SegmentationDataset(Dataset[ImageBatch], ABC):
             image = handle.convert("RGB").resize((width, height), Image.Resampling.BILINEAR)
         with Image.open(mask_path) as handle:
             labels = self.decode_target(handle)
-        labels = Image.fromarray(labels).resize((width, height), Image.Resampling.NEAREST)
+        target_height, target_width = self.target_size
+        labels = Image.fromarray(labels).resize(
+            (target_width, target_height), Image.Resampling.NEAREST
+        )
 
         pixels = torch.from_numpy(np.array(image, dtype=np.float32) / 255).permute(2, 0, 1)
         target = torch.from_numpy(np.array(labels, dtype=np.int64))

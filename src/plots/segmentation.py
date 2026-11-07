@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 
 from src.plots.common import prepare_output_path, save_figure  # noqa: E402
-from src.plots.format import BLUE, apply  # noqa: E402
+from src.plots.format import COLORS, apply  # noqa: E402
 
 
 def plot_segmentation_curves(
@@ -31,19 +31,19 @@ def plot_segmentation_curves(
     best_epoch = int(np.argmax(validation_miou)) + 1
 
     apply()
-    figure, (loss_axes, miou_axes) = plt.subplots(1, 2, figsize=(12, 4.5))
-    loss_axes.plot(epochs, train_loss, marker="o", markersize=4, label="Training loss")
-    loss_axes.plot(epochs, validation_loss, marker="s", markersize=4, label="Validation loss")
+    figure, (loss_axes, miou_axes) = plt.subplots(1, 2)
+    loss_axes.plot(epochs, train_loss, marker="o", label="Training loss")
+    loss_axes.plot(epochs, validation_loss, marker="s", label="Validation loss")
     loss_axes.set_ylabel("Cross-entropy loss")
     loss_axes.set_title("Training and validation loss")
-    miou_axes.plot(epochs, validation_miou, marker="s", markersize=4, color=BLUE)
+    miou_axes.plot(epochs, validation_miou, marker="s", color=COLORS[0])
     miou_axes.set_ylabel("Validation mIoU")
     miou_axes.set_title("Validation mIoU")
 
     for axes in (loss_axes, miou_axes):
         axes.axvline(
             best_epoch,
-            color="grey",
+            color=COLORS[2],
             linestyle="--",
             linewidth=1,
             label=f"Selected epoch ({best_epoch}, highest mIoU)",
