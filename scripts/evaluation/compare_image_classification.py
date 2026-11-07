@@ -1,4 +1,4 @@
-"""Compare saved classification runs without mixing datasets or training budgets."""
+"""Compare A1 image-classification runs within matching datasets and training budgets."""
 
 import argparse
 import csv
@@ -402,7 +402,7 @@ def main() -> None:
     if not records:
         raise FileNotFoundError(
             f"no {args.split}_result.json files found under {results_dir}; "
-            "run scripts/evaluation/evaluate.py first"
+            "run scripts/evaluation/evaluate_image_classification.py first"
         )
     logger.info("Loaded {} run record(s)", len(records))
 

@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 
 from src.plots.common import prepare_output_path, save_figure  # noqa: E402
-from src.plots.format import apply  # noqa: E402
+from src.plots.format import COLORS, apply  # noqa: E402
 
 
 def plot_learning_curves(
@@ -29,14 +29,14 @@ def plot_learning_curves(
     epochs = np.arange(1, len(train_loss) + 1)
 
     apply()
-    figure, axes = plt.subplots(figsize=(7, 4.5))
-    axes.plot(epochs, train_loss, marker="o", markersize=4, label="Training loss")
-    axes.plot(epochs, validation_loss, marker="s", markersize=4, label="Validation loss")
+    figure, axes = plt.subplots()
+    axes.plot(epochs, train_loss, marker="o", label="Training loss")
+    axes.plot(epochs, validation_loss, marker="s", label="Validation loss")
 
     best_epoch = int(np.argmin(validation_loss))
     axes.axvline(
         best_epoch + 1,
-        color="grey",
+        color=COLORS[2],
         linestyle="--",
         linewidth=1,
         label=f"Best validation epoch ({best_epoch + 1})",
@@ -100,11 +100,9 @@ def plot_prediction_examples(
 
 def plot_comparative_learning_curves(histories, output_path, *, loss_max, loss_ceiling=None):
     """Compare architectures with shared train/validation axes and the preset palette."""
-    from src.plots.format import COLORS, GREEN
-
     apply()
-    figure, axes = plt.subplots(1, 2, figsize=(9, 3.6), sharex=True, sharey=True)
-    colors = (*COLORS, GREEN)
+    figure, axes = plt.subplots(1, 2, sharex=True, sharey=True)
+    colors = COLORS
     upper_loss = loss_max * 1.03 if loss_ceiling is None else loss_ceiling
     if any(
         value > upper_loss
@@ -125,7 +123,6 @@ def plot_comparative_learning_curves(histories, output_path, *, loss_max, loss_c
             summary["best_validation_loss"],
             "o",
             color=color,
-            markersize=3,
         )
     axes[0].set(ylabel="Cross-entropy loss", title="Training")
     axes[1].set_title("Validation")

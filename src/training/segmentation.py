@@ -21,6 +21,7 @@ from src.evaluation.segmentation import (
     SegmentationMetrics,
     confusion_matrix,
     metrics_from_confusion,
+    resize_logits,
 )
 from src.models import DeepLabV3
 from src.training.checkpoint import load_state, save_state
@@ -170,6 +171,7 @@ def validate(
         images = images.to(device, non_blocking=True)
         targets = targets.to(device, non_blocking=True)
         logits = model_logits(model, images)
+        logits = resize_logits(logits, (targets.shape[-2], targets.shape[-1]))
         loss_total += loss_fn(logits, targets).item() * len(targets)
         sample_total += len(targets)
         counts += confusion_matrix(targets, logits.argmax(1), num_classes=num_classes)
