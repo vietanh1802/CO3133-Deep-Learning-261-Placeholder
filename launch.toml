@@ -28,7 +28,8 @@ done
 
 [tasks.ablation-segmentation]
 download_checkpoints = false
-output_dirs = ["results/a2", "checkpoints"]
+output_dirs = []
+download_only = ["a2/ablation/*"]
 timeout_seconds = 86400
 command = ["bash", "-lc", '''
 set -euo pipefail
