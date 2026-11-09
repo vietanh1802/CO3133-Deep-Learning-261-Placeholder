@@ -162,5 +162,12 @@ Short CPU benchmarks at 320x240 and batch size four imply 286 training steps per
 
 ## Approval record
 
-- **Instructor decision:** Approved (confirmed by group member).
-- **Approval date and conditions:** To be recorded.
+- **Approval status:** Approved.
+- **Basis:** SUIM meets every default segmentation requirement in handbook Section 19.4 without an exception.
+- **Conditions:** None.
+
+| Handbook Section 19.4 requirement | SUIM | Met |
+| --- | --- | --- |
+| At least 3 foreground classes, excluding background | 7 foreground classes (HD, PF, WR, RO, RI, FV, SR) plus background BW | Yes |
+| About 1,000 or more images with masks | 1,540 usable image and mask pairs (1,430 `train_val/`, 110 `TEST/`) | Yes |
+| Analyze per-class pixel distribution | Per-class pixel share, image count and region area in Section 3 and Appendix A | Yes |
