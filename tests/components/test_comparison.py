@@ -5,7 +5,7 @@ import json
 import numpy as np
 import pytest
 
-from scripts.evaluation.compare import aggregate, load_records, select_examples
+from scripts.evaluation.compare_image_classification import aggregate, load_records, select_examples
 
 
 def record(dataset, epochs):

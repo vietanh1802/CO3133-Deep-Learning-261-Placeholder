@@ -27,6 +27,10 @@ class SegmentationConfig:
     image_height: int = 240
     image_width: int = 320
     num_workers: int = 0
+    augment: bool = True
+    loss: str = "cross_entropy"
+    evaluation_height: int | None = None
+    evaluation_width: int | None = None
     data_dir: Path = Path("data/suim")
     checkpoint_dir: Path = Path("checkpoints")
     results_dir: Path = Path("results")
@@ -49,6 +53,15 @@ class SegmentationConfig:
             raise ValueError("weight_decay must be non-negative")
         if not 0 <= self.warmup_epochs < self.epochs:
             raise ValueError("warmup_epochs must be in the range [0, epochs)")
+        if not isinstance(self.augment, bool):
+            raise ValueError("augment must be a boolean")
+        if self.loss not in ("cross_entropy", "ce_dice"):
+            raise ValueError("loss must be cross_entropy or ce_dice")
+        if (self.evaluation_height is None) != (self.evaluation_width is None):
+            raise ValueError("evaluation_height and evaluation_width must be set together")
+        for size in (self.evaluation_height, self.evaluation_width):
+            if size is not None and size <= 0:
+                raise ValueError("evaluation dimensions must be positive")
         if self.num_workers < 0:
             raise ValueError("num_workers must be non-negative")
 

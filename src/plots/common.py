@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 from matplotlib.figure import Figure  # noqa: E402
 
-from src.plots.format import BLUE_RED, apply  # noqa: E402
+from src.plots.format import SEQUENTIAL, apply, style_axes, text_color  # noqa: E402
 
 
 def prepare_output_path(output_path: str | Path) -> Path:
@@ -22,13 +22,15 @@ def prepare_output_path(output_path: str | Path) -> Path:
 
 
 def save_figure(figure: Figure, output_path: str | Path) -> None:
-    """Save a PDF and 400-dpi PNG, retaining any explicitly requested extra format."""
+    """Save PNG and PDF with the configured export settings."""
     path = prepare_output_path(output_path)
     outputs = [path.with_suffix(".png"), path.with_suffix(".pdf")]
     if path.suffix and path not in outputs:
         outputs.insert(0, path)
+    for axis in figure.axes:
+        style_axes(axis)
     for output in outputs:
-        figure.savefig(output, dpi=400, bbox_inches="tight", facecolor="white")
+        figure.savefig(output)
 
 
 def plot_confusion_matrix(
@@ -54,9 +56,9 @@ def plot_confusion_matrix(
     )
 
     size = max(6.0, 0.7 * len(class_names))
-    apply()
+    apply("heatmap")
     figure, axes = plt.subplots(figsize=(size, size))
-    image = axes.imshow(normalized, cmap=BLUE_RED, vmin=0.0, vmax=1.0)
+    image = axes.imshow(normalized, cmap=SEQUENTIAL, vmin=0.0, vmax=1.0)
     figure.colorbar(image, ax=axes, fraction=0.046, label="Proportion of true class")
 
     axes.set_xticks(np.arange(len(class_names)))
@@ -67,7 +69,6 @@ def plot_confusion_matrix(
     axes.set_ylabel("True label")
     axes.set_title("Confusion matrix")
 
-    threshold = 0.5
     for row in range(counts.shape[0]):
         for column in range(counts.shape[1]):
             axes.text(
@@ -77,7 +78,7 @@ def plot_confusion_matrix(
                 ha="center",
                 va="center",
                 fontsize=8,
-                color="white" if abs(normalized[row, column] - 0.5) > threshold * 0.8 else "black",
+                color=text_color(SEQUENTIAL(normalized[row, column])),
             )
 
     figure.tight_layout()
