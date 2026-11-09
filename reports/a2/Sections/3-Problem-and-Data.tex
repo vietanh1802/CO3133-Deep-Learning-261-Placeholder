@@ -46,7 +46,7 @@ classes such as reef, rock and sea-floor.
 contrast and blurs edges. Object boundaries become uncertain both for the model
 and for the human annotators.
 \item \textit{Small objects.} Divers, robots, fish and plants usually cover a
-small part of the frame (Section~\ref{sec:eda}), so a large share of their
+small part of the frame (\secref{sec:eda}), so a large share of their
 pixels lie on a boundary and they lose detail when the image is resized.
 \item \textit{Class imbalance.} Reefs and the waterbody background cover most
 labelled pixels, while robots cover only \suimShareTrainValRO\% of them. A model
@@ -77,7 +77,7 @@ background class; the other \suimForegroundClasses{} are foreground classes.
 Images are JPEG files and masks are 24-bit BMP files, paired by filename. The
 archive holds \suimOnDiskTotal{} pairs, \suimTrainValOnDisk{} in the training
 pool and \suimTestOnDisk{} in the official test set, of which \suimUsableTotal{}
-remain usable after the audit in Section~\ref{sec:eda}. Image sizes vary, with
+remain usable after the audit in \secref{sec:eda}. Image sizes vary, with
 \suimResolutionCount{} native resolutions. All pairs together occupy
 \suimStorage{}~GiB, of which the images take \suimImageStorage{}~GiB and the masks
 \suimMaskStorage{}~GiB, because the masks are stored as uncompressed bitmaps while
@@ -97,7 +97,7 @@ The dataset has three limitations that affect how far our results generalize.
 Because SUIM reuses images from EUVP, USR-248 and UFO-120, its scenes share the
 sites, cameras and water conditions of those datasets, and the test set may
 contain scenes related to training scenes without being exact copies
-(Section~\ref{sec:splits}). The data come from a limited set of locations, so
+(\secref{sec:splits}). The data come from a limited set of locations, so
 scores on SUIM may not carry over to other waters. Finally, each image has a
 single annotation and the masks contain no void label for ambiguous regions such
 as blurred edges, so some boundary errors reflect label uncertainty rather than
@@ -117,19 +117,19 @@ SUIM meets every default segmentation requirement of Handbook Section 19.4
 without an exception. It has \suimForegroundClasses{} foreground classes plus
 the background class, against a minimum of three. It has
 \suimUsableTotal{} usable image and mask pairs after the audit in
-Section~\ref{sec:eda}, against a threshold of about 1,000. The per-class pixel
-distribution required by the handbook is analysed in Section~\ref{sec:eda}.
+\secref{sec:eda}, against a threshold of about 1,000. The per-class pixel
+distribution required by the handbook is analysed in \secref{sec:eda}.
 
 \subsection{Exploratory data analysis}
 \label{sec:eda}
 Unless stated otherwise, the statistics in this section are computed on the
 \suimTrainValUsable{} usable pairs of the official training pool. These pairs
 remain after removing the masks rejected under mask quality below and the
-copies of test images described in Section~\ref{sec:splits}. The official test set
+copies of test images described in \secref{sec:splits}. The official test set
 is measured separately and only to describe it.
 
 \paragraph{Pixel distribution per class.}
-Table~\ref{tab:eda-classes} and Figure~\ref{fig:class-distribution} count each
+\tabref{tab:eda-classes} and \figref{fig:class-distribution} count each
 class in two ways: the number of images that contain it and its share of all
 labelled pixels. Reefs and invertebrates (RI) and the waterbody background (BW)
 cover \suimShareTrainValRI\% and \suimShareTrainValBW\% of the pixels
@@ -141,9 +141,9 @@ but cover only \suimShareTrainValFV\% of the pixels, because each fish is small.
 This matters for evaluation and training. A model that ignores RO, PF and HD
 loses little pixel accuracy, but mIoU weights all eight classes equally, so those
 classes count as much as RI. The same imbalance motivates the cross-entropy
-versus cross-entropy plus Dice experiment in Section~\ref{sec:experiments}.
+versus cross-entropy plus Dice experiment in \secref{sec:experiments}.
 
-The last column of Table~\ref{tab:eda-classes} shows that the official test set
+The last column of \tabref{tab:eda-classes} shows that the official test set
 has a different class balance from the training pool. BW rises from
 \suimShareTrainValBW\% to \suimShareTestBW\% of the pixels, and RI falls from
 \suimShareTrainValRI\% to \suimShareTestRI\%. Test scores may therefore differ
@@ -152,7 +152,7 @@ from validation scores because of this shift, not only because of overfitting.
 \input{Tables/eda_classes}
 
 \paragraph{Region size and image resolution.}
-Figure~\ref{fig:region-area} shows how much of an image a class occupies when it
+\figref{fig:region-area} shows how much of an image a class occupies when it
 is present. RI and wrecks and ruins (WR) usually fill a large part of the frame,
 with median areas of \suimMedianAreaRI\% and \suimMedianAreaWR\%. RO, HD, FV and
 PF are small objects, with median areas between \suimMedianAreaRO\% and
@@ -162,9 +162,9 @@ therefore expect boundary errors to dominate on these classes and report
 boundary and interior IoU separately in the error analysis.
 
 The usable pairs come in \suimResolutionCount{} native resolutions
-(Figure~\ref{fig:resolutions}). About \suimDominantResolutionShare\% are
+(\figref{fig:resolutions}). About \suimDominantResolutionShare\% are
 \suimDominantResolution, so every model receives the same fixed 4:3 input size
-described in Section~\ref{sec:preprocessing}. Images with other aspect ratios,
+described in \secref{sec:preprocessing}. Images with other aspect ratios,
 mostly 16:9, are stretched by this resize; this is a known limitation.
 
 \reportfigure{Images/suim_class_distribution.png}{Pixel share and image count
@@ -194,7 +194,7 @@ rejected masks have between \suimOffCodeShareMin\% and \suimOffCodeShareMax\% of
 their pixels off code, so any tolerance below \suimOffCodeShareMin\% would reject
 exactly the same masks. The
 \suimSizeMismatches{} pairs whose mask and image have different sizes are all
-among these \suimOffCodeMasks{} masks. Figure~\ref{fig:off-code-examples} shows
+among these \suimOffCodeMasks{} masks. \figref{fig:off-code-examples} shows
 one rejected mask of each kind. Both look clean to the eye, yet
 \suimOffCodeShareSameSize\% and \suimOffCodeShareTaller\% of their pixels are off
 code, and these pixels form square blocks along object edges, the pattern typical
@@ -236,7 +236,7 @@ by less than \suimPixelTolerance{} intensity levels per channel on average (on a
 pairs are merged transitively into \suimDuplicateGroups{} duplicate groups.
 
 Of these groups, \suimCrossSplitGroups{} contain both a training-pool image and a
-test image. Figure~\ref{fig:duplicate-examples} shows the most and the least
+test image. \figref{fig:duplicate-examples} shows the most and the least
 similar of these pairs. The first is an exact copy, with an audit score of
 \suimDuplicateScoreLowest{}. The second shows the same scene stored at a
 different resolution and aspect ratio, so the files differ, yet its score of
@@ -260,7 +260,7 @@ an image, so every copy of a photograph lands on the same side of the split. The
 \suimTrainValUsable{} pairs form \suimSplitGroups{} such units. To keep rare
 classes on both sides, each image is labelled with the rarest class it contains,
 and \texttt{StratifiedGroupKFold} with \suimValFolds{} folds, shuffling and seed
-\suimSplitSeed{} assigns fold 0 to validation. Table~\ref{tab:data-splits} gives
+\suimSplitSeed{} assigns fold 0 to validation. \tabref{tab:data-splits} gives
 the result: \suimTrainImages{} training and \suimValImages{} validation images,
 a ratio of \suimTrainPercent{} to \suimValPercent{} percent. All eight classes
 appear in both subsets, and no class differs by more than \suimMaxShareGap{}
@@ -274,7 +274,7 @@ which are committed to the repository and have not changed since they were
 created. The data loader reads these files instead of
 re-splitting, and it stops with an error if any listed image is missing, so a
 training run cannot silently use a different subset. Both training runs in
-Section~\ref{sec:training-behavior} record \suimValImages{} validation images.
+\secref{sec:training-behavior} record \suimValImages{} validation images.
 
 \paragraph{What has not been checked.}
 Three sources of leakage or bias remain. First, the difference hash is not
@@ -317,18 +317,17 @@ so that both models receive identical inputs.
 The only augmentation is a random horizontal flip with probability one half,
 applied to the image and its mask together and only during training. We add no
 colour, crop or scale augmentation, so the colour cast and turbidity described
-in Section~\ref{sec:task} reach the models as they are in the data. We also do
+in \secref{sec:task} reach the models as they are in the data. We also do
 not reweight or resample classes; the only change aimed at class imbalance is
 the Dice term in the controlled experiment.
 
 A training batch therefore consists of an image tensor of shape
 $B\times3\times\suimInputHeight\times\suimInputWidth$ (float32) and a mask
 tensor of shape $B\times\suimInputHeight\times\suimInputWidth$ (int64) with
-values from 0 to 7. The batch size $B$ is \suimUnetBatch{} for U-Net and
-\suimDeeplabBatch{} for DeepLabV3; accumulating gradients over
-\suimUnetAccumulation{} and \suimDeeplabAccumulation{} batches gives effective
-batch sizes of \suimUnetEffectiveBatch{} and \suimDeeplabEffectiveBatch{}.
-Figure~\ref{fig:example-batch} shows one batch of \suimExampleBatchSize{}
+values from 0 to 7. The batch size $B$ is \suimBatch{} for both models, and
+accumulating gradients over \suimAccumulation{} batches gives an effective batch
+size of \suimEffectiveBatch{}.
+\figref{fig:example-batch} shows one batch of \suimExampleBatchSize{}
 images drawn by the DeepLabV3 training loader. After normalization its values
 lie between \suimExampleValueMin{} and \suimExampleValueMax{}, the flip was
 applied to \suimExampleFlipped{} of the \suimExampleBatchSize{} images, and the
