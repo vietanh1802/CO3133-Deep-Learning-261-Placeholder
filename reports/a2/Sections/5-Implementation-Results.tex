@@ -1,14 +1,45 @@
 \section{Implementation results}
 \label{sec:results}
 
+% Run numbers below come from the run records through
+% scripts/report/a2_results_tables.py; regenerate instead of editing them.
+\input{Tables/results_numbers}
+
 \subsection{Training behavior}
 \label{sec:training-behavior}
-\reporttodo{Describe the loss and validation mIoU curves for each run: the
-selected epoch, signs of overfitting or underfitting, and training time.
-Record implementation issues found during training and how they were fixed.}
+\figref{fig:unet-curves} shows the U-Net run. Training loss falls steadily
+from \unetFirstTrainLoss{} in the first epoch to \unetLastTrainLoss{} in the
+last, and validation loss follows it closely: it is lower than the training
+loss in \unetValBelowTrain{} of the \unetEpochs{} epochs and never exceeds it
+by more than \unetLossGap{}. Validation loss can be the lower of the two because
+the training loss is averaged over an epoch in which the weights are still
+improving, and because batch normalization uses batch statistics during
+training but running statistics during evaluation. Validation mIoU stays low
+during the warm-up, at \unetWarmupValMiou\% after epoch \unetWarmupEpochs{},
+then rises steadily and peaks at \unetBestValMiou\% in epoch \unetBestEpoch{},
+which is the selected checkpoint. The last epochs differ from this peak by only
+\unetLastGap{} percentage points, and validation loss is also lowest in epoch
+\unetLowestValLossEpoch{}.
+
+The curves show no sign of overfitting. They show underfitting instead: both
+losses were still falling when the cosine schedule brought the learning rate
+close to zero, and the mIoU curve flattens only in these final epochs. At the
+selected checkpoint the model still predicts no pixel of \unetZeroClasses{}
+correctly on the validation set, so both classes have an IoU of zero; they are
+the two classes with the fewest pixels (\tabref{tab:eda-classes}). A longer
+schedule or a larger learning rate would probably help, but we kept the
+configuration fixed in the proposal. Training took \unetTrainMinutes{} minutes,
+about \unetEpochSeconds{} seconds per epoch. The only implementation issue
+found for this run, a configuration changed after training, is described in
+\secref{sec:training}.
 
 \reportfigure{Images/unet_learning_curves.png}{U-Net training loss and
 validation mIoU on SUIM, seed 42.}{fig:unet-curves}
+
+\reporttodo{DeepLabV3 cross-entropy and cross-entropy plus Dice: describe both
+curves, the selected epochs, overfitting or underfitting and training time, and
+replace the DeepLabV3 figure, which still shows the earlier two-GPU run, with
+the reported single-GPU run. State why the earlier run was replaced.}
 
 \reportfigure{Images/deeplabv3_ce_learning_curves.png}{DeepLabV3 with
 cross-entropy: training loss and validation mIoU on SUIM, seed 42.}{fig:deeplab-curves}
@@ -28,10 +59,28 @@ or give mean and standard deviation if more seeds are run.}
 
 \subsection{Compute cost}
 \label{sec:compute}
-\reporttodo{Compare parameters, training time, inference latency, throughput,
-and peak memory. Name the hardware for each run (RTX 4060 Laptop or
-$2\times$ RTX 3090). Explain why time measured on different hardware cannot be
-compared directly, and remeasure inference on one device if possible.}
+\tabref{tab:compute-cost} compares the cost of the models. DeepLabV3 has
+\parameterRatio{} times as many parameters as U-Net but needs only \flopRatio{}
+times as many operations per image, \deeplabGflops{} against \unetGflops{}
+GFLOPs. U-Net spends many operations per parameter because its first and last
+blocks run at the full input resolution, while DeepLabV3 runs most of its
+layers at one eighth of it. The operations are counted with the PyTorch FLOP
+counter for one image, with a multiply and an add counted separately. They do
+not depend on the hardware, so they give the fairest comparison of the two
+architectures.
+
+Training time, latency and peak memory were recorded during the training runs.
+U-Net took \unetTrainMinutes{} minutes to train and \unetLatency{} ms per image
+to predict, and used at most \unetPeakMemory{}~GB of GPU memory during
+training. DeepLabV3 with cross-entropy took \deeplabCeTrainMinutes{} minutes and
+\deeplabCeLatency{} ms per image, and used \deeplabCePeakMemory{}~GB. The two
+models were trained on different GPUs, so these times measure the hardware as
+much as the models and cannot be compared directly; we report them to document
+what each run costs to reproduce. Adding the Dice term changes neither the
+parameters nor the operations of the network and lengthens DeepLabV3 training
+by only \diceTimeOverhead\%.
+\reporttodo{Name the GPU of the DeepLabV3 runs in \tabref{tab:compute-cost}.
+If possible, measure the latency of both models on the same GPU.}
 
 \input{Tables/compute_cost}
 
@@ -49,7 +98,7 @@ predictions from U-Net and DeepLabV3. State the selection rule.}{fig:examples}
 \reporttodo{Report the cross-entropy against cross-entropy plus Dice result on
 DeepLabV3. Compare mIoU, mean Dice, and the IoU of the rare classes RO, PF and
 WR. State whether the hypothesis is supported under the decision criterion in
-Section~\ref{sec:experiments}.}
+\secref{sec:experiments}.}
 
 \input{Tables/ablation}
 
@@ -73,6 +122,33 @@ is not enough.}
 
 \subsection{Limitations and conclusion}
 \label{sec:conclusion}
-\reporttodo{List data, method, and experimental limits (single seed, different
-hardware, source overlap, resizing). Discuss generalization and future work.
-End with a short answer to the research question.}
+Several limits restrict what our experiments can show. Each configuration was
+trained with one seed, so differences of about one percentage point in mIoU,
+and larger ones for rare classes, may come from the initialization and the
+batch order rather than from the factor that was changed; the validation set
+holds only \suimImagesValRO{} RO images. The hyperparameters were fixed in
+advance rather than tuned, and U-Net had not converged, so the gap between the
+two models partly reflects the training budget. The comparison of U-Net and
+DeepLabV3 changes architecture, size and initialization together, so its result
+cannot be attributed to pretraining alone. Training time and latency were
+measured on different GPUs.
+
+The data impose further limits. All metrics are computed on masks resized to
+$\suimInputHeight\times\suimInputWidth$, so thin structures lose pixels and our
+scores are not directly comparable with results at native resolution, and images
+with other aspect ratios are stretched. SUIM covers a limited set of sites and
+reuses images from EUVP, USR-248 and UFO-120, and our duplicate search misses
+mirrored copies and near-identical video frames, so the test set may contain
+scenes related to training scenes and the scores may not carry over to other
+waters. Rejecting the masks with off-code pixels also removed some genuine
+examples of rare classes. Finally, each image has one annotation and no void
+label, so part of the boundary error reflects label uncertainty rather than
+model mistakes.
+
+Natural next steps are to train every configuration with several seeds and
+report the mean and standard deviation, to give U-Net a longer schedule and a
+small learning-rate search, to train or evaluate at a higher resolution, to add
+colour and turbidity augmentation, and to make the duplicate search invariant
+to mirroring.
+\reporttodo{End with a short answer to both parts of the research question,
+based on the test results.}
