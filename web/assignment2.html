@@ -70,7 +70,7 @@
 
 <section id="proposal">
   <h2>Dataset approval</h2>
-  <p>The <a href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder/blob/week7/reports/a2_proposal.md">M1 dataset proposal</a> records <strong>Approved</strong>, confirmed by a group member. The approval date and any conditions have not been recorded in that document. SUIM semantic segmentation remains the selected task.</p>
+  <p>The <a href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder/blob/week7/reports/a2_proposal.md">M1 dataset proposal</a> records the approval status <strong>Approved</strong>, with no conditions. SUIM semantic segmentation remains the selected task.</p>
 </section>
 
 <section id="dataset">
@@ -101,7 +101,7 @@
 
 <section id="methodology">
   <h2>Methodology</h2>
-  <p>Images and masks are paired by filename stem. RGB mask colours are decoded into integer labels 0–7. Images use bilinear resizing and ImageNet normalization; masks use nearest-neighbour resizing to retain discrete labels. The training image and mask receive the same random horizontal flip. Validation uses deterministic resizing and normalization.</p>
+  <p>Images and masks are paired by filename stem. RGB mask colours are decoded into integer labels 0 to 7. Images use bilinear resizing and ImageNet normalization; masks use nearest-neighbour resizing to retain discrete labels. The training image and mask receive the same random horizontal flip. Validation uses deterministic resizing and normalization.</p>
   <div class="table-scroll"><table>
     <caption>The two original M2 configurations. The controlled study below uses its own shared reference.</caption>
     <thead><tr><th scope="col">Model</th><th scope="col">Initialization and training</th><th scope="col" class="num">Parameters</th></tr></thead>
@@ -159,7 +159,7 @@
     <caption>Selected checkpoints on the same validation split. Scores are percentages; Δ mIoU is in percentage points relative to the shared reference. One run per configuration; no across-seed uncertainty estimate.</caption>
     <thead><tr><th scope="col">Configuration</th><th scope="col">Change from reference</th><th scope="col" class="num">Best epoch</th><th scope="col" class="num">mIoU (%)</th><th scope="col" class="num">Mean Dice (%)</th><th scope="col" class="num">Δ mIoU (pp)</th></tr></thead>
     <tbody>
-      <tr data-run="suim_ablation_reference_seed42"><th scope="row">Reference</th><td>Full ResNet50 fine-tuning, flips, CE, 320 × 240 input</td><td class="num">31</td><td class="num">62.40</td><td class="num">74.17</td><td class="num">—</td></tr>
+      <tr data-run="suim_ablation_reference_seed42"><th scope="row">Reference</th><td>Full ResNet50 fine-tuning, flips, CE, 320 × 240 input</td><td class="num">31</td><td class="num">62.40</td><td class="num">74.17</td><td class="num">0.00</td></tr>
       <tr data-run="suim_ablation_frozen_seed42"><th scope="row">Frozen backbone</th><td>Freeze the backbone; train the segmentation head</td><td class="num">31</td><td class="num">54.22</td><td class="num">67.43</td><td class="num">-8.18</td></tr>
       <tr data-run="suim_ablation_no_augmentation_seed42"><th scope="row">No augmentation</th><td>Remove horizontal flips</td><td class="num">21</td><td class="num">60.74</td><td class="num">73.05</td><td class="num">-1.66</td></tr>
       <tr data-run="suim_ablation_resnet101_seed42"><th scope="row">ResNet101</th><td>Replace ResNet50 with ResNet101</td><td class="num">36</td><td class="num">62.45</td><td class="num">73.99</td><td class="num">+0.05</td></tr>
@@ -182,14 +182,14 @@
   <div class="table-scroll"><table>
     <caption>Per-class validation IoU at each model's selected checkpoint.</caption>
     <thead><tr><th scope="col">Class</th><th scope="col" class="num">U-Net IoU (%)</th><th scope="col" class="num">DeepLabV3 IoU (%)</th></tr></thead>
-    <tbody><tr data-class="BW"><th scope="row">BW — Background waterbody</th><td class="num">80.62</td><td class="num">84.46</td></tr>
-<tr data-class="HD"><th scope="row">HD — Human divers</th><td class="num">30.83</td><td class="num">69.47</td></tr>
-<tr data-class="PF"><th scope="row">PF — Plants and sea-grass</th><td class="num">0.00</td><td class="num">10.36</td></tr>
-<tr data-class="WR"><th scope="row">WR — Wrecks and ruins</th><td class="num">41.16</td><td class="num">69.70</td></tr>
-<tr data-class="RO"><th scope="row">RO — Robots and instruments</th><td class="num">0.00</td><td class="num">66.70</td></tr>
-<tr data-class="RI"><th scope="row">RI — Reefs and invertebrates</th><td class="num">67.94</td><td class="num">72.95</td></tr>
-<tr data-class="FV"><th scope="row">FV — Fish and vertebrates</th><td class="num">33.14</td><td class="num">65.46</td></tr>
-<tr data-class="SR"><th scope="row">SR — Sea-floor and rocks</th><td class="num">41.85</td><td class="num">49.30</td></tr></tbody>
+    <tbody><tr data-class="BW"><th scope="row">BW: Background waterbody</th><td class="num">80.62</td><td class="num">84.46</td></tr>
+<tr data-class="HD"><th scope="row">HD: Human divers</th><td class="num">30.83</td><td class="num">69.47</td></tr>
+<tr data-class="PF"><th scope="row">PF: Plants and sea-grass</th><td class="num">0.00</td><td class="num">10.36</td></tr>
+<tr data-class="WR"><th scope="row">WR: Wrecks and ruins</th><td class="num">41.16</td><td class="num">69.70</td></tr>
+<tr data-class="RO"><th scope="row">RO: Robots and instruments</th><td class="num">0.00</td><td class="num">66.70</td></tr>
+<tr data-class="RI"><th scope="row">RI: Reefs and invertebrates</th><td class="num">67.94</td><td class="num">72.95</td></tr>
+<tr data-class="FV"><th scope="row">FV: Fish and vertebrates</th><td class="num">33.14</td><td class="num">65.46</td></tr>
+<tr data-class="SR"><th scope="row">SR: Sea-floor and rocks</th><td class="num">41.85</td><td class="num">49.30</td></tr></tbody>
   </table></div>
   <p>U-Net scores zero IoU on PF and RO, despite both classes being present in validation. DeepLabV3 reaches 66.70% robot IoU, but plants remain difficult at 10.36%. Aggregate improvement therefore does not imply that every class is well segmented.</p>
   <p>The larger pretrained model performs better in this observed comparison. Architecture, parameter count and effective batch also change, so the result cannot establish how much improvement is caused by pretraining alone.</p>
@@ -200,9 +200,9 @@
   <p>Three saved <strong>DeepLabV3 validation predictions</strong> show what the trained model produces. Each row reads left to right: the input photograph, the ground-truth mask supplied by SUIM, and the model's predicted mask. Colours represent semantic classes, not prediction confidence; matching colours indicate matching class labels.</p>
   <p>These are the saved best, worst and best robot-containing examples, ranked by per-image mIoU over classes present in either the target or prediction. They illustrate successful segmentation and failures; they are selected cases rather than a random sample or a replacement for the split-wide metrics.</p>
   <div class="gallery">
-    <figure><a href="images/a2/m2/deeplabv3_example_best.png"><img src="images/a2/m2/deeplabv3_example_best.png" width="1920" height="592" alt="Validation image f_r_274_: underwater reef photograph, ground-truth water and reef mask, and closely matching DeepLabV3 prediction" loading="lazy"></a><figcaption><strong>Successful case — <code>f_r_274_</code>.</strong> The prediction follows the water/reef boundary closely. Black is waterbody (BW); magenta is reef (RI). This is the highest-ranked saved validation example.</figcaption></figure>
-    <figure><a href="images/a2/m2/deeplabv3_example_robot.png"><img src="images/a2/m2/deeplabv3_example_robot.png" width="1920" height="592" alt="Validation image d_r_404_: underwater robot photograph, ground-truth mask and DeepLabV3 prediction, with the robot shown in red" loading="lazy"></a><figcaption><strong>Robot case — <code>d_r_404_</code>.</strong> The red robot region (RO) is detected, although its outline is smoother than the annotation and some fine structure is missed. This is the highest-ranked robot-containing validation example.</figcaption></figure>
-    <figure><a href="images/a2/m2/deeplabv3_example_worst.png"><img src="images/a2/m2/deeplabv3_example_worst.png" width="1920" height="592" alt="Validation image w_r_162_: underwater ruins photograph; ground truth contains plants and wrecks, while DeepLabV3 incorrectly predicts mostly reef and water" loading="lazy"></a><figcaption><strong>Failure case — <code>w_r_162_</code>.</strong> The annotation contains plants (PF, green) and wrecks (WR, cyan), but the prediction labels most of the scene as reef (RI, magenta) and water (BW, black). This is the lowest-ranked saved validation example.</figcaption></figure>
+    <figure><a href="images/a2/m2/deeplabv3_example_best.png"><img src="images/a2/m2/deeplabv3_example_best.png" width="1920" height="592" alt="Validation image f_r_274_: underwater reef photograph, ground-truth water and reef mask, and closely matching DeepLabV3 prediction" loading="lazy"></a><figcaption><strong>Successful case: <code>f_r_274_</code>.</strong> The prediction follows the water/reef boundary closely. Black is waterbody (BW); magenta is reef (RI). This is the highest-ranked saved validation example.</figcaption></figure>
+    <figure><a href="images/a2/m2/deeplabv3_example_robot.png"><img src="images/a2/m2/deeplabv3_example_robot.png" width="1920" height="592" alt="Validation image d_r_404_: underwater robot photograph, ground-truth mask and DeepLabV3 prediction, with the robot shown in red" loading="lazy"></a><figcaption><strong>Robot case: <code>d_r_404_</code>.</strong> The red robot region (RO) is detected, although its outline is smoother than the annotation and some fine structure is missed. This is the highest-ranked robot-containing validation example.</figcaption></figure>
+    <figure><a href="images/a2/m2/deeplabv3_example_worst.png"><img src="images/a2/m2/deeplabv3_example_worst.png" width="1920" height="592" alt="Validation image w_r_162_: underwater ruins photograph; ground truth contains plants and wrecks, while DeepLabV3 incorrectly predicts mostly reef and water" loading="lazy"></a><figcaption><strong>Failure case: <code>w_r_162_</code>.</strong> The annotation contains plants (PF, green) and wrecks (WR, cyan), but the prediction labels most of the scene as reef (RI, magenta) and water (BW, black). This is the lowest-ranked saved validation example.</figcaption></figure>
   </div>
   <p>The colour key follows SUIM: BW = waterbody, HD = divers, PF = plants, WR = wrecks, RO = robots, RI = reefs, FV = fish, and SR = sea-floor. Open any figure to inspect it at full size. Equivalent U-Net prediction panels are not available in the current saved outputs, so these figures do not provide a paired visual comparison of the two models.</p>
 </section>
@@ -249,7 +249,7 @@
     <li><strong>Controlled study:</strong> <a href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder/blob/week7/results/a2/ablation/comparisons.csv">Comparison CSV</a> · <a href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder/blob/week7/results/a2/ablation/manifest.json">Resolved configurations</a> · <a href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder/blob/week7/scripts/plots/plot_segmentation_ablation.py">Figure reproduction command</a></li>
     <li><strong>Final deliverables:</strong> checkpoint downloads, the final PDF report, slides and presentation video are not yet linked on this page.</li>
   </ul>
-  <p>The saved run summaries define the settings behind this page. The current U-Net YAML uses physical batch size eight, while the reported run used four. Reproducing the reported run requires its recorded configuration. DeepLabV3's effective batch of 32 additionally requires two GPU processes. Checkpoints and prediction tensors are excluded from Git; plotting the saved validation evidence requires obtaining or regenerating those local artifacts.</p>
+  <p>The saved run summaries define the settings behind this page. The U-Net configuration file matches the reported run, with physical batch size four. DeepLabV3's effective batch of 32 additionally requires two GPU processes. Checkpoints and prediction tensors are excluded from Git; plotting the saved validation evidence requires obtaining or regenerating those local artifacts.</p>
 </section>
 
 <section id="members">
