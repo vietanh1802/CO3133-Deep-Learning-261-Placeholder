@@ -1,0 +1,31 @@
+\documentclass[a4paper,11pt]{article}
+
+% Compile this file from the project directory (pdfLaTeX, twice).
+% Edit shared course/group information only in metadata.tex.
+% Write in English and replace every blue "To complete" prompt with report text.
+% Images go in Images/ with a model prefix; tables go in Tables/.
+% Check every number against results/a2/ in the repository before submission.
+\input{preamble}
+\input{metadata}
+
+\begin{document}
+\input{Sections/1-Title}
+
+\pagenumbering{roman}
+\input{Sections/2-Abstract}
+\clearpage
+\tableofcontents
+\clearpage
+
+\pagenumbering{arabic}
+% The three main parts required by Handbook Section 3.
+\input{Sections/3-Problem-and-Data}
+\clearpage
+\input{Sections/4-Methodology}
+\clearpage
+\input{Sections/5-Implementation-Results}
+\clearpage
+
+\input{Sections/6-AI-Usage}
+\input{Sections/7-References}
+\end{document}

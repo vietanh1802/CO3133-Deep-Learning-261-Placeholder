@@ -1,0 +1,344 @@
+\section{Problem and data description}
+\label{sec:data}
+
+% Dataset numbers below come from results/a2/eda/suim/summary.json through
+% scripts/report/a2_data_tables.py; regenerate instead of editing them.
+\input{Tables/data_numbers}
+
+\subsection{Task and research question}
+\label{sec:task}
+Autonomous underwater vehicles and remotely operated robots rely on cameras to
+follow divers, avoid obstacles and survey reefs and wrecks. A bounding box or an
+image-level label is too coarse for these uses: a robot must know which pixels
+are open water it can move through, and a marine survey must measure how much
+of the scene is covered by reef or sea-grass. We therefore study semantic
+segmentation of underwater images.
+
+The input is an RGB image $x\in\mathbb{R}^{3\times H\times W}$. The output is a
+mask $\hat y\in\{0,\ldots,7\}^{H\times W}$ that assigns one of the eight SUIM
+classes to every pixel, so the prediction unit is one pixel, not one image. A
+model $f_\theta$ produces a score map $f_\theta(x)\in\mathbb{R}^{8\times H\times W}$,
+and each pixel takes the class with the highest score,
+\begin{equation}
+\hat y_{uv}=\arg\max_{k\in\{0,\ldots,7\}} f_\theta(x)_{k,uv}.
+\end{equation}
+The classes are mutually exclusive and there is no void label, so every pixel of
+every mask is a training target and is counted by the metrics.
+
+Our research question has two parts. First, on SUIM, how much better is a
+DeepLabV3 model pretrained on COCO images with the Pascal VOC categories than a
+U-Net trained from scratch, measured by mIoU and per-class IoU on the official
+test set? Second, with the DeepLabV3 model and all
+other settings fixed, does adding a soft Dice term to the cross-entropy loss
+raise IoU on the rare classes (RO, PF and WR) without lowering mIoU? The first
+comparison changes both the architecture and the initialization, so it cannot
+attribute the gap to pretraining alone; only the second comparison isolates a
+single factor.
+
+Four properties of underwater images make the task harder than segmentation of
+ordinary photographs.
+\begin{itemize}
+\item \textit{Colour cast.} Water absorbs red light much faster than blue and
+green light, so most images are tinted blue or green and the same object
+changes colour with depth and distance. Colour is therefore a weak cue for
+classes such as reef, rock and sea-floor.
+\item \textit{Turbidity.} Suspended particles scatter light, which lowers
+contrast and blurs edges. Object boundaries become uncertain both for the model
+and for the human annotators.
+\item \textit{Small objects.} Divers, robots, fish and plants usually cover a
+small part of the frame (Section~\ref{sec:eda}), so a large share of their
+pixels lie on a boundary and they lose detail when the image is resized.
+\item \textit{Class imbalance.} Reefs and the waterbody background cover most
+labelled pixels, while robots cover only \suimShareTrainValRO\% of them. A model
+can reach high pixel accuracy while ignoring the rare classes, which is why we
+report mIoU, which weights every class equally.
+\end{itemize}
+
+\subsection{Dataset and study scope}
+\label{sec:dataset}
+We use SUIM (Segmentation of Underwater IMagery), published by the Interactive
+Robotics and Vision Laboratory of the University of Minnesota together with the
+IROS 2020 paper of Islam et al.\ \cite{suim}, and downloaded from the dataset page
+\cite{suim-data}. Neither the paper nor the information file in the archive gives
+a version number, so we identify our copy by its download date, 02 Oct 2026.
+According to the authors, the images were taken during ocean explorations and
+human-robot cooperative experiments at several sites with different water types,
+and a few come from their earlier underwater datasets EUVP, USR-248 and UFO-120.
+Every image was annotated by hand with one dense pixel-level mask, and the
+annotation was done by seven human participants \cite{suim}.
+
+Each mask stores its class as a 3-bit RGB colour in which each channel is either
+0 or 255. Read as a binary number, the colour gives the class index: background
+waterbody (BW, 000, black), human divers (HD, 001, blue), aquatic plants and
+sea-grass (PF, 010, green), wrecks and ruins (WR, 011, sky blue), robots and
+instruments (RO, 100, red), reefs and invertebrates (RI, 101, pink), fish and
+vertebrates (FV, 110, yellow) and sea-floor and rocks (SR, 111, white). BW is the
+background class; the other \suimForegroundClasses{} are foreground classes.
+Images are JPEG files and masks are 24-bit BMP files, paired by filename. The
+archive holds \suimOnDiskTotal{} pairs, \suimTrainValOnDisk{} in the training
+pool and \suimTestOnDisk{} in the official test set, of which \suimUsableTotal{}
+remain usable after the audit in Section~\ref{sec:eda}. Image sizes vary, with
+\suimResolutionCount{} native resolutions. All pairs together occupy
+\suimStorage{}~GiB, of which the images take \suimImageStorage{}~GiB and the masks
+\suimMaskStorage{}~GiB, because the masks are stored as uncompressed bitmaps while
+the images are compressed JPEG files.
+
+The authors' code repository is released under the MIT licence, but that licence
+covers the software, and the dataset page states no separate licence for the
+images and masks. We therefore do not assume that the dataset may be
+redistributed: we use it only for this course project, cite its source, and keep
+it out of our repository, which provides a download script instead. We use only
+the image and mask pairs. The archive also contains the authors' pretrained
+checkpoints, their benchmark predictions on the test set, and extra per-class
+binary masks and saliency masks for the test images; we use none of them, so all
+models in this report are trained by us.
+
+The dataset has three limitations that affect how far our results generalize.
+Because SUIM reuses images from EUVP, USR-248 and UFO-120, its scenes share the
+sites, cameras and water conditions of those datasets, and the test set may
+contain scenes related to training scenes without being exact copies
+(Section~\ref{sec:splits}). The data come from a limited set of locations, so
+scores on SUIM may not carry over to other waters. Finally, each image has a
+single annotation and the masks contain no void label for ambiguous regions such
+as blurred edges, so some boundary errors reflect label uncertainty rather than
+model mistakes.
+
+\subsection{Dataset proposal and approval}
+\label{sec:proposal}
+The Dataset Proposal submitted at Milestone 1 fixes the track (semantic
+segmentation), the dataset (SUIM), the split protocol, the metrics (mIoU, mDice and per-class
+IoU), the two baselines, the pretrained model, the controlled loss experiment and
+the compute estimate. Its final revision was committed on 07 Oct 2026, the
+Milestone 1 deadline.
+
+\textbf{Approval status:} Approved. \textbf{Conditions:} none.
+
+SUIM meets every default segmentation requirement of Handbook Section 19.4
+without an exception. It has \suimForegroundClasses{} foreground classes plus
+the background class, against a minimum of three. It has
+\suimUsableTotal{} usable image and mask pairs after the audit in
+Section~\ref{sec:eda}, against a threshold of about 1,000. The per-class pixel
+distribution required by the handbook is analysed in Section~\ref{sec:eda}.
+
+\subsection{Exploratory data analysis}
+\label{sec:eda}
+Unless stated otherwise, the statistics in this section are computed on the
+\suimTrainValUsable{} usable pairs of the official training pool. These pairs
+remain after removing the masks rejected under mask quality below and the
+copies of test images described in Section~\ref{sec:splits}. The official test set
+is measured separately and only to describe it.
+
+\paragraph{Pixel distribution per class.}
+Table~\ref{tab:eda-classes} and Figure~\ref{fig:class-distribution} count each
+class in two ways: the number of images that contain it and its share of all
+labelled pixels. Reefs and invertebrates (RI) and the waterbody background (BW)
+cover \suimShareTrainValRI\% and \suimShareTrainValBW\% of the pixels
+respectively, while robots (RO) cover only \suimShareTrainValRO\% and appear in
+\suimImagesTrainValRO{} images. The largest foreground class therefore has about
+\suimImbalanceRatio{} times as many pixels as the smallest. Fish and vertebrates
+(FV) show the opposite pattern: they appear in \suimImagesTrainValFV{} images
+but cover only \suimShareTrainValFV\% of the pixels, because each fish is small.
+This matters for evaluation and training. A model that ignores RO, PF and HD
+loses little pixel accuracy, but mIoU weights all eight classes equally, so those
+classes count as much as RI. The same imbalance motivates the cross-entropy
+versus cross-entropy plus Dice experiment in Section~\ref{sec:experiments}.
+
+The last column of Table~\ref{tab:eda-classes} shows that the official test set
+has a different class balance from the training pool. BW rises from
+\suimShareTrainValBW\% to \suimShareTestBW\% of the pixels, and RI falls from
+\suimShareTrainValRI\% to \suimShareTestRI\%. Test scores may therefore differ
+from validation scores because of this shift, not only because of overfitting.
+
+\input{Tables/eda_classes}
+
+\paragraph{Region size and image resolution.}
+Figure~\ref{fig:region-area} shows how much of an image a class occupies when it
+is present. RI and wrecks and ruins (WR) usually fill a large part of the frame,
+with median areas of \suimMedianAreaRI\% and \suimMedianAreaWR\%. RO, HD, FV and
+PF are small objects, with median areas between \suimMedianAreaRO\% and
+\suimMedianAreaPF\%. Small regions are affected most by downsampling to the
+training resolution, and a larger share of their pixels lies on a boundary. We
+therefore expect boundary errors to dominate on these classes and report
+boundary and interior IoU separately in the error analysis.
+
+The usable pairs come in \suimResolutionCount{} native resolutions
+(Figure~\ref{fig:resolutions}). About \suimDominantResolutionShare\% are
+\suimDominantResolution, so every model receives the same fixed 4:3 input size
+described in Section~\ref{sec:preprocessing}. Images with other aspect ratios,
+mostly 16:9, are stretched by this resize; this is a known limitation.
+
+\reportfigure{Images/suim_class_distribution.png}{Pixel share and image count
+for each SUIM class, computed on the usable train and validation pairs.}{fig:class-distribution}
+
+\reportfigure{Images/suim_region_area_distribution.png}{Distribution of region
+area per class, as a fraction of the image, for images that contain the
+class.}{fig:region-area}
+
+\reportfigure{Images/suim_resolution_distribution.png}{Distribution of native
+image resolutions in the train and validation pool.}{fig:resolutions}
+
+\paragraph{Mask quality.}
+The archive contains \suimOnDiskTotal{} image and mask pairs:
+\suimTrainValOnDisk{} in the training pool and \suimTestOnDisk{} in the test set.
+Images and masks are matched by filename stem. The number of unmatched files is
+\suimUnpaired{}, and the number of files that fail to decode is
+\suimDecodeErrors{}. The audit then checks
+every mask pixel against the eight exact class colours, in which each RGB channel
+is either 0 or 255.
+
+In the training pool, \suimOffCodeMasks{} masks contain pixels with other
+colours, while the test set has \suimTestOffCodeMasks{} such masks. We reject a
+mask if even one of its pixels is off code. This strict rule does not depend on
+the cut-off we choose: every other mask has no off-code pixel at all, while the
+rejected masks have between \suimOffCodeShareMin\% and \suimOffCodeShareMax\% of
+their pixels off code, so any tolerance below \suimOffCodeShareMin\% would reject
+exactly the same masks. The
+\suimSizeMismatches{} pairs whose mask and image have different sizes are all
+among these \suimOffCodeMasks{} masks. Figure~\ref{fig:off-code-examples} shows
+one rejected mask of each kind. Both look clean to the eye, yet
+\suimOffCodeShareSameSize\% and \suimOffCodeShareTaller\% of their pixels are off
+code, and these pixels form square blocks along object edges, the pattern typical
+of JPEG compression. The second mask is also \suimTallerExtraRows{} rows taller
+than its image, so its labels cannot be aligned with the image pixels.
+Because the colour itself encodes the
+class, an off-code pixel cannot be repaired reliably: thresholding each channel
+maps it to the nearest code, which can create false rare-class pixels along
+object edges. We therefore exclude the whole pair instead of repairing it, which
+leaves \suimQualityPassed{} pairs in the training pool. Excluding these pairs
+also removes some genuine rare-class examples, so RO results rest on fewer
+images than the archive contains.
+
+\reportfigure{Images/suim_off_code_examples.png}{Two masks rejected by the
+audit. Off-code pixels are pixels whose colour is none of the eight class codes.
+The examples are chosen by a fixed rule rather than by hand: among the rejected
+masks with the same size as their image (top) and those taller than their image
+(bottom), each row shows the mask with the median share of off-code
+pixels.}{fig:off-code-examples}
+
+\subsection{Splits and leakage prevention}
+\label{sec:splits}
+SUIM ships an official test set but no validation set. We keep all
+\suimTestUsable{} official test pairs unchanged, so that test scores remain
+comparable with published results. The test set was opened only for the audit
+above. No test label or test score is used for hyperparameter tuning, early
+stopping or checkpoint selection, and each selected model is evaluated on it
+once, after its configuration is fixed.
+
+\paragraph{Duplicates and leakage.}
+SUIM contains repeated photographs, both inside the training pool and across the
+training pool and the test set. We find them in two stages. First, each image is
+reduced to a \suimHashBits-bit difference hash computed from a small greyscale
+thumbnail; pairs whose hashes differ in at most \suimHashDistance{} bits become
+candidates. This stage yields \suimHashCandidates{} candidate pairs. Second, a
+candidate is confirmed only if the two images, resized to a common size, differ
+by less than \suimPixelTolerance{} intensity levels per channel on average (on a
+0 to 255 scale). This stage confirms \suimConfirmedPairs{} pairs. Confirmed
+pairs are merged transitively into \suimDuplicateGroups{} duplicate groups.
+
+Of these groups, \suimCrossSplitGroups{} contain both a training-pool image and a
+test image. Figure~\ref{fig:duplicate-examples} shows the most and the least
+similar of these pairs. The first is an exact copy, with an audit score of
+\suimDuplicateScoreLowest{}. The second shows the same scene stored at a
+different resolution and aspect ratio, so the files differ, yet its score of
+\suimDuplicateScoreHighest{} is still far below the threshold of
+\suimPixelTolerance{}. Every cross-split pair is therefore a copy of the same
+photograph, not merely a similar scene. We keep the test images and drop their
+\suimTestDuplicatesDropped{} copies from the training pool, which leaves
+\suimTrainValUsable{} usable pairs for training and validation.
+
+\reportfigure{Images/suim_duplicate_examples.png}{Training-pool copies of test
+images, with the lowest (top) and highest (bottom) audit score among the
+cross-split duplicate groups. The difference map is the absolute pixel
+difference on a 0 to 255 scale, after resizing the training image to the test
+image size. The audit score is the mean difference used to confirm a
+duplicate.}{fig:duplicate-examples}
+
+\paragraph{Split unit and stratification.}
+The remaining \suimWithinGroups{} groups lie entirely in the training pool and
+contain \suimWithinGroupImages{} images. The split unit is a duplicate group, not
+an image, so every copy of a photograph lands on the same side of the split. The
+\suimTrainValUsable{} pairs form \suimSplitGroups{} such units. To keep rare
+classes on both sides, each image is labelled with the rarest class it contains,
+and \texttt{StratifiedGroupKFold} with \suimValFolds{} folds, shuffling and seed
+\suimSplitSeed{} assigns fold 0 to validation. Table~\ref{tab:data-splits} gives
+the result: \suimTrainImages{} training and \suimValImages{} validation images,
+a ratio of \suimTrainPercent{} to \suimValPercent{} percent. All eight classes
+appear in both subsets, and no class differs by more than \suimMaxShareGap{}
+percentage points in pixel share between them. RO, the rarest class, has
+\suimImagesTrainRO{} training and \suimImagesValRO{} validation images.
+
+\input{Tables/data_splits}
+
+The membership of the training and validation sets is saved in two split files,
+which are committed to the repository and have not changed since they were
+created. The data loader reads these files instead of
+re-splitting, and it stops with an error if any listed image is missing, so a
+training run cannot silently use a different subset. Both training runs in
+Section~\ref{sec:training-behavior} record \suimValImages{} validation images.
+
+\paragraph{What has not been checked.}
+Three sources of leakage or bias remain. First, the difference hash is not
+invariant to mirroring, so a horizontally flipped copy of an image would not be
+detected. Second, consecutive frames from the same video can differ by more than
+the pixel tolerance while still showing the same scene; such frames may still
+fall on both sides of a split. Third, SUIM reuses images from EUVP, USR-248 and
+UFO-120, so related scenes may appear in both the training pool and the test set
+without being pixel-level duplicates. In addition, the validation set contains
+only \suimImagesValRO{} RO images, so validation IoU for RO is noisy and small
+differences in it should not decide between models.
+
+\subsection{Preprocessing and augmentation}
+\label{sec:preprocessing}
+The training and validation loaders read only the pairs listed in the split
+files, so the pairs excluded from the training pool never reach training or
+model selection. The test loader reads every official test pair, none of which
+was excluded. Each mask is turned into a map
+of class indices by thresholding every channel at \suimMaskThreshold{} and
+reading the three bits as a binary number,
+$c = 4\,[R \ge \suimMaskThreshold] + 2\,[G \ge \suimMaskThreshold] +
+[B \ge \suimMaskThreshold]$, which gives 0 for BW (black) and 7 for SR (white).
+Since every mask that passed the audit holds only the eight exact codes, the
+threshold changes no pixel of our data; it only guards against a damaged file.
+
+Every image is resized to $\suimInputHeight\times\suimInputWidth$ pixels
+(height by width) with bilinear interpolation, and its mask with
+nearest-neighbour interpolation, so that no new label appears on the boundary
+between two classes. This size is half of the dominant resolution
+\suimDominantResolution{} in each direction. Images with another aspect ratio
+are stretched rather than cropped, so no labelled region is cut off. Validation
+and test masks are resized in the same way, which means that all metrics in this
+report are computed at $\suimInputHeight\times\suimInputWidth$, not at the
+native resolution; thin structures and small regions can lose a few pixels in
+this step. Pixel values are scaled to $[0, 1]$ and normalized with the ImageNet
+channel mean \suimNormMean{} and standard deviation \suimNormStd{}. The
+pretrained backbone expects these constants, and we apply them to U-Net as well
+so that both models receive identical inputs.
+
+The only augmentation is a random horizontal flip with probability one half,
+applied to the image and its mask together and only during training. We add no
+colour, crop or scale augmentation, so the colour cast and turbidity described
+in Section~\ref{sec:task} reach the models as they are in the data. We also do
+not reweight or resample classes; the only change aimed at class imbalance is
+the Dice term in the controlled experiment.
+
+A training batch therefore consists of an image tensor of shape
+$B\times3\times\suimInputHeight\times\suimInputWidth$ (float32) and a mask
+tensor of shape $B\times\suimInputHeight\times\suimInputWidth$ (int64) with
+values from 0 to 7. The batch size $B$ is \suimUnetBatch{} for U-Net and
+\suimDeeplabBatch{} for DeepLabV3; accumulating gradients over
+\suimUnetAccumulation{} and \suimDeeplabAccumulation{} batches gives effective
+batch sizes of \suimUnetEffectiveBatch{} and \suimDeeplabEffectiveBatch{}.
+Figure~\ref{fig:example-batch} shows one batch of \suimExampleBatchSize{}
+images drawn by the DeepLabV3 training loader. After normalization its values
+lie between \suimExampleValueMin{} and \suimExampleValueMax{}, the flip was
+applied to \suimExampleFlipped{} of the \suimExampleBatchSize{} images, and the
+masks contain \suimExampleClasses{} of the eight classes. The overlay confirms
+that the masks stay aligned with their images after resizing and flipping. The
+batch also shows the limits of the labels: in the last image, a partly visible
+animal at the right edge is labelled as sea floor.
+
+\reportfigure{Images/suim_example_batch.png}{One training batch after
+preprocessing, drawn by the DeepLabV3 training loader. Rows show the input after
+undoing the normalization, the class mask in the SUIM colour code, and the mask
+blended over the image, with background water left unblended. Each column title
+gives the image name and whether the random flip was applied.}{fig:example-batch}

@@ -18,7 +18,6 @@ MASK_SUFFIX = ".bmp"
 class SplitPairs:
     """One split's matched image/mask pairs plus the files left unmatched."""
 
-    name: str
     pairs: list[tuple[Path, Path]]
     images_without_mask: list[str]
     masks_without_image: list[str]
@@ -39,7 +38,6 @@ def find_pairs(split_dir: str | Path) -> SplitPairs:
     }
     matched = sorted(images.keys() & masks.keys())
     return SplitPairs(
-        name=split_dir.name,
         pairs=[(images[stem], masks[stem]) for stem in matched],
         images_without_mask=sorted(images.keys() - masks.keys()),
         masks_without_image=sorted(masks.keys() - images.keys()),
