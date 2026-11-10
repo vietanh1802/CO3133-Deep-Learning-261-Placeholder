@@ -2,8 +2,9 @@
 \label{sec:data}
 
 % Dataset numbers below come from results/a2/eda/suim/summary.json through
-% scripts/report/a2_data_tables.py; regenerate instead of editing them.
-\input{Tables/data_numbers}
+% scripts/report/a2_data_tables.py, and the size of the example photograph in
+% the preprocessing figure from scripts/report/a2_preprocessing_figure.py. Both
+% macro files are loaded in main.tex; regenerate instead of editing them.
 
 \subsection{Problem statement}
 \label{sec:task}
@@ -253,7 +254,65 @@ all official test pairs. We decode each RGB mask into class indices using
 $c = 4\,[R \ge \suimMaskThreshold] + 2\,[G \ge \suimMaskThreshold] +
 [B \ge \suimMaskThreshold]$, giving 0 for BW (black) through 7 for SR (white).
 All masks that pass the audit contain exact class colours, so decoding preserves
-their labels.
+their labels. \figref{fig:preprocessing} summarizes the steps that turn each
+pair into a training batch.
+
+\begin{figure}[htbp]
+\centering
+\resizebox{\linewidth}{!}{%
+\begin{tikzpicture}[
+  head/.style={draw=#1, fill=#1!12, text=#1!70!black, rounded corners=2pt,
+    font=\scriptsize\bfseries, minimum width=2.7cm, minimum height=0.5cm, inner sep=1pt},
+  note/.style={font=\scriptsize, align=flush center, text width=2.75cm, anchor=north},
+  flow/.style={-{Stealth[length=5pt]}, thick, draw=black!70},
+  pic/.style={inner sep=0, draw=black!35, line width=0.3pt},
+  row/.style={font=\scriptsize\bfseries, rotate=90, anchor=south}]
+\def\picwidth{2.5cm}
+\def\prep{Images/preprocessing}
+\foreach \i/\x in {1/1.35, 2/4.55, 3/7.75, 4/10.95, 5/14.15} {\coordinate (c\i) at (\x, 0);}
+% The training-only step sits in a dashed frame.
+\draw[figtrain, dashed, rounded corners=4pt, line width=0.6pt, fill=figtrain!4]
+  ($(c3)+(-1.48,0.38)$) rectangle ($(c3)+(1.48,-5.6)$);
+\node[head=figdata]  at (c1) {1\enspace Load};
+\node[head=figmodel] at (c2) {2\enspace Resize};
+\node[head=figtrain] at (c3) {3\enspace Horizontal flip};
+\node[head=figmodel] at (c4) {4\enspace Normalize};
+\node[head=figdata]  at (c5) {5\enspace Batch};
+% Image row and mask row.
+\node[pic] at ($(c1)+(0,-1.35)$) {\includegraphics[width=\picwidth]{\prep/raw_image.jpg}};
+\node[pic] at ($(c1)+(0,-3.35)$) {\includegraphics[width=\picwidth]{\prep/raw_mask.png}};
+\node[pic] at ($(c2)+(0,-1.35)$) {\includegraphics[width=\picwidth]{\prep/resized_image.jpg}};
+\node[pic] at ($(c2)+(0,-3.35)$) {\includegraphics[width=\picwidth]{\prep/resized_mask.png}};
+\node[pic] at ($(c3)+(0,-1.35)$) {\includegraphics[width=\picwidth]{\prep/flipped_image.jpg}};
+\node[pic] at ($(c3)+(0,-3.35)$) {\includegraphics[width=\picwidth]{\prep/flipped_mask.png}};
+\node[pic] at ($(c4)+(0,-1.35)$) {\includegraphics[width=\picwidth,height=1.875cm]{\prep/normalized_histogram.png}};
+\node[pic, opacity=0.35] (unchanged) at ($(c4)+(0,-3.35)$) {\includegraphics[width=\picwidth]{\prep/resized_mask.png}};
+\node[font=\scriptsize\itshape, fill=white, fill opacity=0.85, text opacity=1, inner sep=2pt,
+  rounded corners=1pt] at (unchanged) {mask unchanged};
+% The example batch, stacked with its last pair in front.
+\foreach \k/\d in {0/0.3, 1/0.2, 2/0.1, 3/0.0} {
+  \node[pic, fill=white] at ($(c5)+(-0.15+\d,-1.35+\d)$) {\includegraphics[width=2.2cm]{\prep/batch_image_\k.jpg}};
+  \node[pic, fill=white] at ($(c5)+(-0.15+\d,-3.35+\d)$) {\includegraphics[width=2.2cm]{\prep/batch_mask_\k.png}};
+}
+\foreach \a/\b in {1/2, 2/3, 3/4, 4/5} {
+  \draw[flow] ($(c\a)+(1.3,-1.35)$) -- ($(c\b)+(-1.3,-1.35)$);
+  \draw[flow] ($(c\a)+(1.3,-3.35)$) -- ($(c\b)+(-1.3,-3.35)$);
+}
+\node[row] at ($(c1)+(-1.32,-1.35)$) {image};
+\node[row] at ($(c1)+(-1.32,-3.35)$) {mask};
+\node[note] at ($(c1)+(0,-4.4)$) {JPEG $\prepExampleHeight\times\prepExampleWidth$,\\RGB mask decoded\\to labels 0 to 7};
+\node[note] at ($(c2)+(0,-4.4)$) {$\suimInputHeight\times\suimInputWidth$,\\image bilinear,\\mask nearest};
+\node[note] at ($(c3)+(0,-4.4)$) {training only,\\$p=0.5$, image and\\mask together};
+\node[note] at ($(c4)+(0,-4.4)$) {$(x/255-\mu)/\sigma$,\\ImageNet mean\\and std};
+\node[note] at ($(c5)+(0,-4.4)$) {$B=\suimExampleBatchSize$ pairs:\\$\suimExampleBatchSize\times3\times\suimInputHeight\times\suimInputWidth$\\and $\suimExampleBatchSize\times\suimInputHeight\times\suimInputWidth$};
+\end{tikzpicture}}
+\caption{Preprocessing of one training pair, with sizes given as height by
+width. The original photograph is wider than the input and is stretched to its
+aspect ratio. The dashed step runs only for training images. The histogram shows
+the normalized values of the three colour channels, and the mask is not
+normalized. The last column is the example batch of \figref{fig:example-batch}.}
+\label{fig:preprocessing}
+\end{figure}
 
 We then resize each image and mask to
 $\suimInputHeight\times\suimInputWidth$ pixels (height by width), half the

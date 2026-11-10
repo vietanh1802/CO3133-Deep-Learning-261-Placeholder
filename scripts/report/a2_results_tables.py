@@ -1,26 +1,54 @@
-"""Write the A2 Part 3 compute-cost table and number macros from the run records.
+"""Write the A2 Part 3 tables, the test confusion matrix and number macros.
 
 The results section never quotes a number by hand. This script reads the U-Net
-``training_summary.json`` and the DeepLabV3 rows of the ablation results, counts
-the floating-point operations of each model for one input image, and regenerates
-two files under ``reports/a2/Tables/``: the compute-cost table and a macro file
-used by ``Sections/5-Implementation-Results.tex``.
+``training_summary.json``, the DeepLabV3 rows of the ablation results and the
+single test evaluation of each selected model (``test_summary.json`` and
+``test_evidence.pt``), and counts the floating-point operations of each model for
+one input image. It regenerates the result tables and the macro file under
+``reports/a2/Tables/`` and the test confusion matrix under ``reports/a2/Images/``.
 """
 
 import csv
 import json
 from pathlib import Path
 
+import numpy as np
 import torch
+from PIL import Image
 from torch.utils.flop_counter import FlopCounterMode
 
 from scripts.report.a2_data_tables import count
 from scripts.report.a2_method_tables import device_name
 from src.models.deeplabv3 import DeepLabV3
 from src.models.unet import UNet
+from src.plots.common import plot_confusion_matrix
+from src.plots.format import DIVERGING
 
 UNET_SUMMARY = Path("results/a2/suim_unet_seed42/training_summary.json")
+# Written once per selected model by scripts/evaluation/test_segmentation.py.
+TEST_RUNS = {
+    "unet": "suim_unet_seed42",
+    "deeplabCe": "suim_ablation_reference_seed42",
+    "deeplabDice": "suim_ablation_ce_dice_seed42",
+}
+TEST_CONFUSION = Path("reports/a2/Images/analysis/test_confusion_matrix.png")
+SPLIT_FILES = Path("results/a2/splits/suim")
+TRAIN_VAL_IMAGES = Path("data/suim/train_val/images")
+TEST_IMAGES = Path("data/suim/TEST/images")
+# Hash bits that may differ for two images to count as very close.
+CLOSE_BITS = 8
 COMPARISONS = Path("results/a2/ablation/comparisons.csv")
+# The same six runs trained once before, with the same code and seed. Their
+# checkpoints were not kept; the file only measures run-to-run variation.
+FIRST_RUN = Path("results/a2/ablation/comparisons_first_run.csv")
+ABLATIONS = {
+    "Frozen": "suim_ablation_frozen_seed42",
+    "NoAug": "suim_ablation_no_augmentation_seed42",
+    "Resnet": "suim_ablation_resnet101_seed42",
+    "Dice": "suim_ablation_ce_dice_seed42",
+    "LowRes": "suim_ablation_low_resolution_seed42",
+}
+CLASSES = ("BW", "HD", "PF", "WR", "RO", "RI", "FV", "SR")
 DEEPLAB_RUNS = {"Ce": "suim_ablation_reference_seed42", "Dice": "suim_ablation_ce_dice_seed42"}
 TABLE_DIR = Path("reports/a2/Tables")
 HEADER = (
@@ -52,6 +80,7 @@ def unet_macros(summary: dict) -> dict[str, str]:
     return {
         "unetBestEpoch": count(summary["best_epoch"]),
         "unetBestValMiou": f"{100 * best['validation_miou']:.1f}",
+        "unetValMiou": f"{100 * summary['validation']['all']['mean_iou']:.2f}",
         "unetValDice": f"{100 * summary['validation']['all']['mean_dice']:.2f}",
         "unetWarmupValMiou": f"{100 * warmup['validation_miou']:.1f}",
         "unetLastGap": f"{100 * (best['validation_miou'] - last['validation_miou']):.2f}",
@@ -89,6 +118,53 @@ def cost_macros(summary: dict, deeplab: dict[str, dict]) -> dict[str, str]:
         macros[f"deeplab{key}TrainMinutes"] = f"{row['training_seconds'] / 60:.1f}"
         macros[f"deeplab{key}Latency"] = f"{row['inference_ms_per_image']:.1f}"
         macros[f"deeplab{key}PeakMemory"] = gigabytes(row["peak_training_memory_mb"])
+    return macros
+
+
+def points(value: float) -> str:
+    """A fraction as percentage points, without sign; the text states the direction."""
+    return f"{abs(100 * value):.2f}"
+
+
+def comparison_macros(
+    summary: dict, rows: dict[str, dict], first: dict[str, dict]
+) -> dict[str, str]:
+    """Per-class scores, loss and ablation differences, and run-to-run variation."""
+    unet = summary["validation"]["all"]
+    ce, dice = rows["suim_ablation_reference_seed42"], rows["suim_ablation_ce_dice_seed42"]
+    macros = {
+        "deeplabGain": points(ce["miou"] - unet["mean_iou"]),
+        "unetMillions": f"{summary['parameters'] / 1e6:.2f}",
+        "unetBoundaryIoU": f"{100 * summary['validation']['boundary']['mean_iou']:.2f}",
+        "unetInteriorIoU": f"{100 * summary['validation']['interior']['mean_iou']:.2f}",
+        "diceDeltaMiou": points(dice["miou"] - ce["miou"]),
+        "diceDeltaDice": points(dice["mean_dice"] - ce["mean_dice"]),
+    }
+    for name in CLASSES:
+        macros[f"unetIou{name}"] = f"{100 * unet['per_class_iou'][name]:.2f}"
+        macros[f"deeplabCeIou{name}"] = f"{100 * ce[f'iou_{name}']:.2f}"
+        macros[f"deeplabDiceIou{name}"] = f"{100 * dice[f'iou_{name}']:.2f}"
+        macros[f"diceDelta{name}"] = points(dice[f"iou_{name}"] - ce[f"iou_{name}"])
+    for key, run in ABLATIONS.items():
+        macros[f"ablation{key}Delta"] = points(rows[run]["delta_miou_pp"] / 100)
+        macros[f"ablation{key}Boundary"] = f"{100 * rows[run]['boundary_miou']:.2f}"
+    gaps = {run: rows[run]["miou"] - first[run]["miou"] for run in rows}
+    class_gaps = [
+        (abs(rows[run][f"iou_{name}"] - first[run][f"iou_{name}"]), name, run)
+        for run in rows
+        for name in CLASSES
+    ]
+    largest, name, run = max(class_gaps)
+    macros |= {
+        "repeatReferenceGap": points(gaps["suim_ablation_reference_seed42"]),
+        "repeatMaxMiouGap": points(max(gaps.values(), key=abs)),
+        "repeatMaxClassGap": points(largest),
+        "repeatMaxClassName": name,
+        "repeatDiceDeltaFirst": points(
+            first["suim_ablation_ce_dice_seed42"]["miou"]
+            - first["suim_ablation_reference_seed42"]["miou"]
+        ),
+    }
     return macros
 
 
@@ -137,8 +213,111 @@ def macro_file(macros: dict[str, str]) -> str:
     return HEADER + "\n".join(lines) + "\n"
 
 
-def quantitative_tables(summary: dict, deeplab: dict[str, dict]) -> dict[str, str]:
-    """Validation results at the selected checkpoints, including all eight classes."""
+def test_macros(tests: dict[str, dict], validation: dict[str, dict], images: int) -> dict[str, str]:
+    """Test scores of the selected models and their gap to validation."""
+    macros = {
+        "testImages": count(images),
+        "deeplabTestGain": points(
+            tests["deeplabCe"]["all"]["mean_iou"] - tests["unet"]["all"]["mean_iou"]
+        ),
+    }
+    for key, record in tests.items():
+        scores = record["all"]
+        macros[f"{key}TestMiou"] = f"{100 * scores['mean_iou']:.2f}"
+        macros[f"{key}TestDice"] = f"{100 * scores['mean_dice']:.2f}"
+        macros[f"{key}ValTestGap"] = points(validation[key]["mean_iou"] - scores["mean_iou"])
+        for name in CLASSES:
+            macros[f"{key}TestIou{name}"] = f"{100 * scores['per_class_iou'][name]:.2f}"
+    ce, dice = tests["deeplabCe"]["all"], tests["deeplabDice"]["all"]
+    macros["diceTestDeltaMiou"] = points(dice["mean_iou"] - ce["mean_iou"])
+    for name in CLASSES:
+        macros[f"diceTestDelta{name}"] = points(
+            dice["per_class_iou"][name] - ce["per_class_iou"][name]
+        )
+    return macros
+
+
+def difference_hash(path: Path, mirrored: bool = False) -> np.ndarray:
+    """64-bit difference hash of a photograph, optionally of its mirror image."""
+    with Image.open(path) as image:
+        if mirrored:
+            image = image.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
+        small = image.convert("L").resize((9, 8), Image.Resampling.LANCZOS)
+    pixels = np.asarray(small, dtype=np.int16)
+    return (pixels[:, 1:] > pixels[:, :-1]).ravel()
+
+
+def per_image_miou(evidence_path: Path) -> np.ndarray:
+    """Mean IoU of each image over the classes present in its target or prediction."""
+    evidence = torch.load(evidence_path, map_location="cpu", weights_only=True)
+    scores = []
+    for target, prediction in zip(evidence["targets"], evidence["predictions"], strict=True):
+        counts = np.bincount(
+            8 * target.long().numpy().ravel() + prediction.long().numpy().ravel(), minlength=64
+        ).reshape(8, 8)
+        intersection = counts.diagonal()
+        union = counts.sum(0) + counts.sum(1) - intersection
+        scores.append((intersection[union > 0] / union[union > 0]).mean())
+    return np.array(scores)
+
+
+def split_check_macros(reference: str, dice_history: list[dict]) -> dict[str, str]:
+    """Checks behind the gap between validation and test, and the CE + Dice instability."""
+    stems = {
+        half: (SPLIT_FILES / f"{half}.txt").read_text(encoding="utf-8").split()
+        for half in ("train", "val")
+    }
+    train = np.array([difference_hash(TRAIN_VAL_IMAGES / f"{s}.jpg") for s in stems["train"]])
+    macros = {"closeBits": count(CLOSE_BITS)}
+    for key, paths in (
+        ("Val", [TRAIN_VAL_IMAGES / f"{s}.jpg" for s in stems["val"]]),
+        ("Test", sorted(TEST_IMAGES.glob("*.jpg"))),
+    ):
+        nearest = np.stack(
+            [
+                (np.array([difference_hash(p, mirror) for p in paths])[:, None] != train)
+                .sum(-1)
+                .min(1)
+                for mirror in (False, True)
+            ]
+        ).min(0)
+        macros[f"nearest{key}Median"] = f"{np.median(nearest):.0f}"
+        macros[f"nearest{key}Close"] = f"{100 * (nearest <= CLOSE_BITS).mean():.1f}"
+        evidence = Path("results/a2") / reference / f"{key.lower()}_evidence.pt"
+        macros[f"imageMiou{key}Median"] = f"{100 * np.median(per_image_miou(evidence)):.1f}"
+    scores = [record["validation_miou"] for record in dice_history]
+    best = int(np.argmax(scores))
+    after = scores[best + 1 : best + 3]
+    macros["diceDropEpoch"] = count(best + 2 + int(np.argmin(after)))
+    macros["diceDropPoints"] = f"{100 * (scores[best] - min(after)):.1f}"
+    return macros
+
+
+def test_confusion(run: str, test: dict) -> dict[str, str]:
+    """Plot the reference test confusion matrix, as for validation, and its main errors."""
+    evidence = torch.load(
+        Path("results/a2") / run / "test_evidence.pt", map_location="cpu", weights_only=True
+    )
+    assert evidence["split"] == "test"
+    targets = evidence["targets"].numpy().astype(np.int64)
+    counts = np.bincount(
+        8 * targets.ravel() + evidence["predictions"].numpy().ravel(), minlength=64
+    ).reshape(8, 8)
+    diagonal = counts.diagonal()
+    iou = diagonal / (counts.sum(0) + counts.sum(1) - diagonal)
+    np.testing.assert_allclose(iou, list(test["all"]["per_class_iou"].values()))
+    plot_confusion_matrix(counts, CLASSES, TEST_CONFUSION, cmap=DIVERGING)
+    plants, reef, robots, divers = (CLASSES.index(name) for name in ("PF", "RI", "RO", "HD"))
+    return {
+        "testPlantsAsReef": f"{100 * counts[plants, reef] / counts[plants].sum():.2f}",
+        "testRobotsAsDivers": f"{100 * counts[robots, divers] / counts[robots].sum():.2f}",
+    }
+
+
+def quantitative_tables(
+    summary: dict, deeplab: dict[str, dict], tests: dict[str, dict]
+) -> dict[str, str]:
+    """Validation and test results at the selected checkpoints, for all eight classes."""
     validation = summary["validation"]["all"]
     records = [
         (
@@ -147,7 +326,8 @@ def quantitative_tables(summary: dict, deeplab: dict[str, dict]) -> dict[str, st
             validation["mean_iou"],
             validation["mean_dice"],
             summary["parameters"],
-            list(validation["per_class_iou"].values()),
+            [validation["per_class_iou"][name] for name in CLASSES],
+            tests["unet"]["all"],
         )
     ]
     for key, loss in (("Ce", "CE"), ("Dice", "CE + Dice")):
@@ -159,32 +339,46 @@ def quantitative_tables(summary: dict, deeplab: dict[str, dict]) -> dict[str, st
                 row["miou"],
                 row["mean_dice"],
                 row["parameters"],
-                [row[f"iou_{name}"] for name in ("BW", "HD", "PF", "WR", "RO", "RI", "FV", "SR")],
+                [row[f"iou_{name}"] for name in CLASSES],
+                tests[f"deeplab{key}"]["all"],
             )
         )
     overall, per_class = [], []
-    for model, loss, miou, dice, parameters, values in records:
-        assert len(values) == 8 and all(0 <= value <= 1 for value in values)
-        assert abs(sum(values) / 8 - miou) < 1e-10
+    for model, loss, miou, dice, parameters, values, test in records:
+        test_values = [test["per_class_iou"][name] for name in CLASSES]
+        for scores, mean in ((values, miou), (test_values, test["mean_iou"])):
+            assert len(scores) == 8 and all(0 <= value <= 1 for value in scores)
+            assert abs(sum(scores) / 8 - mean) < 1e-10
         overall.append(
             rf"{model} & {loss} & {100 * miou:.2f} & {100 * dice:.2f} & "
+            rf"{100 * test['mean_iou']:.2f} & {100 * test['mean_dice']:.2f} & "
             rf"{parameters / 1e6:.2f}\\"
         )
-        per_class.append(
-            f"{model} ({loss}) & " + " & ".join(f"{100 * value:.2f}" for value in values) + r"\\"
-        )
+        for split, scores in (("Validation", values), ("Test", test_values)):
+            label = f"{model} ({loss})" if split == "Validation" else ""
+            per_class.append(
+                f"{label} & {split} & "
+                + " & ".join(f"{100 * value:.2f}" for value in scores)
+                + r"\\"
+            )
     return {
         "quantitative_results.tex": HEADER
         + "\n".join(
             [
                 r"\begin{table}[htbp]",
                 r"\centering\small",
-                r"\caption{Validation results on 287 SUIM images at the selected checkpoints. "
-                r"Each configuration uses seed 42.}",
+                r"\caption{Validation and test results at the checkpoints selected on "
+                r"validation. Each configuration uses seed \unetSeed{}, and each model was "
+                r"scored once on the test split.}",
                 r"\label{tab:quantitative-results}",
-                r"\begin{tabular}{llrrr}",
+                r"\setlength{\tabcolsep}{4pt}",
+                r"\begin{tabular}{llrrrrr}",
                 r"\toprule",
-                r"Model & Loss & mIoU (\%) & Mean Dice (\%) & Params (M)\\",
+                r"& & \multicolumn{2}{c}{Validation (\suimValImages{} images)} & "
+                r"\multicolumn{2}{c}{Test (\testImages{} images)} &\\",
+                r"\cmidrule(lr){3-4}\cmidrule(lr){5-6}",
+                r"Model & Loss & mIoU (\%) & Mean Dice (\%) & mIoU (\%) & Mean Dice (\%) & "
+                r"Params (M)\\",
                 r"\midrule",
                 *overall,
                 r"\bottomrule",
@@ -199,11 +393,12 @@ def quantitative_tables(summary: dict, deeplab: dict[str, dict]) -> dict[str, st
                 r"\begin{table}[htbp]",
                 r"\centering\footnotesize",
                 r"\setlength{\tabcolsep}{3pt}",
-                r"\caption{Per-class validation IoU (\%) on the same 287 SUIM images.}",
+                r"\caption{Per-class IoU (\%) on the validation and test splits at the "
+                r"selected checkpoints.}",
                 r"\label{tab:per-class-iou}",
-                r"\begin{tabular}{lrrrrrrrr}",
+                r"\begin{tabular}{llrrrrrrrr}",
                 r"\toprule",
-                r"Model & BW & HD & PF & WR & RO & RI & FV & SR\\",
+                r"Model & Split & BW & HD & PF & WR & RO & RI & FV & SR\\",
                 r"\midrule",
                 *per_class,
                 r"\bottomrule",
@@ -219,6 +414,15 @@ def main() -> None:
     summary = json.loads(UNET_SUMMARY.read_text(encoding="utf-8"))
     with COMPARISONS.open(encoding="utf-8", newline="") as handle:
         rows = {row["run"]: row for row in csv.DictReader(handle)}
+    with FIRST_RUN.open(encoding="utf-8", newline="") as handle:
+        first = {row["run"]: row for row in csv.DictReader(handle)}
+    numeric = {
+        name: {
+            run: {k: float(v) for k, v in row.items() if k != "run"} for run, row in table.items()
+        }
+        for name, table in (("second", rows), ("first", first))
+    }
+    assert numeric["first"].keys() == numeric["second"].keys()
     deeplab = {
         key: {name: float(value) for name, value in rows[run].items() if name != "run"}
         for key, run in DEEPLAB_RUNS.items()
@@ -239,13 +443,33 @@ def main() -> None:
             "peak_training_memory_mb": record["peak_training_memory_mb"],
             "inference_ms_per_image": record["validation_inference"]["milliseconds_per_image"],
         }
-    macros = unet_macros(summary) | cost_macros(summary, compute)
+    test_summaries = {
+        key: json.loads((Path("results/a2") / run / "test_summary.json").read_text())
+        for key, run in TEST_RUNS.items()
+    }
+    for key, record in test_summaries.items():
+        assert record["split"] == "test" and record["name"] == TEST_RUNS[key]
+    tests = {key: record["test"] for key, record in test_summaries.items()}
+    (images,) = {record["images"] for record in test_summaries.values()}
+    validation = {
+        "unet": summary["validation"]["all"],
+        "deeplabCe": run_summaries["Ce"]["validation"]["all"],
+        "deeplabDice": run_summaries["Dice"]["validation"]["all"],
+    }
+    macros = (
+        unet_macros(summary)
+        | cost_macros(summary, compute)
+        | comparison_macros(summary, numeric["second"], numeric["first"])
+        | test_macros(tests, validation, images)
+        | test_confusion(TEST_RUNS["deeplabCe"], tests["deeplabCe"])
+        | split_check_macros(TEST_RUNS["deeplabCe"], run_summaries["Dice"]["history"])
+    )
     outputs = {
         "results_numbers.tex": macro_file(macros),
         "compute_cost.tex": cost_table(
             summary, macros, {key: record["device"] for key, record in run_summaries.items()}
         ),
-        **quantitative_tables(summary, deeplab),
+        **quantitative_tables(summary, deeplab, tests),
     }
     for name, text in outputs.items():
         (TABLE_DIR / name).write_text(text, encoding="utf-8", newline="\n")

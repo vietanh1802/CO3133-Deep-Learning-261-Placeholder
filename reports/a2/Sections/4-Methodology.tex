@@ -2,8 +2,8 @@
 \label{sec:method}
 
 % Model numbers below come from the run records through
-% scripts/report/a2_method_tables.py; regenerate instead of editing them.
-\input{Tables/method_numbers}
+% scripts/report/a2_method_tables.py, loaded in main.tex; regenerate instead of
+% editing them.
 
 \subsection{Training and evaluation pipeline}
 \label{sec:pipeline}
@@ -27,34 +27,52 @@ prediction refinement or test-time augmentation.
 
 \begin{figure}[htbp]
 \centering
+\resizebox{\linewidth}{!}{%
 \begin{tikzpicture}[
-  stage/.style={draw, rounded corners=2pt, align=center, font=\scriptsize,
-    text width=2.2cm, minimum height=1.3cm, inner sep=2pt},
-  flow/.style={-{Stealth[length=4pt]}, thick},
-  node distance=0.32cm]
-\node[stage] (raw) {\textbf{Raw data}\\JPEG images,\\RGB BMP masks};
-\node[stage, right=of raw] (prep) {\textbf{Preprocessing}\\audit, decode,\\resize,\\normalize, flip};
-\node[stage, right=of prep] (load) {\textbf{Data loader}\\split files,\\shuffled batches};
-\node[stage, right=of load] (model) {\textbf{Model}\\U-Net or\\DeepLabV3};
-\node[stage, right=of model] (loss) {\textbf{Loss}\\CE or\\CE + Dice};
-\node[stage, right=of loss] (opt) {\textbf{Optimization}\\AdamW, warm-up\\and cosine,\\accumulation};
-\node[stage, below=0.75cm of model] (pred) {\textbf{Prediction}\\argmax over\\eight classes};
-\node[stage, right=of pred] (post) {\textbf{Post-processing}\\logit resize\\if sizes differ};
-\node[stage, right=of post] (eval) {\textbf{Evaluation}\\pooled confusion\\matrix, mIoU,\\mDice};
+  stage/.style={draw=#1, line width=0.7pt, fill=white, rounded corners=3pt,
+    align=flush center, font=\scriptsize, text width=2.35cm, minimum height=1.9cm,
+    inner sep=2pt},
+  model/.style={stage=figmodel, line width=1.1pt, fill=figmodel!12},
+  lane/.style={draw=#1!55, fill=#1!7, rounded corners=6pt, line width=0.5pt, inner sep=5pt},
+  tag/.style={font=\tiny\bfseries, text=#1!80!black, inner sep=1pt},
+  flow/.style={-{Stealth[length=5pt]}, thick, draw=black!70}]
+\def\dx{2.8}
+\node[stage=figdata] (raw)  at (0*\dx, 0) {\textbf{Raw data}\\[1pt]JPEG images,\\RGB BMP masks};
+\node[stage=figdata] (prep) at (1*\dx, 0) {\textbf{Preprocessing}\\[1pt]audit, decode,\\resize, flip,\\normalize};
+\node[stage=figdata] (load) at (2*\dx, 0) {\textbf{Data loader}\\[1pt]fixed split files,\\shuffled batches};
+\node[model]         (net)  at (3*\dx, 0) {\textbf{Model}\\[1pt]U-Net or\\DeepLabV3\\[2pt]{\tiny\color{black!65}8 scores per pixel}};
+\node[stage=figtrain] (loss) at (4*\dx, 0) {\textbf{Loss}\\[1pt]CE or CE + Dice\\against the\\target mask};
+\node[stage=figtrain] (opt)  at (5*\dx, 0) {\textbf{Optimization}\\[1pt]AdamW, warm-up\\then cosine,\\accumulation};
+\node[stage=figeval] (pred) at (3*\dx, -2.75) {\textbf{Prediction}\\[1pt]argmax over\\the 8 classes};
+\node[stage=figeval] (post) at (4*\dx, -2.75) {\textbf{Post-processing}\\[1pt]resize scores\\only if sizes differ};
+\node[stage=figeval] (eval) at (5*\dx, -2.75) {\textbf{Evaluation}\\[1pt]pooled confusion\\matrix, mIoU, mDice;\\best mIoU kept};
+\begin{scope}[on background layer]
+  \node[lane=figdata, fit={(raw) (load) ($(raw.north)+(0,0.3)$)}] (dataLane) {};
+  \node[lane=figtrain, fit={(loss) (opt) ($(loss.north)+(0,0.3)$)}] (trainLane) {};
+  \node[lane=figeval, fit={(pred) (eval) ($(pred.south)+(0,-0.3)$)}] (evalLane) {};
+\end{scope}
+\node[tag=figdata, anchor=north west] at ($(dataLane.north west)+(5pt,-3pt)$) {DATA};
+\node[tag=figtrain, anchor=north west] at ($(trainLane.north west)+(5pt,-3pt)$) {TRAINING, every batch};
+\node[tag=figeval, anchor=south west] at ($(evalLane.south west)+(5pt,3pt)$)
+  {EVALUATION, validation after every epoch, test once};
 \draw[flow] (raw) -- (prep);
 \draw[flow] (prep) -- (load);
-\draw[flow] (load) -- (model);
-\draw[flow] (model) -- (loss);
+\draw[flow] (load) -- (net);
+\draw[flow] (net) -- (loss);
 \draw[flow] (loss) -- (opt);
-\draw[flow] (opt.north) to[bend right=14] node[above, font=\scriptsize] {weight update} (model.north);
-\draw[flow] (model) -- (pred);
+\draw[flow, draw=figtrain] (opt.north) .. controls +(0,1.25) and +(0.4,1.25) ..
+  node[pos=0.5, above, font=\scriptsize, text=figtrain!80!black] {weight update}
+  ($(net.north)+(0.4,0)$);
+\draw[flow] (net) -- (pred);
 \draw[flow] (pred) -- (post);
 \draw[flow] (post) -- (eval);
-\end{tikzpicture}
-\caption{The shared SUIM pipeline. The training path computes the loss and
-updates model weights, while the evaluation path converts model scores into
-class masks and measures segmentation quality. We evaluate validation predictions
-after every epoch and reserve the official test set for the selected models.}
+\end{tikzpicture}}
+\caption{The shared SUIM pipeline. Grey steps prepare the data, the green
+training path computes the loss and updates the model weights after every
+batch, and the amber evaluation path turns model scores into class masks and
+measures segmentation quality. We evaluate validation predictions after every
+epoch, keep the checkpoint with the best validation mIoU, and reserve the
+official test set for the selected models.}
 \label{fig:pipeline}
 \end{figure}
 
@@ -260,7 +278,6 @@ the metric calculations against a hand-computed confusion matrix.
 
 \subsection{Training configuration}
 \label{sec:training}
-\label{sec:experiments}
 Both models train for \unetEpochs{} epochs with AdamW and weight decay
 \unetWeightDecay{} (see \tabref{tab:training-setup}). The learning rate rises
 linearly over the first \unetWarmupEpochs{} epochs, then follows a cosine decay
@@ -276,19 +293,46 @@ Training continues for the full schedule without early stopping. After each
 epoch, validation mIoU determines whether to save a new best checkpoint, which
 we retain for subsequent evaluation. Seed \unetSeed{} controls new-layer
 initialization, batch order and random flips, and convolution algorithms run
-deterministically. The hyperparameters are fixed before training, so validation
+deterministically. Some other GPU operations, such as the backward pass of
+bilinear upsampling, do not, so retraining with the same seed does not
+reproduce a run exactly (\secref{sec:conclusion}). The hyperparameters are fixed before training, so validation
 selects the checkpoint rather than tuning the configuration. This budget may
 limit U-Net, whose loss is still decreasing near the end of training
 (see \secref{sec:training-behavior}).
 
 U-Net runs on an \unetDevice{} with \texttt{PyTorch} \unetTorchVersion{}
 and CUDA \unetCudaVersion{}, while DeepLabV3 runs on an \deeplabDevice{}
-with \texttt{PyTorch} \deeplabTorchVersion{} and CUDA \deeplabCudaVersion{}. The table lists the settings for U-Net and the DeepLabV3
-reference configuration. For the loss comparison, we keep the DeepLabV3
-architecture, split, seed and training schedule fixed and change only the loss.
-We compare mIoU and rare-class IoU to assess whether adding Dice improves those
-classes without lowering the overall score. Since each configuration uses one
-seed, these differences describe the observed runs rather than variation
-across repeated training.
+with \texttt{PyTorch} \deeplabTorchVersion{} and CUDA \deeplabCudaVersion{}. The
+table lists the settings for U-Net and the DeepLabV3 reference configuration.
 
 \input{Tables/training_setup}
+
+\subsection{Experimental design}
+\label{sec:experiments}
+We run six comparisons (see \tabref{tab:experiment-design}). Unless stated
+otherwise, every run shares the same split and preprocessing, a
+$\suimInputHeight\times\suimInputWidth$ input, AdamW with warm-up and cosine
+decay, \unetEpochs{} epochs, an effective batch of \suimEffectiveBatch{},
+seed \unetSeed{}, and checkpoint selection by validation mIoU. The five
+DeepLabV3 variants each change one factor of the reference configuration. The
+comparison of U-Net and DeepLabV3 changes architecture, size and initialization
+together, so it cannot isolate the effect of pretraining.
+
+We make every comparison and decision on the \suimValImages{} validation
+images, including the assessment of the loss hypothesis, as our proposal
+planned. Only after these decisions do we score U-Net and the two DeepLabV3
+loss variants once on the \suimTestUsable{} official test images, to report
+their final performance (see \secref{sec:quantitative}).
+
+\input{Tables/experiment_design}
+
+Only the loss comparison carries a hypothesis stated in advance, in our
+dataset proposal; its criterion follows directly from that statement. The
+other rows give the expectation that motivated each run. The four ablations
+cover the controlled factors suggested for this assignment and were added
+after the proposal. To judge whether a difference exceeds chance, we compare it
+with the variation between repeated training runs: the six DeepLabV3
+configurations were trained twice with the same code, seed and GPU, and their
+mIoU differed by up to \repeatMaxMiouGap{} points (see \secref{sec:conclusion}).
+We treat smaller differences as indistinguishable. This threshold was derived
+from the repeated run, not set before the experiments.

@@ -1,0 +1,119 @@
+{
+  "name": "suim_unet_seed42",
+  "split": "test",
+  "images": 110,
+  "evaluated_at": "2026-11-10T16:36:48+00:00",
+  "checkpoint": ".tmp\\a2-unet-result\\a2-checkpoint\\suim_unet_seed42\\best.pt",
+  "checkpoint_sha256": "5a985888ead373ff77288685c7e8906c5b62d6c9ca39572c5d0740db6eee862d",
+  "checkpoint_epoch": 38,
+  "checkpoint_validation_miou": 0.36941969112236195,
+  "device": "CPU",
+  "software": {
+    "python": "3.12.7",
+    "torch": "2.14.0+cpu",
+    "torchvision": "0.29.0+cpu",
+    "cuda": null,
+    "cudnn": null
+  },
+  "git": {
+    "commit": "88adde182f78721c8de668c546c7edbc046f1ce9",
+    "dirty": true
+  },
+  "test": {
+    "all": {
+      "mean_iou": 0.36749731253511864,
+      "mean_dice": 0.47835014248640795,
+      "per_class_iou": {
+        "BW": 0.848248309467893,
+        "HD": 0.33754704467546165,
+        "PF": 0.00052948160133653,
+        "WR": 0.33298418026853044,
+        "RO": 0.0,
+        "RI": 0.5430551542585637,
+        "FV": 0.31638475581534875,
+        "SR": 0.5612295741938154
+      },
+      "per_class_dice": {
+        "BW": 0.9178943166052207,
+        "HD": 0.5047254913674653,
+        "PF": 0.0010584027978647874,
+        "WR": 0.4996070999153952,
+        "RO": 0.0,
+        "RI": 0.7038700499587794,
+        "FV": 0.4806873589467919,
+        "SR": 0.7189584202997461
+      }
+    },
+    "boundary": {
+      "mean_iou": 0.1894701533188621,
+      "mean_dice": 0.2965544588352189,
+      "per_class_iou": {
+        "BW": 0.42589998172625937,
+        "HD": 0.20558410890401443,
+        "PF": 0.0,
+        "WR": 0.13455392448946427,
+        "RO": 0.0,
+        "RI": 0.28349435574087256,
+        "FV": 0.21018343497747186,
+        "SR": 0.2560454207128144
+      },
+      "per_class_dice": {
+        "BW": 0.5973770771925327,
+        "HD": 0.34105311671851596,
+        "PF": 0.0,
+        "WR": 0.23719264740988302,
+        "RO": 0.0,
+        "RI": 0.4417539578150009,
+        "FV": 0.3473579771506036,
+        "SR": 0.4077008943952152
+      }
+    },
+    "interior": {
+      "mean_iou": 0.3757993478592888,
+      "mean_dice": 0.48587661130164395,
+      "per_class_iou": {
+        "BW": 0.8632346778849674,
+        "HD": 0.34850928183011437,
+        "PF": 0.0005577496016074275,
+        "WR": 0.34176140005343164,
+        "RO": 0.0,
+        "RI": 0.5537180553060466,
+        "FV": 0.32690353536840244,
+        "SR": 0.5717100828297407
+      },
+      "per_class_dice": {
+        "BW": 0.9265979086057584,
+        "HD": 0.5168808053840592,
+        "PF": 0.0011148773807998725,
+        "WR": 0.5094220180127734,
+        "RO": 0.0,
+        "RI": 0.7127651679338655,
+        "FV": 0.4927314256912289,
+        "SR": 0.7275006874046663
+      }
+    }
+  },
+  "config": {
+    "name": "suim_unet_seed42",
+    "model": "unet",
+    "model_config": {
+      "in_channels": 3,
+      "num_classes": 8,
+      "base_width": 32
+    },
+    "dataset": "suim",
+    "seed": 42,
+    "batch_size": 4,
+    "accumulation_steps": 4,
+    "learning_rate": 0.001,
+    "weight_decay": 0.0001,
+    "epochs": 40,
+    "warmup_epochs": 5,
+    "image_height": 240,
+    "image_width": 320,
+    "num_workers": 4,
+    "data_dir": "data/suim",
+    "checkpoint_dir": "checkpoints",
+    "results_dir": "results"
+  }
+}

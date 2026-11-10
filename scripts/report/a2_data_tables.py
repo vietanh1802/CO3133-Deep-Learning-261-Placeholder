@@ -144,6 +144,14 @@ def number_macros(summary: dict) -> dict[str, str]:
         macros[f"suimShareTest{name}"] = percent(held_out[name]["pixel_share"], 2)
         macros[f"suimMedianArea{name}"] = percent(pool[name]["median_area_when_present"])
         macros[f"suimImagesTrainVal{name}"] = count(pool[name]["images"])
+        macros[f"suimImagesTest{name}"] = count(held_out[name]["images"])
+        # Share of images that contain the class, to compare the class mix of the splits.
+        macros[f"suimPresenceVal{name}"] = percent(
+            halves["val"]["classes"][name]["images"] / halves["val"]["images"], 0
+        )
+        macros[f"suimPresenceTest{name}"] = percent(
+            held_out[name]["images"] / summary["splits"]["TEST"]["usable_pairs"], 0
+        )
         for half in ("train", "val"):
             entry = halves[half]["classes"][name]
             prefix = half.capitalize()

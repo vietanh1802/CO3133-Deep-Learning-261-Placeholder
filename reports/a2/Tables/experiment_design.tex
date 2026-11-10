@@ -1,13 +1,48 @@
+% Written by hand; numbers come from the macros of the generated tables.
 \begin{table}[htbp]
-\centering\small
-\caption{Experimental design. Each row changes one factor and fixes the rest.}
+\centering\footnotesize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.25}
+\caption{Experimental design. Every comparison also fixes the shared settings
+listed in \secref{sec:experiments}; the reference is DeepLabV3-ResNet50 with
+cross-entropy. Only the loss hypothesis was stated in our dataset proposal.}
 \label{tab:experiment-design}
-\begin{tabularx}{\linewidth}{lYYYY}
+\begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}p{2.05cm}YYYYY}
 \toprule
-Experiment & Hypothesis & Changed factor & Fixed factors & Decision criterion\\
+Experiment & Hypothesis or expectation & Changed factor & Fixed factors & Metrics & Decision criterion\\
 \midrule
-Baseline vs.\ pretrained & \pending & U-Net vs.\ DeepLabV3 & \pending & \pending\\
-Loss function & \pending & CE vs.\ CE + Dice & \pending & \pending\\
+Baseline vs.\ pretrained & DeepLabV3 scores higher, especially on small classes
+  & U-Net from scratch vs.\ pretrained DeepLabV3; architecture, size,
+    initialization and learning rates change together
+  & Shared settings, cross-entropy
+  & mIoU, mean Dice, per-class IoU
+  & Gap larger than run-to-run variation; not attributed to pretraining alone\\
+Loss function & Dice raises RO, PF and WR IoU without lowering mIoU
+  & Cross-entropy vs.\ 0.5 cross-entropy + 0.5 soft Dice
+  & Reference model and shared settings
+  & mIoU; IoU of RO, PF and WR
+  & Supported only if all three classes improve and mIoU does not fall\\
+Backbone freezing & Freezing lowers mIoU, as fixed features cannot adapt to
+    underwater images
+  & Full fine-tuning vs.\ frozen backbone
+  & Reference and shared settings
+  & mIoU, per-class IoU, training cost
+  & Change larger than run-to-run variation\\
+Augmentation & Flips give a small gain with \suimTrainImages{} training images
+  & Random horizontal flips vs.\ none
+  & Reference and shared settings
+  & mIoU, per-class IoU
+  & Change larger than run-to-run variation\\
+Backbone depth & ResNet101 gives a small gain at a higher cost
+  & ResNet50 vs.\ ResNet101
+  & Reference and shared settings
+  & mIoU, training time, memory, latency
+  & Change larger than run-to-run variation\\
+Input resolution & A smaller input loses small and thin structures
+  & Full vs.\ half input size, both scored on the full-size mask grid
+  & Reference and shared settings
+  & mIoU, boundary mIoU
+  & Change larger than run-to-run variation\\
 \bottomrule
 \end{tabularx}
 \end{table}
