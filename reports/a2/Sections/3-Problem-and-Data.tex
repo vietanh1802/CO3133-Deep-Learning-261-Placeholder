@@ -130,6 +130,17 @@ appears.}{fig:region-area}
 \reportfigure{Images/suim_resolution_distribution.png}{Original image sizes
 across all usable pairs, including the official test set.}{fig:resolutions}
 
+We also compare colour and brightness across classes by grouping photograph
+pixels with their ground-truth labels (see \figref{fig:class-colour}). We use
+287 validation images resized to $240\times320$. Plants and reefs have
+broadly overlapping distributions, so colour alone may offer limited
+separation between these classes.
+
+\reportfigure{Images/suim_class_colour_distribution.pdf}{RGB and brightness
+distributions by class in 287 validation images at $240\times320$ resolution.
+Each curve sums to 100\% across 32 intensity bins. The dashed curve shows
+brightness, calculated as $0.2126R+0.7152G+0.0722B$ from image RGB values.}{fig:class-colour}
+
 \paragraph{Mask quality.}
 We also audit all \suimOnDiskTotal{} pairs: \suimTrainValOnDisk{} in the training
 pool and \suimTestOnDisk{} in the test set. We match photographs and masks by

@@ -88,6 +88,9 @@
   <div class="gallery">
     <figure><a href="images/a2/m2/suim_resolution_distribution.png?v=549a09a54d28"><img src="images/a2/m2/suim_resolution_distribution.png?v=549a09a54d28" width="2840" height="1200" alt="Counts for the 11 original image resolutions across all 1,540 usable SUIM pairs, on a logarithmic scale" loading="lazy"></a><figcaption>Original image sizes across all usable pairs, including the official test set.</figcaption></figure>
   </div>
+  <h3>Colour and brightness by class</h3>
+  <p>We compare colour and brightness across classes using photograph pixels grouped by their ground-truth labels. The plot uses 287 validation images resized to 240 × 320. Plants and reefs have broadly overlapping distributions, so colour alone may offer limited separation between these classes.</p>
+  <div class="gallery"><figure><a href="images/a2/m2/suim_class_colour_distribution.png?v=9d525ce89d05"><img src="images/a2/m2/suim_class_colour_distribution.png?v=9d525ce89d05" width="3600" height="1720" alt="Eight class panels showing red, green, blue and brightness distributions from validation image pixels" loading="lazy"></a><figcaption>Each curve sums to 100% across 32 intensity bins. Solid lines show red, green and blue channels; the dashed line shows brightness, calculated as 0.2126R + 0.7152G + 0.0722B. <a href="images/a2/m2/suim_class_colour_distribution.pdf">Vector PDF</a>.</figcaption></figure></div>
 </section>
 
 <section id="methodology">
@@ -154,10 +157,11 @@
 
 <section id="examples">
 <h3>Input and output examples</h3>
-<p>These reference-run predictions show the photograph, ground-truth mask and predicted mask from left to right. We select the highest- and lowest-scoring validation images, plus the highest-scoring image containing a robot, by per-image mIoU. Colours identify SUIM classes.</p>
-<div class="gallery"><figure><a href="images/a2/errors/example_best.png?v=0a1ba8400919"><img src="images/a2/errors/example_best.png?v=0a1ba8400919" width="2840" height="960" alt="Reference prediction for w_r_148_: photograph, target mask and predicted mask" loading="lazy"></a><figcaption>Highest-scoring example: <code>w_r_148_</code>, with 97.60% per-image mIoU.</figcaption></figure>
-<figure><a href="images/a2/errors/example_robot.png?v=66bd98953ac3"><img src="images/a2/errors/example_robot.png?v=66bd98953ac3" width="2840" height="960" alt="Reference prediction for d_r_211_: photograph, target mask and predicted mask" loading="lazy"></a><figcaption>Highest-scoring robot example: <code>d_r_211_</code>, with 89.04% per-image mIoU.</figcaption></figure>
-<figure><a href="images/a2/errors/example_worst.png?v=013802f78126"><img src="images/a2/errors/example_worst.png?v=013802f78126" width="2840" height="960" alt="Reference prediction for w_r_162_: photograph, target mask and predicted mask" loading="lazy"></a><figcaption>Lowest-scoring example: <code>w_r_162_</code>, with 0.01% per-image mIoU.</figcaption></figure></div>
+<p>We compare U-Net and the DeepLabV3 reference on the same validation images. Each row shows the input, ground truth, U-Net prediction and DeepLabV3 prediction. We select the highest- and lowest-scoring DeepLabV3 images, plus its highest-scoring robot-containing image, by per-image mIoU. Colours identify SUIM classes.</p>
+<div class="gallery"><figure><a href="images/a2/errors/comparison_best.png?v=a0f923087468"><img src="images/a2/errors/comparison_best.png?v=a0f923087468" width="3600" height="840" alt="w_r_148_: input, ground truth, U-Net and DeepLabV3 predictions" loading="lazy"></a><figcaption><code>w_r_148_</code>: DeepLabV3 follows the wreck region closely, while U-Net confuses parts of it with other classes. <a href="images/a2/errors/comparison_best.pdf?v=a0f923087468">Vector PDF</a>.</figcaption></figure>
+<figure><a href="images/a2/errors/comparison_robot.png?v=fb40cd61ccf4"><img src="images/a2/errors/comparison_robot.png?v=fb40cd61ccf4" width="3600" height="840" alt="d_r_211_: input, ground truth, U-Net and DeepLabV3 predictions" loading="lazy"></a><figcaption><code>d_r_211_</code>: DeepLabV3 recovers the robot body; U-Net misses the robot class. <a href="images/a2/errors/comparison_robot.pdf?v=fb40cd61ccf4">Vector PDF</a>.</figcaption></figure>
+<figure><a href="images/a2/errors/comparison_worst.png?v=291f21362924"><img src="images/a2/errors/comparison_worst.png?v=291f21362924" width="3600" height="840" alt="w_r_162_: input, ground truth, U-Net and DeepLabV3 predictions" loading="lazy"></a><figcaption><code>w_r_162_</code>: Both models predict mostly reef where the ground truth contains plants and wrecks. <a href="images/a2/errors/comparison_worst.pdf?v=291f21362924">Vector PDF</a>.</figcaption></figure>
+</div>
 </section>
 </section>
 
@@ -194,7 +198,7 @@
   <h2>Error analysis</h2>
   <p>We most often confuse plants with reefs: DeepLabV3 labels 71.27% of plant pixels as reef. The confusion matrix below covers all 287 validation images.</p>
   <div class="gallery">
-    <figure><a href="images/a2/errors/confusion_matrix.png?v=adec242f0a65"><img src="images/a2/errors/confusion_matrix.png?v=adec242f0a65" width="2400" height="2400" alt="DeepLabV3 validation confusion matrix with true classes in rows and predicted classes in columns" loading="lazy"></a><figcaption>Row-normalized DeepLabV3 confusion matrix. Colours show the fraction of each true class, and annotations show pixel counts. The diagonal gives class recall. <a href="images/a2/errors/confusion_matrix.pdf">Vector PDF</a>.</figcaption></figure>
+    <figure><a href="images/a2/errors/confusion_matrix.png?v=adec242f0a65-report"><img src="images/a2/errors/confusion_matrix.png?v=adec242f0a65-report" width="2400" height="2400" alt="DeepLabV3 validation confusion matrix with true classes in rows and predicted classes in columns" loading="lazy"></a><figcaption>Row-normalized DeepLabV3 confusion matrix. Colours show the fraction of each true class, and annotations show pixel counts. The diagonal gives class recall. <a href="images/a2/errors/confusion_matrix.pdf?v=adec242f0a65-report">Vector PDF</a>.</figcaption></figure>
   </div>
   <p>Both models struggle at object boundaries. DeepLabV3 reaches 30.07% boundary mIoU against 64.34% in the interior. U-Net drops from 37.88% in the interior to 18.04% at boundaries.</p>
   <div class="gallery">

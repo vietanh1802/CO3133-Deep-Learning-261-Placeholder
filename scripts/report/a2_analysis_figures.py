@@ -13,7 +13,8 @@ import numpy as np
 import torch
 from matplotlib.patches import Patch
 
-from src.data.suim import CLASS_NAMES
+from src.data.suim import CLASS_NAMES, IMAGENET_MEAN, IMAGENET_STD
+from src.models import build_model
 from src.plots.common import save_figure
 from src.plots.format import apply
 
@@ -24,26 +25,30 @@ TABLES = Path("reports/a2/Tables")
 def main() -> None:
     """Pair predictions by sample ID and export reproducible report evidence."""
     OUTPUT.mkdir(parents=True, exist_ok=True)
-    runs = ["suim_ablation_reference_seed42", "suim_ablation_ce_dice_seed42"]
-    evidence = [
-        torch.load(
-            Path("results/a2") / run / "val_evidence.pt", weights_only=True, map_location="cpu"
-        )
-        for run in runs
-    ]
-    reference, dice = evidence
+    runs = ["suim_ablation_reference_seed42"]
+    reference = torch.load(
+        Path("results/a2") / runs[0] / "val_evidence.pt",
+        weights_only=True,
+        map_location="cpu",
+    )
     ids = reference["sample_ids"]
-    dice_ids = {name: index for index, name in enumerate(dice["sample_ids"])}
-    assert set(ids) == set(dice_ids) and len(ids) == len(dice_ids) == 287
-    assert all(record["split"] == "validation" for record in evidence)
-    order = [dice_ids[name] for name in ids]
+    assert reference["split"] == "validation" and len(ids) == len(set(ids)) == 287
     targets = reference["targets"].numpy()
     predictions = reference["predictions"].numpy()
-    dice_predictions = dice["predictions"][order].numpy()
-    np.testing.assert_array_equal(targets, dice["targets"][order].numpy())
-    assert targets.shape == predictions.shape == dice_predictions.shape == (287, 240, 320)
-    for labels in (targets, predictions, dice_predictions):
+    assert targets.shape == predictions.shape == (287, 240, 320)
+    for labels in (targets, predictions):
         assert labels.min() >= 0 and labels.max() < 8
+    checkpoint = torch.load(
+        "checkpoints/suim_unet_seed42/best.pt", weights_only=True, map_location="cpu"
+    )
+    config = checkpoint["metadata"]["config"]
+    assert config["model"] == "unet"
+    model = build_model(config["model"], config["model_config"])
+    model.load_state_dict(checkpoint["model"], strict=True)
+    model.eval()
+    torch.set_num_threads(4)
+    mean = torch.tensor(IMAGENET_MEAN).view(3, 1, 1)
+    std = torch.tensor(IMAGENET_STD).view(3, 1, 1)
     analysis = json.loads(Path("web/images/a2/errors/analysis.json").read_text())
     assert analysis["run"] == runs[0]
     palette = np.array([[(i >> bit) & 1 for bit in (2, 1, 0)] for i in range(8)], dtype=float)
@@ -52,17 +57,24 @@ def main() -> None:
     for row, label in enumerate(("best", "robot", "worst")):
         name = analysis["examples"][label]["sample_id"]
         index = ids.index(name)
+        image = reference["images"][index]
+        assert image.shape == (3, 240, 320) and torch.isfinite(image).all()
+        assert 0 <= image.min() <= image.max() <= 1
+        with torch.inference_mode():
+            logits = model(((image - mean) / std).unsqueeze(0))
+        assert logits.shape == (1, 8, 240, 320) and torch.isfinite(logits).all()
+        unet_prediction = logits.argmax(1)[0].numpy()
         panels = (
             reference["images"][index].numpy().transpose(1, 2, 0),
             palette[targets[index]],
+            palette[unet_prediction],
             palette[predictions[index]],
-            palette[dice_predictions[index]],
         )
         for col, (axis, panel) in enumerate(zip(axes[row], panels, strict=True)):
             axis.imshow(panel)
             axis.axis("off")
             if row == 0:
-                axis.set_title(("Photograph", "Target", "Reference", "CE + Dice")[col])
+                axis.set_title(("Input", "Ground truth", "U-Net", "DeepLabV3")[col])
         axes[row, 0].text(
             0.5, -0.08, name, transform=axes[row, 0].transAxes, ha="center", fontsize=7
         )

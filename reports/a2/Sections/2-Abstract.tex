@@ -13,11 +13,13 @@ and we score each selected model once on the test set. On the test set,
 DeepLabV3 reaches \deeplabCeTestMiou\% mIoU and \deeplabCeTestDice\% mean Dice,
 compared with \unetTestMiou\% and \unetTestDice\% for U-Net, at the cost of
 \parameterRatio{} times the parameters and \flopRatio{} times the operations
-per image. In a controlled experiment, adding a Dice term to the cross-entropy
-loss raises plant IoU but lowers robot and wreck IoU on both validation and
-test, and its change in validation mIoU is smaller than the variation we
-measured between two identical training runs, so the result does not support
-our hypothesis. The main remaining errors are plants predicted as reef, which
-take \testPlantsAsReef\% of plant pixels on the test set, and mistakes along
-object boundaries. Each configuration uses a single seed, which limits the
-strength of these comparisons.
+per image. Among five controlled variants of DeepLabV3, only freezing the
+backbone and halving the input resolution clearly lower validation mIoU, by
+\ablationFrozenDelta{} and \ablationLowResDelta{} points. Adding a Dice term to
+the cross-entropy loss raises plant IoU but lowers robot and wreck IoU on both
+validation and test, and its change in validation mIoU is smaller than the
+variation we measured between two identical training runs, so the result does
+not support our hypothesis. The main remaining errors are plants predicted as
+reef, which take \testPlantsAsReef\% of plant pixels on the test set, and
+mistakes along object boundaries. Each configuration uses a single seed, which
+limits the strength of these comparisons.
