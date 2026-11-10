@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Assignment 2 M3 - Deep Learning on Large-Scale Data and Specialized Tasks | CO3133</title>
-<meta name="description" content="Assignment 2 Milestone 3 progress: SUIM segmentation baselines and five controlled DeepLabV3 ablation comparisons.">
+<title>Assignment 2 - Deep Learning on Large-Scale Data and Specialized Tasks | CO3133</title>
+<meta name="description" content="Assignment 2: underwater image segmentation with U-Net and DeepLabV3, including results and five controlled comparisons.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&amp;family=IBM+Plex+Sans:wght@400;600&amp;display=swap">
@@ -21,18 +21,16 @@
   <p class="eyebrow">On this page</p>
   <nav aria-label="Report contents">
     <a href="#problem">Problem statement</a>
-    <a href="#track">M3 progress</a>
-    <a href="#proposal">Dataset approval</a>
     <a href="#dataset">Dataset and EDA</a>
     <a href="#methodology">Methodology</a>
     <a href="#setup">Experimental setup</a>
-    <a href="#results">Validation results</a>
+    <a href="#results">Experimental Results</a>
+    <a class="results-subsection" href="#comparison">Class comparison</a>
+    <a class="results-subsection" href="#examples">Input and output examples</a>
     <a href="#ablation">Controlled experiments</a>
-    <a href="#comparison">M2 class comparison</a>
-    <a href="#examples">Input and output examples</a>
     <a href="#error-analysis">Error analysis</a>
     <a href="#compute-cost">Compute cost</a>
-    <a href="#limitations">Limitations and next steps</a>
+    <a href="#limitations">Limitations</a>
     <a href="#links">Evidence and reproduction</a>
     <a href="#members">Group members</a>
   </nav>
@@ -40,101 +38,88 @@
 </aside>
 <article>
 <header class="article-header">
-  <p class="eyebrow">Assignment 2 · Milestone 3 Progress · <time datetime="2026-11-07">7 November 2026</time></p>
+  <p class="eyebrow">Assignment 2 · <time datetime="2026-11-07">7 November 2026</time></p>
   <h1>Underwater segmentation</h1>
   <p class="article-subtitle">Deep Learning on Large-Scale Data and Specialized Tasks.</p>
-  <p>SUIM segmentation: baseline results and five controlled comparisons against a shared DeepLabV3-ResNet50 reference.</p>
 </header>
 
 <section id="problem">
   <h2>Problem statement</h2>
-  <p>Semantic segmentation assigns a category to every pixel of an underwater photograph. Distinguishing water, divers, robots, marine life, vegetation, reefs, wrecks and the sea floor could support underwater scene understanding. SUIM provides a controlled benchmark for this task; these experiments do not establish readiness for deployment.</p>
-  <p>The input is an RGB image resized to 320 × 240 pixels. Each model returns eight scores per pixel, and the predicted mask takes the class with the highest score. The question is how a model trained from scratch compares with a pretrained segmentation model on the same data partitions, especially for rare classes and object boundaries.</p>
-</section>
-
-<section id="track">
-  <h2>M3 progress</h2>
-  <p>The earlier M2 runs established a U-Net baseline and pretrained DeepLabV3. The controlled study now adds six 40-epoch runs: one shared reference and five variants, each changing one factor. <strong>All model scores on this page are validation results on 287 images.</strong> No final scores on the 110-image official test split are reported.</p>
-  <div class="table-scroll"><table>
-    <caption>Evidence available for the M3 progress update.</caption>
-    <thead><tr><th scope="col">Requirement</th><th scope="col">Completed evidence</th></tr></thead>
-    <tbody>
-      <tr><td>EDA and data preparation</td><td>Mask-quality audit, duplicate checks, class/region/resolution analysis, and committed train/validation lists.</td></tr>
-      <tr><td>Simple baseline</td><td>U-Net trained from scratch for 40 epochs.</td></tr>
-      <tr><td>Pretrained model</td><td>DeepLabV3-ResNet50 fine-tuned for 40 epochs.</td></tr>
-      <tr><td>Controlled experiments</td><td>Backbone freezing, augmentation, backbone depth, loss and input resolution; six completed runs, seed 42.</td></tr>
-      <tr><td>Preliminary metrics</td><td>Validation mIoU, mean Dice, per-class IoU, learning curves and recorded compute cost.</td></tr>
-    </tbody>
-  </table></div>
-</section>
-
-<section id="proposal">
-  <h2>Dataset approval</h2>
-  <p>The <a href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder/blob/week7/reports/a2_proposal.md">M1 dataset proposal</a> records the approval status <strong>Approved</strong>, with no conditions. SUIM semantic segmentation remains the selected task.</p>
+  <p>The task is to label each pixel in an underwater photograph as water, a diver, marine life, vegetation, a robot, a wreck, a reef or the sea floor. We compare a model trained from scratch with a pretrained model, focusing on rare classes and object boundaries.</p>
 </section>
 
 <section id="dataset">
   <h2>Dataset and EDA</h2>
-  <p><a href="https://irvlab.cs.umn.edu/resources/suim-dataset">SUIM</a> contains underwater RGB images paired with colour-coded segmentation masks. Its eight labels comprise background waterbody (BW), human divers (HD), aquatic plants and sea-grass (PF), wrecks and ruins (WR), robots and instruments (RO), reefs and invertebrates (RI), fish and vertebrates (FV), and sea-floor and rocks (SR).</p>
-  <p>The downloaded archive has 1,525 training/validation pairs and 110 official test pairs. The audit excludes 85 training/validation pairs with invalid mask colours and ten that duplicate official test images, retaining <strong>1,540 usable pairs</strong>. The test split retains all 110 pairs. The software repository uses an MIT licence; the proposal does not assume that this also grants a licence to redistribute the image archive.</p>
+  <p><a href="https://irvlab.cs.umn.edu/resources/suim-dataset">SUIM</a> pairs underwater photographs with colour-coded masks that label every pixel. Its varied scenes and uneven class frequencies let us compare segmentation quality on common and rare objects.</p>
+  <p>The eight classes are waterbody (BW), divers (HD), plants and sea-grass (PF), wrecks (WR), robots and instruments (RO), reefs and invertebrates (RI), fish and vertebrates (FV), and sea-floor and rocks (SR).</p>
+  <p>We resize images and masks to 320 × 240 pixels. The model assigns one of the eight classes to each pixel to produce a predicted mask.</p>
+  <div class="gallery">
+    <figure><a href="images/a2/m2/suim_example_batch.png?v=9336d0e83a8e"><img src="images/a2/m2/suim_example_batch.png?v=9336d0e83a8e" width="2840" height="2000" alt="Four SUIM training examples with underwater photographs, eight-class masks and overlays, arranged in three rows" loading="lazy"></a><figcaption>Four training examples after resizing and horizontal-flip augmentation. Rows show the photograph, labelled mask and overlay. The colour key identifies the eight classes.</figcaption></figure>
+  </div>
+
+  <h3>Data quality and splits</h3>
+  <p>The archive contains 1,635 image–mask pairs. Every file decodes and every image has a mask. We exclude 85 training-pool pairs whose masks contain colours outside the eight class codes. These include all 37 masks that are taller than their images.</p>
+  <div class="gallery">
+    <figure><a href="images/a2/m2/suim_off_code_examples.png?v=4841bc2f804e"><img src="images/a2/m2/suim_off_code_examples.png?v=4841bc2f804e" width="2840" height="1680" alt="Two excluded SUIM examples with photographs, stored masks and purple maps of invalid mask colours; the second mask is taller than its image" loading="lazy"></a><figcaption>The masks look plausible, but 35% and 23% of their pixels have invalid colours, marked in purple. The lower mask is also 55 pixels taller than its photograph.</figcaption></figure>
+  </div>
+  <p>Ten training-pool images duplicate official test images. We remove the training copies and retain all 110 test pairs, leaving 1,540 usable pairs.</p>
+  <div class="gallery">
+    <figure><a href="images/a2/m2/suim_duplicate_examples.png?v=e84894f7e5c9"><img src="images/a2/m2/suim_duplicate_examples.png?v=e84894f7e5c9" width="2840" height="1600" alt="Two duplicate pairs with a training-pool image, its matching test image and a pixel-difference map" loading="lazy"></a><figcaption>Training-pool copies beside their test counterparts. The difference maps show an identical pair and a near-identical pair at different resolutions.</figcaption></figure>
+  </div>
+  <p>The remaining training pool contains 55 duplicate groups covering 115 images. Duplicate groups stay together when we split the pool into training and validation, using seed 42 and each image's rarest class to balance the split. All eight classes appear in both sets.</p>
   <div class="table-scroll"><table>
-    <caption>Working split after the documented exclusions.</caption>
+    <caption>Data split after exclusions.</caption>
     <thead><tr><th scope="col">Split</th><th scope="col" class="num">Pairs</th><th scope="col">Use</th></tr></thead>
     <tbody>
-      <tr><td>Training</td><td class="num">1,143</td><td>Fit model parameters, with horizontal-flip augmentation.</td></tr>
-      <tr><td>Validation</td><td class="num">287</td><td>Select checkpoints and compare baseline and ablation configurations.</td></tr>
-      <tr><td>Official test</td><td class="num">110</td><td>Reserved for final evaluation after configurations are fixed.</td></tr>
+      <tr><td>Training</td><td class="num">1,143</td><td>Fit model parameters.</td></tr>
+      <tr><td>Validation</td><td class="num">287</td><td>Select checkpoints and compare configurations.</td></tr>
+      <tr><td>Official test</td><td class="num">110</td><td>Reserved for final evaluation.</td></tr>
     </tbody>
   </table></div>
-  <p>Duplicate groups stay within one partition. A five-fold stratified group split with seed 42 uses fold 0 for validation; stratification uses each image's rarest present class. The committed <a href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder/blob/week7/results/a2/splits/suim/train.txt">training list</a> and <a href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder/blob/week7/results/a2/splits/suim/val.txt">validation list</a> are disjoint and unchanged between the recorded runs.</p>
-  <p>Class imbalance is substantial: reefs occupy 35.64% of usable training/validation pixels, while robots occupy 0.56%. There are 69 robot-containing training images and 17 in validation. Rare categories can contribute little to pixel-wise loss even when their segmentation is poor.</p>
+  <p>All model scores on this page use the 287 validation images. The official test set has not been evaluated in the results reported here.</p>
+
+  <h3>Class balance and image sizes</h3>
+  <p>Reefs occupy 35.64% of usable training-pool pixels, while robots occupy 0.56%. Only 69 training images and 17 validation images contain robots.</p>
   <div class="gallery">
-    <figure><a href="images/a2/m2/suim_class_distribution.png"><img src="images/a2/m2/suim_class_distribution.png" width="1350" height="600" alt="SUIM class frequency by image occurrence and pixel share, with reefs dominant and robots rare" loading="lazy"></a><figcaption>Usable training/validation data: the proportion of images containing each class and its share of all labelled pixels. Image occurrence is not pixel frequency.</figcaption></figure>
+    <figure><a href="images/a2/m2/suim_class_distribution.png?v=8d4b6a251498"><img src="images/a2/m2/suim_class_distribution.png?v=8d4b6a251498" width="2840" height="1200" alt="Class frequency by image occurrence and pixel share in the usable training and validation pool; reefs dominate pixels and robots are rare" loading="lazy"></a><figcaption>Class frequency across the 1,430 usable training-pool images, measured by image occurrence and pixel share.</figcaption></figure>
+    <figure><a href="images/a2/m2/suim_region_area_distribution.png?v=8be05f6ccbb7"><img src="images/a2/m2/suim_region_area_distribution.png?v=8be05f6ccbb7" width="2840" height="1200" alt="Box plots of the fraction of an image occupied by each class when present" loading="lazy"></a><figcaption>Class area within training-pool images where the class appears. Robots usually cover a small region even when present.</figcaption></figure>
   </div>
-  <p>Across all 1,540 usable pairs, including the official test split, the resolution audit identifies 11 original sizes; about 84% of images are 640 × 480. Resizing may remove small objects and fine boundaries. Region-area distributions show that class occurrence alone does not describe how much of an image a class occupies.</p>
-  <div class="gallery gallery-pair">
-    <figure><a href="images/a2/m2/suim_resolution_distribution.png"><img src="images/a2/m2/suim_resolution_distribution.png" width="1350" height="600" alt="Distribution of original SUIM image resolutions" loading="lazy"></a><figcaption>Original resolutions across all 1,540 usable pairs. This dataset audit includes the official test split.</figcaption></figure>
-    <figure><a href="images/a2/m2/suim_region_area_distribution.png"><img src="images/a2/m2/suim_region_area_distribution.png" width="1350" height="600" alt="Distribution of class area within SUIM images where each class is present" loading="lazy"></a><figcaption>Usable training/validation data: class area as a fraction of image area, conditional on that class being present.</figcaption></figure>
+  <p>The 1,540 usable pairs span 11 image sizes. About 84% are 640 × 480 pixels. Resizing to 320 × 240 reduces detail in small objects and thin boundaries.</p>
+  <div class="gallery">
+    <figure><a href="images/a2/m2/suim_resolution_distribution.png?v=549a09a54d28"><img src="images/a2/m2/suim_resolution_distribution.png?v=549a09a54d28" width="2840" height="1200" alt="Counts for the 11 original image resolutions across all 1,540 usable SUIM pairs, on a logarithmic scale" loading="lazy"></a><figcaption>Original image sizes across all usable pairs, including the official test set.</figcaption></figure>
   </div>
-  <p>Counts, exclusion rules, duplicate groups and split fingerprints are recorded in the <a href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder/blob/week7/results/a2/eda/suim/summary.json">EDA summary</a> and proposal.</p>
 </section>
 
 <section id="methodology">
   <h2>Methodology</h2>
-  <p>Images and masks are paired by filename stem. RGB mask colours are decoded into integer labels 0 to 7. Images use bilinear resizing and ImageNet normalization; masks use nearest-neighbour resizing to retain discrete labels. The training image and mask receive the same random horizontal flip. Validation uses deterministic resizing and normalization.</p>
-  <div class="table-scroll"><table>
-    <caption>The two original M2 configurations. The controlled study below uses its own shared reference.</caption>
-    <thead><tr><th scope="col">Model</th><th scope="col">Initialization and training</th><th scope="col" class="num">Parameters</th></tr></thead>
-    <tbody>
-      <tr><td>U-Net baseline</td><td>Trained from scratch; base width 32, RGB input and eight output classes.</td><td class="num">7,763,272</td></tr>
-      <tr><td>DeepLabV3-ResNet50</td><td>Initialized with torchvision <code>COCO_WITH_VOC_LABELS_V1</code> weights. The final classifier is replaced with an eight-class head; the auxiliary classifier is removed.</td><td class="num">39,635,528</td></tr>
-    </tbody>
-  </table></div>
-  <p>Both original M2 configurations use cross-entropy over all eight classes. DeepLabV3 fine-tunes the backbone at a base learning rate of 0.0001 and its classifier at 0.001. BatchNorm running statistics remain fixed; its affine parameters and the rest of the network still train. U-Net uses one base learning rate of 0.001.</p>
+  <p>We pair each photograph with its mask and resize both to 320 × 240 pixels, using bilinear interpolation for images and nearest-neighbour interpolation for masks. We decode mask colours into class labels and normalize images with ImageNet statistics. During training, we randomly flip each image and its mask together.</p>
+  <div class="gallery">
+    <figure><a href="images/a2/models/unet.png"><img src="images/a2/models/unet.png" width="3438" height="1619" alt="U-Net encoder and decoder with four downsampling stages and skip connections, mapping an RGB image to eight pixel-level class scores" loading="lazy"></a><figcaption>U-Net, trained from scratch with base width 32 and 7.76 million parameters. Skip connections carry spatial detail from the encoder to the decoder.</figcaption></figure>
+    <figure><a href="images/a2/models/deeplabv3.png"><img src="images/a2/models/deeplabv3.png" width="3548" height="1124" alt="DeepLabV3 with a pretrained ResNet-50 backbone, parallel atrous convolutions, a new eight-class output layer and bilinear upsampling" loading="lazy"></a><figcaption>DeepLabV3-ResNet50, with 39.64 million parameters. We use torchvision weights pretrained on COCO with VOC labels, replace the final layer for eight classes and remove the auxiliary classifier.</figcaption></figure>
+  </div>
+  <p>Both baseline configurations use cross-entropy over all eight classes. DeepLabV3 fine-tunes the backbone at a base learning rate of 0.0001 and its classifier at 0.001. BatchNorm running statistics remain fixed; its affine parameters and the rest of the network still train. U-Net uses one base learning rate of 0.001.</p>
   <p>The checkpoint with the <strong>highest validation mIoU</strong> supplies the reported metrics. IoU and Dice are computed from confusion counts accumulated over the whole validation split, then averaged equally across all eight classes, including background. The reported convention assigns zero to an absent-class denominator and ignores no labels.</p>
 </section>
 
 <section id="setup">
   <h2>Experimental setup</h2>
-  <p>Both original M2 runs use seed 42, the committed data split, 320 × 240 inputs, AdamW with weight decay 0.0001, float32 training, and a 40-epoch budget. The learning-rate schedule uses five warm-up epochs followed by cosine decay. Both accumulate gradients over four minibatches.</p>
+  <p>Both baseline comparison runs use seed 42, the committed data split, 320 × 240 inputs, AdamW with weight decay 0.0001, float32 training, and a 40-epoch budget. The learning-rate schedule uses five warm-up epochs followed by cosine decay. Both accumulate gradients over four minibatches.</p>
   <div class="table-scroll"><table>
     <caption>Recorded run settings, taken from the saved training summaries.</caption>
     <thead><tr><th scope="col">Setting</th><th scope="col">U-Net</th><th scope="col">DeepLabV3</th></tr></thead>
     <tbody>
       <tr><th scope="row">Run ID</th><td><code>suim_unet_seed42</code></td><td><code>suim_deeplabv3_ce_seed42_2gpu</code></td></tr>
-      <tr><th scope="row">GPU</th><td>RTX 4060 Laptop GPU</td><td>RTX 3090 recorded device; two GPU processes</td></tr>
+      <tr><th scope="row">GPU</th><td>RTX 4060 Laptop GPU</td><td>2 x RTX 3090</td></tr>
       <tr><th scope="row">Physical batch per GPU</th><td>4</td><td>4</td></tr>
       <tr><th scope="row">Effective batch</th><td>16</td><td>32</td></tr>
       <tr><th scope="row">Python</th><td>3.12.3</td><td>3.11.11</td></tr>
       <tr><th scope="row">PyTorch / CUDA build</th><td>2.14.0+cu130 / 13.0</td><td>2.14.0+cu126 / 12.6</td></tr>
-      <tr><th scope="row">Recorded source</th><td><code>ae6d38e2cb00</code>, clean</td><td><code>c0c00eb640a1</code>, dirty working tree</td></tr>
     </tbody>
   </table></div>
-  <p class="note">The dataset and validation protocol match, but hardware, effective batch size, model size and pretraining differ. These are preliminary configuration comparisons, not an isolated test of pretraining or a controlled speed benchmark.</p>
 </section>
 
 <section id="results">
-  <h2>M2 baseline validation results</h2>
+  <h2>Experimental Results</h2>
   <div class="table-scroll"><table>
     <caption>Selected checkpoints on 287 validation images. mIoU and mean Dice are percentages over all eight classes.</caption>
     <thead><tr><th scope="col">Model</th><th scope="col" class="num">Completed epochs</th><th scope="col" class="num">Best epoch</th><th scope="col" class="num">mIoU (%)</th><th scope="col" class="num">Mean Dice (%)</th></tr></thead>
@@ -149,36 +134,8 @@
     <figure><a href="images/a2/m2/deeplabv3_learning_curves.png"><img src="images/a2/m2/deeplabv3_learning_curves.png" width="4765" height="1762" alt="DeepLabV3 training and validation loss and validation mIoU over 40 epochs, with the selected epoch 23 marked" loading="lazy"></a><figcaption>DeepLabV3, seed 42. The validation-mIoU checkpoint is epoch 23. Continued reduction in training loss does not guarantee a better validation result.</figcaption></figure>
   </div>
   <p>At epoch 40, U-Net records train/validation cross-entropy of 0.7400/0.7526. DeepLabV3 ends at 0.0906/1.0193, with validation mIoU 60.65%, below its selected maximum of 61.05%. The DeepLabV3 loss gap is consistent with late overfitting, although the runs do not isolate its cause.</p>
-</section>
-
-<section id="ablation">
-  <h2>Controlled experiments</h2>
-  <p>Five comparisons change one factor at a time against a shared DeepLabV3-ResNet50 reference. All six runs use seed 42, the same 1,143 training and 287 validation images, 40 epochs, a single GPU process, physical batch 4 and gradient accumulation 4 (effective batch 16). AdamW, weight decay 0.0001, backbone/head learning rates 0.0001/0.001, five warm-up epochs and cosine decay are fixed. BatchNorm running statistics remain fixed. The selected checkpoint maximizes validation mIoU.</p>
-  <p>The reference fine-tunes the full pretrained network using horizontal flips, cross-entropy and 320 × 240 inputs. The half-resolution variant resizes its output scores to the common 320 × 240 target grid <em>before</em> choosing class labels. The CE + Dice variant uses equal weights for cross-entropy and per-image macro soft Dice over all eight classes. These are ablation-study validation results; the earlier M2 DeepLabV3 run used a different effective batch and is not the reference for these deltas.</p>
-  <div class="table-scroll"><table>
-    <caption>Selected checkpoints on the same validation split. Scores are percentages; Δ mIoU is in percentage points relative to the shared reference. One run per configuration; no across-seed uncertainty estimate.</caption>
-    <thead><tr><th scope="col">Configuration</th><th scope="col">Change from reference</th><th scope="col" class="num">Best epoch</th><th scope="col" class="num">mIoU (%)</th><th scope="col" class="num">Mean Dice (%)</th><th scope="col" class="num">Δ mIoU (pp)</th></tr></thead>
-    <tbody>
-      <tr data-run="suim_ablation_reference_seed42"><th scope="row">Reference</th><td>Full ResNet50 fine-tuning, flips, CE, 320 × 240 input</td><td class="num">31</td><td class="num">62.40</td><td class="num">74.17</td><td class="num">0.00</td></tr>
-      <tr data-run="suim_ablation_frozen_seed42"><th scope="row">Frozen backbone</th><td>Freeze the backbone; train the segmentation head</td><td class="num">31</td><td class="num">54.22</td><td class="num">67.43</td><td class="num">-8.18</td></tr>
-      <tr data-run="suim_ablation_no_augmentation_seed42"><th scope="row">No augmentation</th><td>Remove horizontal flips</td><td class="num">21</td><td class="num">60.74</td><td class="num">73.05</td><td class="num">-1.66</td></tr>
-      <tr data-run="suim_ablation_resnet101_seed42"><th scope="row">ResNet101</th><td>Replace ResNet50 with ResNet101</td><td class="num">36</td><td class="num">62.45</td><td class="num">73.99</td><td class="num">+0.05</td></tr>
-      <tr data-run="suim_ablation_ce_dice_seed42"><th scope="row">CE + Dice</th><td>Use 0.5 CE + 0.5 soft Dice</td><td class="num">39</td><td class="num">62.27</td><td class="num">74.12</td><td class="num">-0.13</td></tr>
-      <tr data-run="suim_ablation_low_resolution_seed42"><th scope="row">Half resolution</th><td>Reduce input to 160 × 120</td><td class="num">30</td><td class="num">56.07</td><td class="num">69.06</td><td class="num">-6.33</td></tr>
-    </tbody>
-  </table></div>
-  <div class="gallery">
-    <figure><a href="images/a2/m3/ablation_scores.png"><img src="images/a2/m3/ablation_scores.png" width="2840" height="1360" alt="Validation mIoU and mean Dice for six ablation configurations; reference mIoU is 62.40 percent, freezing yields 54.22 and half resolution 56.07" loading="lazy"></a><figcaption>Validation scores, seed 42. Fine-tuning improves mIoU by 8.18 pp relative to a frozen backbone; augmentation improves it by 1.66 pp. ResNet101 (+0.05 pp) and CE + Dice (−0.13 pp) show little aggregate change in this run. <a href="images/a2/m3/ablation_scores.pdf">Vector PDF</a>.</figcaption></figure>
-    <figure><a href="images/a2/m3/ablation_class_deltas.png"><img src="images/a2/m3/ablation_class_deltas.png" width="2840" height="1320" alt="Heatmap of per-class IoU changes from reference, with gains and losses centered on zero; freezing and half resolution reduce every class score" loading="lazy"></a><figcaption>Per-class IoU change from the reference in percentage points, with a shared diverging scale centered at zero. Freezing and half resolution reduce all eight class scores. CE + Dice raises robot IoU by 3.10 pp but lowers diver and wreck IoU by 1.88 and 2.16 pp; its overall mIoU remains close to the reference. Class abbreviations are defined in Dataset and EDA. <a href="images/a2/m3/ablation_class_deltas.pdf">Vector PDF</a>.</figcaption></figure>
-    <figure><a href="images/a2/m3/ablation_compute.png"><img src="images/a2/m3/ablation_compute.png" width="2840" height="1360" alt="Recorded training duration, peak training memory and inference latency; ResNet101 costs more than reference, while freezing and half resolution reduce training cost" loading="lazy"></a><figcaption>Recorded cost for the six runs; purple marks the reference. Training covers 40 epochs including validation; memory is peak PyTorch allocated training memory in GiB. Inference uses each configuration's input resolution. ResNet101 takes 32.86 minutes versus 21.67 for the reference, with mIoU only 0.05 pp higher. Half resolution takes 9.15 minutes but loses 6.33 pp mIoU. These are single-run measurements, without repeated timing trials. <a href="images/a2/m3/ablation_compute.pdf">Vector PDF</a>.</figcaption></figure>
-  </div>
-  <p><strong>Interpretation.</strong> The full ResNet50 reference remains a reasonable configuration for final evaluation: it outperforms the frozen, unaugmented and half-resolution variants in this run, while the larger backbone and combined loss provide no clear aggregate gain. One seed cannot establish statistical significance or rule out gains under other training budgets. Boundary mIoU also falls from 30.42% to 25.75% with half-resolution input.</p>
-  <p>Source: <a href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder/blob/week7/results/a2/ablation/comparisons.csv" download>comparison CSV</a> · <a href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder/blob/week7/results/a2/ablation/manifest.json">resolved experiment manifest</a>. Figures can be regenerated from these saved measurements without retraining:</p>
-  <pre><code>uv run python -m scripts.plots.plot_segmentation_ablation</code></pre>
-</section>
-
 <section id="comparison">
-  <h2>M2 class-level comparison</h2>
+  <h3>Class-level comparison</h3>
   <div class="table-scroll"><table>
     <caption>Per-class validation IoU at each model's selected checkpoint.</caption>
     <thead><tr><th scope="col">Class</th><th scope="col" class="num">U-Net IoU (%)</th><th scope="col" class="num">DeepLabV3 IoU (%)</th></tr></thead>
@@ -196,7 +153,7 @@
 </section>
 
 <section id="examples">
-  <h2>Input and output examples</h2>
+  <h3>Input and output examples</h3>
   <p>Three saved <strong>DeepLabV3 validation predictions</strong> show what the trained model produces. Each row reads left to right: the input photograph, the ground-truth mask supplied by SUIM, and the model's predicted mask. Colours represent semantic classes, not prediction confidence; matching colours indicate matching class labels.</p>
   <p>These are the saved best, worst and best robot-containing examples, ranked by per-image mIoU over classes present in either the target or prediction. They illustrate successful segmentation and failures; they are selected cases rather than a random sample or a replacement for the split-wide metrics.</p>
   <div class="gallery">
@@ -206,39 +163,82 @@
   </div>
   <p>The colour key follows SUIM: BW = waterbody, HD = divers, PF = plants, WR = wrecks, RO = robots, RI = reefs, FV = fish, and SR = sea-floor. Open any figure to inspect it at full size. Equivalent U-Net prediction panels are not available in the current saved outputs, so these figures do not provide a paired visual comparison of the two models.</p>
 </section>
+</section>
+
+<section id="ablation">
+  <h2>Controlled experiments</h2>
+  <p>We use DeepLabV3-ResNet50 as the reference and change one factor per run: backbone freezing, horizontal flips, backbone depth, loss or input resolution. All six runs share seed 42, the same data split and 40 training epochs. We use one GPU with batches of four and accumulate four batches per update, giving an effective batch of 16.</p>
+  <p>We keep AdamW, weight decay 0.0001, backbone and head learning rates of 0.0001 and 0.001, five warm-up epochs and cosine decay fixed. BatchNorm running statistics also stay fixed. We select each checkpoint by its highest validation mIoU.</p>
+  <p>Our reference fine-tunes the full pretrained network with horizontal flips, cross-entropy and 320 × 240 inputs. For the half-resolution run, we resize output scores to 320 × 240 before assigning class labels. The combined loss weights cross-entropy and per-image macro soft Dice equally across all eight classes. We calculate differences against this reference, whose effective batch of 16 differs from the earlier two-GPU run's 32.</p>
+  <div class="table-scroll"><table>
+    <caption>Validation scores at the selected checkpoints. Δ mIoU is the change from our reference in percentage points. Each configuration uses one seed.</caption>
+    <thead><tr><th scope="col">Configuration</th><th scope="col">Change from reference</th><th scope="col" class="num">Best epoch</th><th scope="col" class="num">mIoU (%)</th><th scope="col" class="num">Mean Dice (%)</th><th scope="col" class="num">Δ mIoU (pp)</th></tr></thead>
+    <tbody>
+      <tr data-run="suim_ablation_reference_seed42"><th scope="row">Reference</th><td>Full ResNet50 fine-tuning, flips, CE, 320 × 240 input</td><td class="num">31</td><td class="num">62.40</td><td class="num">74.17</td><td class="num">0.00</td></tr>
+      <tr data-run="suim_ablation_frozen_seed42"><th scope="row">Frozen backbone</th><td>Freeze the backbone; train the segmentation head</td><td class="num">31</td><td class="num">54.22</td><td class="num">67.43</td><td class="num">-8.18</td></tr>
+      <tr data-run="suim_ablation_no_augmentation_seed42"><th scope="row">No augmentation</th><td>Remove horizontal flips</td><td class="num">21</td><td class="num">60.74</td><td class="num">73.05</td><td class="num">-1.66</td></tr>
+      <tr data-run="suim_ablation_resnet101_seed42"><th scope="row">ResNet101</th><td>Replace ResNet50 with ResNet101</td><td class="num">36</td><td class="num">62.45</td><td class="num">73.99</td><td class="num">+0.05</td></tr>
+      <tr data-run="suim_ablation_ce_dice_seed42"><th scope="row">CE + Dice</th><td>Use 0.5 CE + 0.5 soft Dice</td><td class="num">39</td><td class="num">62.27</td><td class="num">74.12</td><td class="num">-0.13</td></tr>
+      <tr data-run="suim_ablation_low_resolution_seed42"><th scope="row">Half resolution</th><td>Reduce input to 160 × 120</td><td class="num">30</td><td class="num">56.07</td><td class="num">69.06</td><td class="num">-6.33</td></tr>
+    </tbody>
+  </table></div>
+  <div class="gallery">
+    <figure><a href="images/a2/m3/ablation_scores.png"><img src="images/a2/m3/ablation_scores.png" width="2840" height="1360" alt="Validation mIoU and mean Dice for six ablation configurations; reference mIoU is 62.40 percent, freezing yields 54.22 and half resolution 56.07" loading="lazy"></a><figcaption>With seed 42, we gain 8.18 points of mIoU by fine-tuning the backbone and 1.66 points by using horizontal flips. ResNet101 (+0.05 points) and CE + Dice (−0.13 points) give similar overall scores to the reference. <a href="images/a2/m3/ablation_scores.pdf">Vector PDF</a>.</figcaption></figure>
+    <figure><a href="images/a2/m3/ablation_class_deltas.png"><img src="images/a2/m3/ablation_class_deltas.png" width="2840" height="1320" alt="Heatmap of per-class IoU changes from reference, with gains and losses centered on zero; freezing and half resolution reduce every class score" loading="lazy"></a><figcaption>Changes in per-class IoU, in percentage points. Freezing the backbone and halving the resolution reduce every class score. With CE + Dice, we gain 3.10 points on robots but lose 1.88 on divers and 2.16 on wrecks. <a href="images/a2/m3/ablation_class_deltas.pdf">Vector PDF</a>.</figcaption></figure>
+    <figure><a href="images/a2/m3/ablation_compute.png"><img src="images/a2/m3/ablation_compute.png" width="2840" height="1360" alt="Recorded training duration, peak training memory and inference latency; ResNet101 costs more than reference, while freezing and half resolution reduce training cost" loading="lazy"></a><figcaption>Training time includes 40 epochs and validation. Memory is peak PyTorch allocated training memory in GiB, and inference uses each run's input resolution. ResNet101 takes 32.86 minutes against 21.67 for our reference, for a 0.05-point mIoU gain. Half resolution takes 9.15 minutes and loses 6.33 points. We measured each run once. <a href="images/a2/m3/ablation_compute.pdf">Vector PDF</a>.</figcaption></figure>
+  </div>
+  <p>We retain the full ResNet50 reference for final evaluation. It scores higher than the frozen, unaugmented and half-resolution variants, while the larger backbone and combined loss give similar overall scores. These single-seed results do not establish a reliable advantage for either alternative. Halving the input resolution also lowers boundary mIoU from 30.42% to 25.75%.</p>
+</section>
+
+
+
+
 
 <section id="error-analysis">
-  <h2>Preliminary error analysis</h2>
-  <p>DeepLabV3's pixel confusion matrix covers 22,041,600 pixels, exactly 287 resized validation masks. Of the true PF pixels, 77.59% are classified as RI. Distinguishing aquatic plants from reefs is a priority for further inspection; colour, appearance and class imbalance are possible explanations, not causes established by this matrix.</p>
+  <h2>Error analysis</h2>
+  <p>We most often confuse plants with reefs: DeepLabV3 labels 77.59% of plant pixels as reef. The confusion matrix below covers all 287 validation images.</p>
   <div class="gallery">
-    <figure><a href="images/a2/m2/deeplabv3_confusion_matrix.png"><img src="images/a2/m2/deeplabv3_confusion_matrix.png" width="2358" height="2078" alt="DeepLabV3 eight-class validation confusion matrix with true classes in rows and predictions in columns" loading="lazy"></a><figcaption>DeepLabV3 validation confusion matrix. Colours show the fraction within each true class; annotations are pixel counts. The diagonal measures recall, not IoU.</figcaption></figure>
+    <figure><a href="images/a2/errors/confusion_matrix.png"><img src="images/a2/errors/confusion_matrix.png" width="2400" height="2400" alt="DeepLabV3 validation confusion matrix with true classes in rows and predicted classes in columns" loading="lazy"></a><figcaption>Row-normalized DeepLabV3 confusion matrix. Colours show the fraction of each true class, and annotations show pixel counts. The diagonal gives class recall. <a href="images/a2/errors/confusion_matrix.pdf">Vector PDF</a>.</figcaption></figure>
   </div>
-  <p>On target-defined boundaries, DeepLabV3 mIoU is 29.12%, compared with 63.30% in the interior. U-Net records 18.04% and 37.88%, respectively. Boundaries include both sides of four-neighbour label transitions. These regional scores identify localization difficulty and are separate from the whole-mask mIoU.</p>
-  <p>The selected DeepLabV3 examples above show both a close reef boundary and a severe plants/wrecks failure. A paired qualitative comparison with U-Net on the same images remains to be completed.</p>
+  <p>Both models struggle at object boundaries. DeepLabV3 reaches 29.12% boundary mIoU against 63.30% in the interior. U-Net drops from 37.88% in the interior to 18.04% at boundaries.</p>
+  <div class="gallery">
+    <figure><a href="images/a2/errors/regional_iou.png"><img src="images/a2/errors/regional_iou.png" width="2840" height="1200" alt="Grouped bars comparing whole-mask, boundary and interior validation mIoU for U-Net and DeepLabV3" loading="lazy"></a><figcaption>We score boundaries on both sides of neighbouring pixels with different target labels. Each region has its own pooled confusion counts. <a href="images/a2/errors/regional_iou.pdf">Vector PDF</a>.</figcaption></figure>
+  </div>
+  <p>Performance also varies across images. DeepLabV3 has a median per-image mIoU of 53.96%. This differs from the 61.05% split-wide score, which pools pixels before computing class IoU.</p>
+  <div class="gallery">
+    <figure><a href="images/a2/errors/per_image_iou.png"><img src="images/a2/errors/per_image_iou.png" width="2840" height="1200" alt="Histogram of per-image DeepLabV3 mIoU across 287 validation images, with the median marked at 53.96 percent" loading="lazy"></a><figcaption>For each image, we average IoU over classes present in its target or prediction. The dashed line marks the median across images. <a href="images/a2/errors/per_image_iou.pdf">Vector PDF</a>.</figcaption></figure>
+  </div>
+  <p>We selected the lowest-IoU plant and robot examples to inspect rare-class failures. When scores tie, we choose the largest labelled region, then the filename. Both selected classes have zero IoU.</p>
+  <div class="gallery">
+    <figure><a href="images/a2/errors/rare_class_failures.png"><img src="images/a2/errors/rare_class_failures.png" width="2840" height="1600" alt="Plant and robot failure examples with input images, ground-truth masks, predictions and purple error maps" loading="lazy"></a><figcaption>Plant failure: <code>f_r_1819_</code>, with plants covering 67.7% of the target. Robot failure: <code>d_r_795_</code>, with robots covering 5.1%. Purple marks every incorrectly labelled pixel. These are selected failures, not a random sample. <a href="images/a2/errors/rare_class_failures.pdf">Vector PDF</a>.</figcaption></figure>
+  </div>
 </section>
 
 <section id="compute-cost">
-  <h2>Recorded compute cost</h2>
+  <h2>Compute cost</h2>
   <div class="table-scroll"><table>
-    <caption>Execution records on different hardware. Memory figures are MiB; validation inference covers 287 images at physical batch size four.</caption>
+    <caption>Training time, peak GPU memory and inference time for 287 validation images at batch size four.</caption>
     <thead><tr><th scope="col">Measurement</th><th scope="col" class="num">U-Net</th><th scope="col" class="num">DeepLabV3</th></tr></thead>
     <tbody>
-      <tr><th scope="row">Training wall time (s)</th><td class="num">894.97</td><td class="num">509.48</td></tr>
+      <tr><th scope="row">Training time (s)</th><td class="num">894.97</td><td class="num">509.48</td></tr>
       <tr><th scope="row">Peak allocated training memory (MiB)</th><td class="num">996.42</td><td class="num">2,106.98</td></tr>
       <tr><th scope="row">Validation inference (s)</th><td class="num">1.390</td><td class="num">1.402</td></tr>
     </tbody>
   </table></div>
-  <p>U-Net used an RTX 4060 Laptop GPU; DeepLabV3 used a distributed two-GPU run with RTX 3090 recorded as the device. The memory figure is a process/device allocation measurement, not summed memory across both GPUs. Different devices, software and effective batches prevent a direct architecture speed ranking from these times.</p>
+  <p>We trained U-Net on an RTX 4060 Laptop GPU and DeepLabV3 on 2 x RTX 3090. Peak memory is measured per process on one GPU. These timings reflect different hardware and training settings.</p>
 </section>
 
 <section id="limitations">
-  <h2>Limitations and next steps</h2>
-  <p>The M2 runs establish baseline performance, and the M3 controlled study completes all five planned comparisons. One seed limits the ablation conclusions, while different training environments limit the earlier U-Net/DeepLabV3 comparison. Weak PF segmentation persists. The low-resolution resize can obscure small objects, and duplicate filtering does not establish complete independence of underwater scenes.</p>
-  <p>The five controlled comparisons are reported above. The downloaded study contains aggregate measurements and resolved configurations; per-run learning histories and prediction tensors were not retrieved, so new ablation learning curves and paired qualitative panels are not available here. Further work includes paired U-Net/DeepLabV3 qualitative comparisons, detailed failure inspection, checkpoint access and final report/presentation deliverables. The official test set will be evaluated after model configurations are fixed.</p>
+  <h2>Limitations</h2>
+  <p>We trained each configuration with one seed, so we cannot measure variation between training runs. The U-Net and DeepLabV3 comparison also changes architecture, pretraining, effective batch size and hardware. We cannot attribute the score difference to pretraining alone or compare their speed directly.</p>
+  <p>Resizing can remove small objects and thin boundaries, and plant segmentation remains weak. Duplicate filtering does not rule out related scenes across splits.</p>
 </section>
 
 <section id="links">
   <h2>Evidence and reproduction</h2>
+  <p>We generate the controlled-experiment figures from the comparison CSV and resolved configurations linked below. The error-analysis figures use the saved validation summaries and DeepLabV3 prediction masks.</p>
+  <pre><code>uv run python -m scripts.plots.plot_segmentation_ablation
+uv run python -m scripts.plots.plot_segmentation_errors</code></pre>
   <ul class="links">
     <li><strong>Source code:</strong> <a href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder/tree/week7">week7 branch</a></li>
     <li><strong>Dataset proposal:</strong> <a href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder/blob/week7/reports/a2_proposal.md">SUIM task, exclusions, splits and experiment plan</a></li>
@@ -247,9 +247,9 @@
     <li><strong>DeepLabV3 run:</strong> <a href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder/blob/week7/results/a2/suim_deeplabv3_ce_seed42_2gpu/training_summary.json">Training summary</a> · <a href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder/blob/week7/results/a2/suim_deeplabv3_ce_seed42_2gpu/evaluation/metrics.json">Validation metrics and confusion counts</a> · <a href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder/blob/week7/results/a2/suim_deeplabv3_ce_seed42_2gpu/launch-config.yaml">Run configuration</a></li>
     <li><strong>Installation, training and evaluation:</strong> <a href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder/blob/week7/README.md#segmentation">README reproduction commands</a></li>
     <li><strong>Controlled study:</strong> <a href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder/blob/week7/results/a2/ablation/comparisons.csv">Comparison CSV</a> · <a href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder/blob/week7/results/a2/ablation/manifest.json">Resolved configurations</a> · <a href="https://github.com/vietanh1802/CO3133-Deep-Learning-261-Placeholder/blob/week7/scripts/plots/plot_segmentation_ablation.py">Figure reproduction command</a></li>
+    <li><strong>Error analysis:</strong> <a href="images/a2/errors/analysis.json">Per-image scores and failure selections</a></li>
     <li><strong>Final deliverables:</strong> checkpoint downloads, the final PDF report, slides and presentation video are not yet linked on this page.</li>
   </ul>
-  <p>The saved run summaries define the settings behind this page. The U-Net configuration file matches the reported run, with physical batch size four. DeepLabV3's effective batch of 32 additionally requires two GPU processes. Checkpoints and prediction tensors are excluded from Git; plotting the saved validation evidence requires obtaining or regenerating those local artifacts.</p>
 </section>
 
 <section id="members">

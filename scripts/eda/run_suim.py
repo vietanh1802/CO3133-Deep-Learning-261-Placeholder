@@ -130,6 +130,8 @@ def example_batch(config_path: Path) -> dict:
         augment=config.augment,
     ).train
     dataset = loader.dataset
+    assert isinstance(dataset, SuimSegmentation)
+    assert loader.batch_sampler is not None
     indices = next(iter(loader.batch_sampler))
     images, masks = loader.collate_fn([dataset[i] for i in indices])
     # The flip is random, so an unaugmented copy tells which samples it hit.
