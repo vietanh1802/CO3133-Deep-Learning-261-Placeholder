@@ -1,8 +1,17 @@
 \section*{Abstract}
 \addcontentsline{toc}{section}{Abstract}
-\reporttodo{Write this last, in one paragraph of about 150 words. State the
-task (eight-class semantic segmentation on SUIM), the protocol (fixed split,
-seed, checkpoint rule, official test set), the U-Net and DeepLabV3 test mIoU
-and Dice, the gap between them, the outcome of the cross-entropy versus
-cross-entropy plus Dice experiment, the main error group, the compute
-trade-off, and the main limitation. Use only test-set numbers here.}
+We study eight-class semantic segmentation of underwater images using SUIM,
+comparing U-Net trained from scratch with pretrained DeepLabV3-ResNet50. After
+filtering invalid masks and duplicates, we train on 1,143 images and validate
+on 287, using a fixed split, seed 42 and 40 epochs. Checkpoints are selected by
+validation mean intersection over union (mIoU). DeepLabV3 reaches 62.40\% mIoU
+and 74.17\% mean Dice, while U-Net reaches 36.94\% and 48.05\%, respectively.
+Five controlled comparisons examine backbone freezing, augmentation, backbone
+depth, loss and input resolution. Freezing the backbone and halving the
+resolution reduce mIoU by 8.18 and 6.33 percentage points, while ResNet101 and
+CE + Dice give similar overall scores to the reference. Adding Dice improves
+robot IoU but lowers wreck IoU. Prediction examples and error analysis reveal
+persistent plant--reef confusion and weak object boundaries. DeepLabV3's
+accuracy gains come with higher parameter, operation and memory costs. These
+findings favour full ResNet50 fine-tuning with cross-entropy, although one seed
+per configuration limits conclusions about small score differences.

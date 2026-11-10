@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.9.10)  10 NOV 2026 15:20
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.9.10)  10 NOV 2026 16:32
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1171,53 +1171,63 @@ Package pdftex.def Info: Images/suim_resolution_distribution.png  used on input
 (pdftex.def)             Requested size: 400.62895pt x 169.27983pt.
 File: Images/bachkhoa_logo.png Graphic file (type png)
 <use Images/bachkhoa_logo.png>
-Package pdftex.def Info: Images/bachkhoa_logo.png  used on input line 139.
+Package pdftex.def Info: Images/bachkhoa_logo.png  used on input line 137.
 (pdftex.def)             Requested size: 22.76219pt x 17.82909pt.
  [2]
 File: Images/bachkhoa_logo.png Graphic file (type png)
 <use Images/bachkhoa_logo.png>
-Package pdftex.def Info: Images/bachkhoa_logo.png  used on input line 139.
+Package pdftex.def Info: Images/bachkhoa_logo.png  used on input line 137.
 (pdftex.def)             Requested size: 22.76219pt x 17.82909pt.
  [3 <./Images/suim_class_distribution.png> <./Images/suim_region_area_distribut
 ion.png> <./Images/suim_resolution_distribution.png>]
-<Images/suim_off_code_examples.png, id=202, 513.117pt x 303.534pt>
+<Images/suim_class_colour_distribution.pdf, id=202, 650.43pt x 310.761pt>
+File: Images/suim_class_colour_distribution.pdf Graphic file (type pdf)
+<use Images/suim_class_colour_distribution.pdf>
+Package pdftex.def Info: Images/suim_class_colour_distribution.pdf  used on inp
+ut line 141.
+(pdftex.def)             Requested size: 400.62245pt x 191.4085pt.
+<Images/suim_off_code_examples.png, id=204, 513.117pt x 303.534pt>
 File: Images/suim_off_code_examples.png Graphic file (type png)
 <use Images/suim_off_code_examples.png>
 Package pdftex.def Info: Images/suim_off_code_examples.png  used on input line 
-164.
+175.
 (pdftex.def)             Requested size: 400.62895pt x 236.99176pt.
 File: Images/bachkhoa_logo.png Graphic file (type png)
 <use Images/bachkhoa_logo.png>
-Package pdftex.def Info: Images/bachkhoa_logo.png  used on input line 184.
+Package pdftex.def Info: Images/bachkhoa_logo.png  used on input line 195.
 (pdftex.def)             Requested size: 22.76219pt x 17.82909pt.
- [4 <./Images/suim_off_code_examples.png>]
-<Images/suim_duplicate_examples.png, id=213, 513.117pt x 289.08pt>
+ [4 <./Images/suim_class_colour_distribution.pdf>]
+<Images/suim_duplicate_examples.png, id=222, 513.117pt x 289.08pt>
 File: Images/suim_duplicate_examples.png Graphic file (type png)
 <use Images/suim_duplicate_examples.png>
 Package pdftex.def Info: Images/suim_duplicate_examples.png  used on input line
- 199.
+ 210.
 (pdftex.def)             Requested size: 400.62895pt x 225.70644pt.
 LaTeX Font Info:    Trying to load font information for T5+cmtt on input line 2
-10.
-
-(/usr/local/texlive/2026basic/texmf-dist/tex/latex/vntex/t5cmtt.fd
+21.
+ (/usr/local/texlive/2026basic/texmf-dist/tex/latex/vntex/t5cmtt.fd
 File: t5cmtt.fd 1999/05/25 v2.5h Standard LaTeX font definitions
 )
 
 Package microtype Warning: I cannot find a protrusion list for font
 (microtype)                `T5/cmtt/m/n/10.95'. Switching off
-(microtype)                protrusion for this font on input line 210.
+(microtype)                protrusion for this font on input line 221.
 
 (./Tables/data_splits.tex)
 File: Images/bachkhoa_logo.png Graphic file (type png)
 <use Images/bachkhoa_logo.png>
-Package pdftex.def Info: Images/bachkhoa_logo.png  used on input line 236.
+Package pdftex.def Info: Images/bachkhoa_logo.png  used on input line 247.
 (pdftex.def)             Requested size: 22.76219pt x 17.82909pt.
- [5 <./Images/suim_duplicate_examples.png>]
-<Images/suim_example_batch.png, id=226, 513.117pt x 361.35pt>
+ [5 <./Images/suim_off_code_examples.png>]
+File: Images/bachkhoa_logo.png Graphic file (type png)
+<use Images/bachkhoa_logo.png>
+Package pdftex.def Info: Images/bachkhoa_logo.png  used on input line 247.
+(pdftex.def)             Requested size: 22.76219pt x 17.82909pt.
+ [6 <./Images/suim_duplicate_examples.png>]
+<Images/suim_example_batch.png, id=241, 513.117pt x 361.35pt>
 File: Images/suim_example_batch.png Graphic file (type png)
 <use Images/suim_example_batch.png>
-Package pdftex.def Info: Images/suim_example_batch.png  used on input line 288.
+Package pdftex.def Info: Images/suim_example_batch.png  used on input line 299.
 
 (pdftex.def)             Requested size: 400.62895pt x 282.13307pt.
 )
@@ -1225,27 +1235,26 @@ File: Images/bachkhoa_logo.png Graphic file (type png)
 <use Images/bachkhoa_logo.png>
 Package pdftex.def Info: Images/bachkhoa_logo.png  used on input line 23.
 (pdftex.def)             Requested size: 22.76219pt x 17.82909pt.
- [6]
+ [7]
 File: Images/bachkhoa_logo.png Graphic file (type png)
 <use Images/bachkhoa_logo.png>
 Package pdftex.def Info: Images/bachkhoa_logo.png  used on input line 23.
 (pdftex.def)             Requested size: 22.76219pt x 17.82909pt.
-
-[7 <./Images/suim_example_batch.png>] (./Sections/4-Methodology.tex
-(./Tables/method_numbers.tex)
+ [8 <./Images/suim_example_batch.png>]
+(./Sections/4-Methodology.tex (./Tables/method_numbers.tex)
 File: Images/bachkhoa_logo.png Graphic file (type png)
 <use Images/bachkhoa_logo.png>
 Package pdftex.def Info: Images/bachkhoa_logo.png  used on input line 103.
 (pdftex.def)             Requested size: 22.76219pt x 17.82909pt.
- [8
+ [9
 
 ]
-<Images/models/unet.png, id=253, 828.2142pt x 390.0171pt>
+<Images/models/unet.png, id=268, 828.2142pt x 390.0171pt>
 File: Images/models/unet.png Graphic file (type png)
 <use Images/models/unet.png>
 Package pdftex.def Info: Images/models/unet.png  used on input line 106.
 (pdftex.def)             Requested size: 432.48051pt x 203.66107pt.
-<Images/models/deeplabv3.png, id=257, 854.7132pt x 270.7716pt>
+<Images/models/deeplabv3.png, id=272, 854.7132pt x 270.7716pt>
 File: Images/models/deeplabv3.png Graphic file (type png)
 <use Images/models/deeplabv3.png>
 Package pdftex.def Info: Images/models/deeplabv3.png  used on input line 146.
@@ -1254,32 +1263,30 @@ File: Images/bachkhoa_logo.png Graphic file (type png)
 <use Images/bachkhoa_logo.png>
 Package pdftex.def Info: Images/bachkhoa_logo.png  used on input line 166.
 (pdftex.def)             Requested size: 22.76219pt x 17.82909pt.
- [9 <./Images/models/unet.png (PNG copy)>]
-(./Tables/model_summary.tex)
+ [10 <./Images/models/unet.png (PNG copy)>] (./Tables/model_summary.tex)
 File: Images/bachkhoa_logo.png Graphic file (type png)
 <use Images/bachkhoa_logo.png>
 Package pdftex.def Info: Images/bachkhoa_logo.png  used on input line 200.
 (pdftex.def)             Requested size: 22.76219pt x 17.82909pt.
- [10 <./Images/models/deeplabv3.png (PNG copy)>]
+ [11 <./Images/models/deeplabv3.png (PNG copy)>]
 File: Images/bachkhoa_logo.png Graphic file (type png)
 <use Images/bachkhoa_logo.png>
 Package pdftex.def Info: Images/bachkhoa_logo.png  used on input line 274.
 (pdftex.def)             Requested size: 22.76219pt x 17.82909pt.
-
-[11] (./Tables/training_setup.tex))
+ [12] (./Tables/training_setup.tex))
 File: Images/bachkhoa_logo.png Graphic file (type png)
 <use Images/bachkhoa_logo.png>
 Package pdftex.def Info: Images/bachkhoa_logo.png  used on input line 25.
 (pdftex.def)             Requested size: 22.76219pt x 17.82909pt.
- [12]
+ [13]
 (./Sections/5-Implementation-Results.tex (./Tables/results_numbers.tex)
-<Images/unet_learning_curves.pdf, id=301, 455.30101pt x 224.037pt>
+<Images/unet_learning_curves.pdf, id=317, 455.30101pt x 224.037pt>
 File: Images/unet_learning_curves.pdf Graphic file (type pdf)
 <use Images/unet_learning_curves.pdf>
 Package pdftex.def Info: Images/unet_learning_curves.pdf  used on input line 33
 .
 (pdftex.def)             Requested size: 455.24411pt x 224.01591pt.
-<Images/deeplabv3_ce_learning_curves.pdf, id=303, 455.30101pt x 224.037pt>
+<Images/deeplabv3_ce_learning_curves.pdf, id=319, 455.30101pt x 224.037pt>
 File: Images/deeplabv3_ce_learning_curves.pdf Graphic file (type pdf)
 <use Images/deeplabv3_ce_learning_curves.pdf>
 Package pdftex.def Info: Images/deeplabv3_ce_learning_curves.pdf  used on input
@@ -1290,10 +1297,10 @@ File: Images/bachkhoa_logo.png Graphic file (type png)
 Package pdftex.def Info: Images/bachkhoa_logo.png  used on input line 68.
 (pdftex.def)             Requested size: 22.76219pt x 17.82909pt.
 
-[13
+[14
 
  <./Images/unet_learning_curves.pdf>]
-<Images/deeplabv3_dice_learning_curves.pdf, id=324, 455.30101pt x 224.037pt>
+<Images/deeplabv3_dice_learning_curves.pdf, id=339, 455.30101pt x 224.037pt>
 File: Images/deeplabv3_dice_learning_curves.pdf Graphic file (type pdf)
 <use Images/deeplabv3_dice_learning_curves.pdf>
 Package pdftex.def Info: Images/deeplabv3_dice_learning_curves.pdf  used on inp
@@ -1305,14 +1312,14 @@ File: Images/bachkhoa_logo.png Graphic file (type png)
 Package pdftex.def Info: Images/bachkhoa_logo.png  used on input line 15.
 (pdftex.def)             Requested size: 22.76219pt x 17.82909pt.
 
-[14 <./Images/deeplabv3_ce_learning_curves.pdf> <./Images/deeplabv3_dice_learni
+[15 <./Images/deeplabv3_ce_learning_curves.pdf> <./Images/deeplabv3_dice_learni
 ng_curves.pdf>]) (./Tables/per_class_iou.tex)
 File: Images/bachkhoa_logo.png Graphic file (type png)
 <use Images/bachkhoa_logo.png>
 Package pdftex.def Info: Images/bachkhoa_logo.png  used on input line 144.
 (pdftex.def)             Requested size: 22.76219pt x 17.82909pt.
- [15] (./Tables/compute_cost.tex)
-<Images/analysis/qualitative_examples.pdf, id=364, 455.30101pt x 325.215pt>
+ [16] (./Tables/compute_cost.tex)
+<Images/analysis/qualitative_examples.pdf, id=380, 455.30101pt x 325.215pt>
 File: Images/analysis/qualitative_examples.pdf Graphic file (type pdf)
 <use Images/analysis/qualitative_examples.pdf>
 Package pdftex.def Info: Images/analysis/qualitative_examples.pdf  used on inpu
@@ -1320,87 +1327,87 @@ t line 169.
 (pdftex.def)             Requested size: 455.24411pt x 325.18442pt.
 
 (./Tables/ablation.tex)
-<Images/analysis/ablation_class_deltas.pdf, id=369, 513.11702pt x 238.49101pt>
+<Images/analysis/ablation_class_deltas.pdf, id=385, 513.11702pt x 238.49101pt>
 File: Images/analysis/ablation_class_deltas.pdf Graphic file (type pdf)
 <use Images/analysis/ablation_class_deltas.pdf>
 Package pdftex.def Info: Images/analysis/ablation_class_deltas.pdf  used on inp
-ut line 203.
+ut line 202.
 (pdftex.def)             Requested size: 455.24411pt x 211.60129pt.
 File: Images/bachkhoa_logo.png Graphic file (type png)
 <use Images/bachkhoa_logo.png>
-Package pdftex.def Info: Images/bachkhoa_logo.png  used on input line 223.
+Package pdftex.def Info: Images/bachkhoa_logo.png  used on input line 222.
 (pdftex.def)             Requested size: 22.76219pt x 17.82909pt.
- [16]
+ [17]
 File: Images/bachkhoa_logo.png Graphic file (type png)
 <use Images/bachkhoa_logo.png>
-Package pdftex.def Info: Images/bachkhoa_logo.png  used on input line 223.
+Package pdftex.def Info: Images/bachkhoa_logo.png  used on input line 222.
 (pdftex.def)             Requested size: 22.76219pt x 17.82909pt.
- [17 <./Images/analysis/qualitative_examples.pdf>]
-<Images/analysis/ablation_compute.pdf, id=415, 513.11702pt x 245.718pt>
+ [18 <./Images/analysis/qualitative_examples.pdf>]
+<Images/analysis/ablation_compute.pdf, id=430, 513.11702pt x 245.718pt>
 File: Images/analysis/ablation_compute.pdf Graphic file (type pdf)
 <use Images/analysis/ablation_compute.pdf>
 Package pdftex.def Info: Images/analysis/ablation_compute.pdf  used on input li
-ne 226.
+ne 225.
 (pdftex.def)             Requested size: 455.24411pt x 218.01344pt.
 
 (./Tables/analysis_numbers.tex)
 File: Images/bachkhoa_logo.png Graphic file (type png)
 <use Images/bachkhoa_logo.png>
-Package pdftex.def Info: Images/bachkhoa_logo.png  used on input line 248.
+Package pdftex.def Info: Images/bachkhoa_logo.png  used on input line 247.
 (pdftex.def)             Requested size: 22.76219pt x 17.82909pt.
- [18 <./Images/analysis/ablation_class_deltas.pdf> <./Images/analysis/ablation_
+ [19 <./Images/analysis/ablation_class_deltas.pdf> <./Images/analysis/ablation_
 compute.pdf>]
-<Images/analysis/confusion_matrix.pdf, id=443, 433.62pt x 433.62pt>
+<Images/analysis/confusion_matrix.pdf, id=458, 433.62pt x 433.62pt>
 File: Images/analysis/confusion_matrix.pdf Graphic file (type pdf)
 <use Images/analysis/confusion_matrix.pdf>
 Package pdftex.def Info: Images/analysis/confusion_matrix.pdf  used on input li
-ne 251.
+ne 250.
 (pdftex.def)             Requested size: 400.61703pt x 400.63568pt.
-<Images/analysis/rare_class_failures.pdf, id=445, 513.11702pt x 289.08pt>
+<Images/analysis/rare_class_failures.pdf, id=460, 513.11702pt x 289.08pt>
 File: Images/analysis/rare_class_failures.pdf Graphic file (type pdf)
 <use Images/analysis/rare_class_failures.pdf>
 Package pdftex.def Info: Images/analysis/rare_class_failures.pdf  used on input
- line 271.
+ line 270.
 (pdftex.def)             Requested size: 455.24411pt x 256.4864pt.
 File: Images/bachkhoa_logo.png Graphic file (type png)
 <use Images/bachkhoa_logo.png>
-Package pdftex.def Info: Images/bachkhoa_logo.png  used on input line 286.
+Package pdftex.def Info: Images/bachkhoa_logo.png  used on input line 285.
 (pdftex.def)             Requested size: 22.76219pt x 17.82909pt.
- [19 <./Images/analysis/confusion_matrix.pdf>]
-<Images/analysis/regional_iou.pdf, id=466, 513.11702pt x 216.81pt>
+ [20 <./Images/analysis/confusion_matrix.pdf>]
+<Images/analysis/regional_iou.pdf, id=481, 513.11702pt x 216.81pt>
 File: Images/analysis/regional_iou.pdf Graphic file (type pdf)
 <use Images/analysis/regional_iou.pdf>
 Package pdftex.def Info: Images/analysis/regional_iou.pdf  used on input line 2
-89.
+88.
 (pdftex.def)             Requested size: 455.24411pt x 192.36479pt.
-<Images/analysis/per_image_iou.pdf, id=469, 513.11702pt x 216.81pt>
+<Images/analysis/per_image_iou.pdf, id=484, 513.11702pt x 216.81pt>
 File: Images/analysis/per_image_iou.pdf Graphic file (type pdf)
 <use Images/analysis/per_image_iou.pdf>
 Package pdftex.def Info: Images/analysis/per_image_iou.pdf  used on input line 
-308.
+307.
 (pdftex.def)             Requested size: 455.24411pt x 192.36479pt.
 File: Images/bachkhoa_logo.png Graphic file (type png)
 <use Images/bachkhoa_logo.png>
-Package pdftex.def Info: Images/bachkhoa_logo.png  used on input line 337.
+Package pdftex.def Info: Images/bachkhoa_logo.png  used on input line 336.
 (pdftex.def)             Requested size: 22.76219pt x 17.82909pt.
- [20 <./Images/analysis/rare_class_failures.pdf>]
+ [21 <./Images/analysis/rare_class_failures.pdf>]
 File: Images/bachkhoa_logo.png Graphic file (type png)
 <use Images/bachkhoa_logo.png>
-Package pdftex.def Info: Images/bachkhoa_logo.png  used on input line 337.
+Package pdftex.def Info: Images/bachkhoa_logo.png  used on input line 336.
 (pdftex.def)             Requested size: 22.76219pt x 17.82909pt.
- [21 <./Images/analysis/regional_iou.pdf> <./Images/analysis/per_image_iou.pdf>
+ [22 <./Images/analysis/regional_iou.pdf> <./Images/analysis/per_image_iou.pdf>
 ])
 File: Images/bachkhoa_logo.png Graphic file (type png)
 <use Images/bachkhoa_logo.png>
 Package pdftex.def Info: Images/bachkhoa_logo.png  used on input line 27.
 (pdftex.def)             Requested size: 22.76219pt x 17.82909pt.
- [22]
+ [23]
 (./Sections/6-AI-Usage.tex) (./Sections/7-References.tex)
 File: Images/bachkhoa_logo.png Graphic file (type png)
 <use Images/bachkhoa_logo.png>
 Package pdftex.def Info: Images/bachkhoa_logo.png  used on input line 31.
 (pdftex.def)             Requested size: 22.76219pt x 17.82909pt.
- [23
+ [24
 
 ]
 
@@ -1416,14 +1423,14 @@ LaTeX Font Warning: Size substitutions with differences
 (Font)              up to 0.5pt have occurred.
 
 Package rerunfilecheck Info: File `main.out' has not changed.
-(rerunfilecheck)             Checksum: 9A5188C787A99D9E1B993596EDFE22B1;3876.
+(rerunfilecheck)             Checksum: CF4A6C1B3C5118537585049707C6F877;3876.
  ) 
 Here is how much of TeX's memory you used:
- 28225 strings out of 469006
- 516284 string characters out of 5454813
- 929899 words of memory out of 5000000
- 56039 multiletter control sequences out of 15000+600000
- 666730 words of font info for 249 fonts, out of 8000000 for 9000
+ 28238 strings out of 469006
+ 516697 string characters out of 5454813
+ 930184 words of memory out of 5000000
+ 56046 multiletter control sequences out of 15000+600000
+ 666829 words of font info for 251 fonts, out of 8000000 for 9000
  319 hyphenation exceptions out of 8191
  104i,18n,111p,1001b,845s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2026basic/texmf-dist/fonts/type1/public/amsfonts/cm/cmex1
@@ -1448,10 +1455,10 @@ ex/vnr/vnr10.pfb></usr/local/texlive/2026basic/texmf-dist/fonts/type1/vntex/vnr
 pfb></usr/local/texlive/2026basic/texmf-dist/fonts/type1/vntex/vnr/vnr9.pfb></u
 sr/local/texlive/2026basic/texmf-dist/fonts/type1/vntex/vnr/vnti10.pfb></usr/lo
 cal/texlive/2026basic/texmf-dist/fonts/type1/vntex/vnr/vntt10.pfb>
-Output written on main.pdf (26 pages, 13996663 bytes).
+Output written on main.pdf (27 pages, 14079896 bytes).
 PDF statistics:
- 658 PDF objects out of 1000 (max. 8388607)
- 490 compressed objects within 5 object streams
- 97 named destinations out of 1000 (max. 500000)
- 63794 words of extra memory for PDF output out of 74296 (max. 10000000)
+ 673 PDF objects out of 1000 (max. 8388607)
+ 500 compressed objects within 5 object streams
+ 99 named destinations out of 1000 (max. 500000)
+ 63799 words of extra memory for PDF output out of 74296 (max. 10000000)
 

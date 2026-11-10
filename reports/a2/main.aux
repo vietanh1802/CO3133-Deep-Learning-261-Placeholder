@@ -26,97 +26,99 @@
 \newlabel{fig:region-area}{{2}{3}{Class area as a fraction of the image, measured in training-pool images where the class appears}{figure.caption.7}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Original image sizes across all usable pairs, including the official test set.}}{3}{figure.caption.8}\protected@file@percent }
 \newlabel{fig:resolutions}{{3}{3}{Original image sizes across all usable pairs, including the official test set}{figure.caption.8}{}}
-\@writefile{toc}{\contentsline {paragraph}{Mask quality.}{4}{section*.9}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Two rejected masks and their invalid-colour pixels. We select the mask with the median invalid-pixel share from each group: masks matching the image size (top) and masks taller than the image (bottom).}}{4}{figure.caption.10}\protected@file@percent }
-\newlabel{fig:off-code-examples}{{4}{4}{Two rejected masks and their invalid-colour pixels. We select the mask with the median invalid-pixel share from each group: masks matching the image size (top) and masks taller than the image (bottom)}{figure.caption.10}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces RGB and brightness distributions by class in 287 validation images at $240\times 320$ resolution. Each curve sums to 100\% across 32 intensity bins. The dashed curve shows brightness, calculated as $0.2126R+0.7152G+0.0722B$ from image RGB values.}}{4}{figure.caption.9}\protected@file@percent }
+\newlabel{fig:class-colour}{{4}{4}{RGB and brightness distributions by class in 287 validation images at $240\times 320$ resolution. Each curve sums to 100\% across 32 intensity bins. The dashed curve shows brightness, calculated as $0.2126R+0.7152G+0.0722B$ from image RGB values}{figure.caption.9}{}}
+\@writefile{toc}{\contentsline {paragraph}{Mask quality.}{4}{section*.10}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {1.4}Splits and leakage prevention}{4}{subsection.1.4}\protected@file@percent }
 \newlabel{sec:splits}{{1.4}{4}{Splits and leakage prevention}{subsection.1.4}{}}
-\@writefile{toc}{\contentsline {paragraph}{Duplicates and leakage.}{4}{section*.11}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Training-pool copies of test images with the lowest (top) and highest (bottom) mean pixel differences among the cross-split duplicates. We resize each training image to the test image size before computing the absolute difference map. The score is the mean pixel difference on a 0 to 255 scale.}}{5}{figure.caption.12}\protected@file@percent }
-\newlabel{fig:duplicate-examples}{{5}{5}{Training-pool copies of test images with the lowest (top) and highest (bottom) mean pixel differences among the cross-split duplicates. We resize each training image to the test image size before computing the absolute difference map. The score is the mean pixel difference on a 0 to 255 scale}{figure.caption.12}{}}
-\@writefile{toc}{\contentsline {paragraph}{Split unit and stratification.}{5}{section*.13}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces SUIM splits. The official test set is held out; train and validation come from the official training pool with seed 42.}}{6}{table.caption.14}\protected@file@percent }
-\newlabel{tab:data-splits}{{2}{6}{SUIM splits. The official test set is held out; train and validation come from the official training pool with seed 42}{table.caption.14}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {1.5}Preprocessing and augmentation}{6}{subsection.1.5}\protected@file@percent }
-\newlabel{sec:preprocessing}{{1.5}{6}{Preprocessing and augmentation}{subsection.1.5}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces A preprocessed batch from the DeepLabV3 training loader. From top to bottom, the rows show the photographs with normalization undone, the SUIM class masks, and the masks overlaid on the photographs, leaving background water unblended. Each column title gives the image name and indicates whether we applied a horizontal flip.}}{7}{figure.caption.15}\protected@file@percent }
-\newlabel{fig:example-batch}{{6}{7}{A preprocessed batch from the DeepLabV3 training loader. From top to bottom, the rows show the photographs with normalization undone, the SUIM class masks, and the masks overlaid on the photographs, leaving background water unblended. Each column title gives the image name and indicates whether we applied a horizontal flip}{figure.caption.15}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Two rejected masks and their invalid-colour pixels. We select the mask with the median invalid-pixel share from each group: masks matching the image size (top) and masks taller than the image (bottom).}}{5}{figure.caption.11}\protected@file@percent }
+\newlabel{fig:off-code-examples}{{5}{5}{Two rejected masks and their invalid-colour pixels. We select the mask with the median invalid-pixel share from each group: masks matching the image size (top) and masks taller than the image (bottom)}{figure.caption.11}{}}
+\@writefile{toc}{\contentsline {paragraph}{Duplicates and leakage.}{5}{section*.12}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Split unit and stratification.}{5}{section*.14}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Training-pool copies of test images with the lowest (top) and highest (bottom) mean pixel differences among the cross-split duplicates. We resize each training image to the test image size before computing the absolute difference map. The score is the mean pixel difference on a 0 to 255 scale.}}{6}{figure.caption.13}\protected@file@percent }
+\newlabel{fig:duplicate-examples}{{6}{6}{Training-pool copies of test images with the lowest (top) and highest (bottom) mean pixel differences among the cross-split duplicates. We resize each training image to the test image size before computing the absolute difference map. The score is the mean pixel difference on a 0 to 255 scale}{figure.caption.13}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces SUIM splits. The official test set is held out; train and validation come from the official training pool with seed 42.}}{6}{table.caption.15}\protected@file@percent }
+\newlabel{tab:data-splits}{{2}{6}{SUIM splits. The official test set is held out; train and validation come from the official training pool with seed 42}{table.caption.15}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.5}Preprocessing and augmentation}{7}{subsection.1.5}\protected@file@percent }
+\newlabel{sec:preprocessing}{{1.5}{7}{Preprocessing and augmentation}{subsection.1.5}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces A preprocessed batch from the DeepLabV3 training loader. From top to bottom, the rows show the photographs with normalization undone, the SUIM class masks, and the masks overlaid on the photographs, leaving background water unblended. Each column title gives the image name and indicates whether we applied a horizontal flip.}}{8}{figure.caption.16}\protected@file@percent }
+\newlabel{fig:example-batch}{{7}{8}{A preprocessed batch from the DeepLabV3 training loader. From top to bottom, the rows show the photographs with normalization undone, the SUIM class masks, and the masks overlaid on the photographs, leaving background water unblended. Each column title gives the image name and indicates whether we applied a horizontal flip}{figure.caption.16}{}}
 \citation{unet}
-\@writefile{toc}{\contentsline {section}{\numberline {2}Methodology}{8}{section.2}\protected@file@percent }
-\newlabel{sec:method}{{2}{8}{Methodology}{section.2}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Training and evaluation pipeline}{8}{subsection.2.1}\protected@file@percent }
-\newlabel{sec:pipeline}{{2.1}{8}{Training and evaluation pipeline}{subsection.2.1}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces The shared SUIM pipeline. The training path computes the loss and updates model weights, while the evaluation path converts model scores into class masks and measures segmentation quality. We evaluate validation predictions after every epoch and reserve the official test set for the selected models.}}{8}{figure.caption.16}\protected@file@percent }
-\newlabel{fig:pipeline}{{7}{8}{The shared SUIM pipeline. The training path computes the loss and updates model weights, while the evaluation path converts model scores into class masks and measures segmentation quality. We evaluate validation predictions after every epoch and reserve the official test set for the selected models}{figure.caption.16}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Model architectures}{8}{subsection.2.2}\protected@file@percent }
-\newlabel{sec:models}{{2.2}{8}{Model architectures}{subsection.2.2}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.2.1}U-Net baseline}{8}{subsubsection.2.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2}Methodology}{9}{section.2}\protected@file@percent }
+\newlabel{sec:method}{{2}{9}{Methodology}{section.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Training and evaluation pipeline}{9}{subsection.2.1}\protected@file@percent }
+\newlabel{sec:pipeline}{{2.1}{9}{Training and evaluation pipeline}{subsection.2.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces The shared SUIM pipeline. The training path computes the loss and updates model weights, while the evaluation path converts model scores into class masks and measures segmentation quality. We evaluate validation predictions after every epoch and reserve the official test set for the selected models.}}{9}{figure.caption.17}\protected@file@percent }
+\newlabel{fig:pipeline}{{8}{9}{The shared SUIM pipeline. The training path computes the loss and updates model weights, while the evaluation path converts model scores into class masks and measures segmentation quality. We evaluate validation predictions after every epoch and reserve the official test set for the selected models}{figure.caption.17}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Model architectures}{9}{subsection.2.2}\protected@file@percent }
+\newlabel{sec:models}{{2.2}{9}{Model architectures}{subsection.2.2}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.2.1}U-Net baseline}{9}{subsubsection.2.2.1}\protected@file@percent }
 \citation{deeplabv3}
 \citation{torchvision}
 \citation{deeplabv3}
 \citation{torchvision}
-\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces The U-Net baseline. Each bar is a block of two $3\times 3$ convolutions, each followed by batch normalization and ReLU, labelled with its output channels and resolution for our input size. Every layer is written by the group and starts from random weights.}}{9}{figure.caption.17}\protected@file@percent }
-\newlabel{fig:unet}{{8}{9}{The U-Net baseline. Each bar is a block of two $3\times 3$ convolutions, each followed by batch normalization and ReLU, labelled with its output channels and resolution for our input size. Every layer is written by the group and starts from random weights}{figure.caption.17}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.2.2}Pretrained DeepLabV3}{9}{subsubsection.2.2.2}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces DeepLabV3 adapted for SUIM. Blue layers retain the pretrained initialization, while the orange output layer starts from random weights and predicts eight classes. The white box has no learned parameters. We fix batch normalization statistics throughout the network and remove the auxiliary head.}}{10}{figure.caption.18}\protected@file@percent }
-\newlabel{fig:deeplab}{{9}{10}{DeepLabV3 adapted for SUIM. Blue layers retain the pretrained initialization, while the orange output layer starts from random weights and predicts eight classes. The white box has no learned parameters. We fix batch normalization statistics throughout the network and remove the auxiliary head}{figure.caption.18}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Initialization and parameter counts of U-Net and DeepLabV3.}}{10}{table.caption.19}\protected@file@percent }
-\newlabel{tab:model-summary}{{3}{10}{Initialization and parameter counts of U-Net and DeepLabV3}{table.caption.19}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Fine-tuning procedure}{10}{subsection.2.3}\protected@file@percent }
-\newlabel{sec:finetune}{{2.3}{10}{Fine-tuning procedure}{subsection.2.3}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.4}Loss and evaluation metrics}{11}{subsection.2.4}\protected@file@percent }
-\newlabel{sec:metrics}{{2.4}{11}{Loss and evaluation metrics}{subsection.2.4}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.5}Training configuration}{12}{subsection.2.5}\protected@file@percent }
-\newlabel{sec:training}{{2.5}{12}{Training configuration}{subsection.2.5}{}}
-\newlabel{sec:experiments}{{2.5}{12}{Training configuration}{subsection.2.5}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Training settings of the reported runs.}}{12}{table.caption.20}\protected@file@percent }
-\newlabel{tab:training-setup}{{4}{12}{Training settings of the reported runs}{table.caption.20}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {3}Implementation results}{13}{section.3}\protected@file@percent }
-\newlabel{sec:results}{{3}{13}{Implementation results}{section.3}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Training behavior}{13}{subsection.3.1}\protected@file@percent }
-\newlabel{sec:training-behavior}{{3.1}{13}{Training behavior}{subsection.3.1}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces U-Net training and validation losses alongside validation mIoU over 40{} epochs, with seed 42{}. Validation mIoU selects the checkpoint at epoch 38{}.}}{13}{figure.caption.21}\protected@file@percent }
-\newlabel{fig:unet-curves}{{10}{13}{U-Net training and validation losses alongside validation mIoU over \unetEpochs {} epochs, with seed \unetSeed {}. Validation mIoU selects the checkpoint at epoch \unetBestEpoch {}}{figure.caption.21}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces Training and validation losses alongside validation mIoU for the DeepLabV3 reference run with cross-entropy. The dashed line marks epoch 31, selected by validation mIoU.}}{14}{figure.caption.22}\protected@file@percent }
-\newlabel{fig:deeplab-curves}{{11}{14}{Training and validation losses alongside validation mIoU for the DeepLabV3 reference run with cross-entropy. The dashed line marks epoch 31, selected by validation mIoU}{figure.caption.22}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces Training and validation losses alongside validation mIoU for DeepLabV3 with CE + Dice. Validation mIoU selects epoch 24, before the decline in the later epochs.}}{14}{figure.caption.23}\protected@file@percent }
-\newlabel{fig:dice-curves}{{12}{14}{Training and validation losses alongside validation mIoU for DeepLabV3 with CE + Dice. Validation mIoU selects epoch 24, before the decline in the later epochs}{figure.caption.23}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Quantitative results}{14}{subsection.3.2}\protected@file@percent }
-\newlabel{sec:quantitative}{{3.2}{14}{Quantitative results}{subsection.3.2}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Validation results on 287 SUIM images at the selected checkpoints. Each configuration uses seed 42.}}{15}{table.caption.24}\protected@file@percent }
-\newlabel{tab:quantitative-results}{{5}{15}{Validation results on 287 SUIM images at the selected checkpoints. Each configuration uses seed 42}{table.caption.24}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces Per-class validation IoU (\%) on the same 287 SUIM images.}}{15}{table.caption.25}\protected@file@percent }
-\newlabel{tab:per-class-iou}{{6}{15}{Per-class validation IoU (\%) on the same 287 SUIM images}{table.caption.25}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Compute cost}{15}{subsection.3.3}\protected@file@percent }
-\newlabel{sec:compute}{{3.3}{15}{Compute cost}{subsection.3.3}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {7}{\ignorespaces Compute cost for $240\times 320$ inputs. Latency excludes data loading and uses validation batches of 4. Memory is peak allocated GPU memory.}}{16}{table.caption.26}\protected@file@percent }
-\newlabel{tab:compute-cost}{{7}{16}{Compute cost for $\suimInputHeight \times \suimInputWidth $ inputs. Latency excludes data loading and uses validation batches of 4. Memory is peak allocated GPU memory}{table.caption.26}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Qualitative results}{16}{subsection.3.4}\protected@file@percent }
-\newlabel{sec:qualitative}{{3.4}{16}{Qualitative results}{subsection.3.4}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.5}Controlled experiments}{16}{subsection.3.5}\protected@file@percent }
-\newlabel{sec:ablation}{{3.5}{16}{Controlled experiments}{subsection.3.5}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {13}{\ignorespaces Matched validation predictions from the reference and CE + Dice models. Rows show the highest-scoring reference image, its highest-scoring robot-containing image, and its lowest-scoring image. Columns show the photograph, annotation and the two predictions. Colours identify SUIM classes; the legend uses the class codes introduced in \hyperref  [sec:task]{Section~\ref *{sec:task}}.}}{17}{figure.caption.27}\protected@file@percent }
-\newlabel{fig:examples}{{13}{17}{Matched validation predictions from the reference and CE + Dice models. Rows show the highest-scoring reference image, its highest-scoring robot-containing image, and its lowest-scoring image. Columns show the photograph, annotation and the two predictions. Colours identify SUIM classes; the legend uses the class codes introduced in \secref {sec:task}}{figure.caption.27}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {8}{\ignorespaces Controlled comparisons on the same validation split, with seed 42. Scores are percentages; $\Delta $ mIoU is the change from the reference in percentage points.}}{17}{table.caption.28}\protected@file@percent }
-\newlabel{tab:ablation}{{8}{17}{Controlled comparisons on the same validation split, with seed 42. Scores are percentages; $\Delta $ mIoU is the change from the reference in percentage points}{table.caption.28}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {14}{\ignorespaces Per-class IoU changes from the reference, in percentage points. Positive values indicate improvement. Freezing the backbone and halving the input resolution reduce every class score, while the other variants produce smaller, mixed changes.}}{18}{figure.caption.29}\protected@file@percent }
-\newlabel{fig:ablation-classes}{{14}{18}{Per-class IoU changes from the reference, in percentage points. Positive values indicate improvement. Freezing the backbone and halving the input resolution reduce every class score, while the other variants produce smaller, mixed changes}{figure.caption.29}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {15}{\ignorespaces Training time, peak allocated GPU memory and inference latency from the saved comparison measurements. Training covers 40 epochs with validation; inference uses each configuration's input resolution. Each bar represents one run, so the chart does not estimate timing variation.}}{18}{figure.caption.30}\protected@file@percent }
-\newlabel{fig:ablation-compute}{{15}{18}{Training time, peak allocated GPU memory and inference latency from the saved comparison measurements. Training covers 40 epochs with validation; inference uses each configuration's input resolution. Each bar represents one run, so the chart does not estimate timing variation}{figure.caption.30}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.6}Error analysis}{19}{subsection.3.6}\protected@file@percent }
-\newlabel{sec:errors}{{3.6}{19}{Error analysis}{subsection.3.6}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {16}{\ignorespaces Reference-model confusion matrix over 287 validation images. Rows are target classes and columns are predictions. Colour shows the fraction of each target class assigned to a predicted class, while cell annotations give pixel counts.}}{19}{figure.caption.31}\protected@file@percent }
-\newlabel{fig:confusion}{{16}{19}{Reference-model confusion matrix over 287 validation images. Rows are target classes and columns are predictions. Colour shows the fraction of each target class assigned to a predicted class, while cell annotations give pixel counts}{figure.caption.31}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {17}{\ignorespaces Reference-model failures on plants (top) and robots (bottom). Columns show the photograph, target, prediction and error map, where purple marks an incorrect pixel. The selected target class has zero IoU in each row.}}{20}{figure.caption.32}\protected@file@percent }
-\newlabel{fig:rare-failures}{{17}{20}{Reference-model failures on plants (top) and robots (bottom). Columns show the photograph, target, prediction and error map, where purple marks an incorrect pixel. The selected target class has zero IoU in each row}{figure.caption.32}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.7}Comparison and discussion}{20}{subsection.3.7}\protected@file@percent }
-\newlabel{sec:discussion}{{3.7}{20}{Comparison and discussion}{subsection.3.7}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {18}{\ignorespaces Whole-mask, boundary and interior validation mIoU. A boundary includes both sides of a transition between neighbouring target classes. Each region uses its own pooled confusion matrix.}}{21}{figure.caption.33}\protected@file@percent }
-\newlabel{fig:regional-errors}{{18}{21}{Whole-mask, boundary and interior validation mIoU. A boundary includes both sides of a transition between neighbouring target classes. Each region uses its own pooled confusion matrix}{figure.caption.33}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {19}{\ignorespaces Distribution of reference per-image mIoU over the validation split. The dashed line marks the median. Each image score averages IoU over classes present in either the annotation or prediction.}}{21}{figure.caption.34}\protected@file@percent }
-\newlabel{fig:image-errors}{{19}{21}{Distribution of reference per-image mIoU over the validation split. The dashed line marks the median. Each image score averages IoU over classes present in either the annotation or prediction}{figure.caption.34}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.8}Limitations and conclusion}{22}{subsection.3.8}\protected@file@percent }
-\newlabel{sec:conclusion}{{3.8}{22}{Limitations and conclusion}{subsection.3.8}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces The U-Net baseline. Each bar is a block of two $3\times 3$ convolutions, each followed by batch normalization and ReLU, labelled with its output channels and resolution for our input size. Every layer is written by the group and starts from random weights.}}{10}{figure.caption.18}\protected@file@percent }
+\newlabel{fig:unet}{{9}{10}{The U-Net baseline. Each bar is a block of two $3\times 3$ convolutions, each followed by batch normalization and ReLU, labelled with its output channels and resolution for our input size. Every layer is written by the group and starts from random weights}{figure.caption.18}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.2.2}Pretrained DeepLabV3}{10}{subsubsection.2.2.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces DeepLabV3 adapted for SUIM. Blue layers retain the pretrained initialization, while the orange output layer starts from random weights and predicts eight classes. The white box has no learned parameters. We fix batch normalization statistics throughout the network and remove the auxiliary head.}}{11}{figure.caption.19}\protected@file@percent }
+\newlabel{fig:deeplab}{{10}{11}{DeepLabV3 adapted for SUIM. Blue layers retain the pretrained initialization, while the orange output layer starts from random weights and predicts eight classes. The white box has no learned parameters. We fix batch normalization statistics throughout the network and remove the auxiliary head}{figure.caption.19}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Initialization and parameter counts of U-Net and DeepLabV3.}}{11}{table.caption.20}\protected@file@percent }
+\newlabel{tab:model-summary}{{3}{11}{Initialization and parameter counts of U-Net and DeepLabV3}{table.caption.20}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Fine-tuning procedure}{11}{subsection.2.3}\protected@file@percent }
+\newlabel{sec:finetune}{{2.3}{11}{Fine-tuning procedure}{subsection.2.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4}Loss and evaluation metrics}{12}{subsection.2.4}\protected@file@percent }
+\newlabel{sec:metrics}{{2.4}{12}{Loss and evaluation metrics}{subsection.2.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.5}Training configuration}{13}{subsection.2.5}\protected@file@percent }
+\newlabel{sec:training}{{2.5}{13}{Training configuration}{subsection.2.5}{}}
+\newlabel{sec:experiments}{{2.5}{13}{Training configuration}{subsection.2.5}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Training settings of the reported runs.}}{13}{table.caption.21}\protected@file@percent }
+\newlabel{tab:training-setup}{{4}{13}{Training settings of the reported runs}{table.caption.21}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3}Implementation results}{14}{section.3}\protected@file@percent }
+\newlabel{sec:results}{{3}{14}{Implementation results}{section.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Training behavior}{14}{subsection.3.1}\protected@file@percent }
+\newlabel{sec:training-behavior}{{3.1}{14}{Training behavior}{subsection.3.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces U-Net training and validation losses alongside validation mIoU over 40{} epochs, with seed 42{}. Validation mIoU selects the checkpoint at epoch 38{}.}}{14}{figure.caption.22}\protected@file@percent }
+\newlabel{fig:unet-curves}{{11}{14}{U-Net training and validation losses alongside validation mIoU over \unetEpochs {} epochs, with seed \unetSeed {}. Validation mIoU selects the checkpoint at epoch \unetBestEpoch {}}{figure.caption.22}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces Training and validation losses alongside validation mIoU for the DeepLabV3 reference run with cross-entropy. The dashed line marks epoch 31, selected by validation mIoU.}}{15}{figure.caption.23}\protected@file@percent }
+\newlabel{fig:deeplab-curves}{{12}{15}{Training and validation losses alongside validation mIoU for the DeepLabV3 reference run with cross-entropy. The dashed line marks epoch 31, selected by validation mIoU}{figure.caption.23}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {13}{\ignorespaces Training and validation losses alongside validation mIoU for DeepLabV3 with CE + Dice. Validation mIoU selects epoch 24, before the decline in the later epochs.}}{15}{figure.caption.24}\protected@file@percent }
+\newlabel{fig:dice-curves}{{13}{15}{Training and validation losses alongside validation mIoU for DeepLabV3 with CE + Dice. Validation mIoU selects epoch 24, before the decline in the later epochs}{figure.caption.24}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Quantitative results}{15}{subsection.3.2}\protected@file@percent }
+\newlabel{sec:quantitative}{{3.2}{15}{Quantitative results}{subsection.3.2}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Validation results on 287 SUIM images at the selected checkpoints. Each configuration uses seed 42.}}{16}{table.caption.25}\protected@file@percent }
+\newlabel{tab:quantitative-results}{{5}{16}{Validation results on 287 SUIM images at the selected checkpoints. Each configuration uses seed 42}{table.caption.25}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces Per-class validation IoU (\%) on the same 287 SUIM images.}}{16}{table.caption.26}\protected@file@percent }
+\newlabel{tab:per-class-iou}{{6}{16}{Per-class validation IoU (\%) on the same 287 SUIM images}{table.caption.26}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Compute cost}{16}{subsection.3.3}\protected@file@percent }
+\newlabel{sec:compute}{{3.3}{16}{Compute cost}{subsection.3.3}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {7}{\ignorespaces Compute cost for $240\times 320$ inputs. Latency excludes data loading and uses validation batches of 4. Memory is peak allocated GPU memory.}}{17}{table.caption.27}\protected@file@percent }
+\newlabel{tab:compute-cost}{{7}{17}{Compute cost for $\suimInputHeight \times \suimInputWidth $ inputs. Latency excludes data loading and uses validation batches of 4. Memory is peak allocated GPU memory}{table.caption.27}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Qualitative results}{17}{subsection.3.4}\protected@file@percent }
+\newlabel{sec:qualitative}{{3.4}{17}{Qualitative results}{subsection.3.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.5}Controlled experiments}{17}{subsection.3.5}\protected@file@percent }
+\newlabel{sec:ablation}{{3.5}{17}{Controlled experiments}{subsection.3.5}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {14}{\ignorespaces Matched validation predictions from U-Net and the DeepLabV3 reference. Rows show the highest-scoring reference image, its highest-scoring robot-containing image, and its lowest-scoring image. Columns show the input, ground truth, U-Net prediction and DeepLabV3 prediction. Colours identify SUIM classes; the legend uses the class codes introduced in \hyperref  [sec:task]{Section~\ref *{sec:task}}.}}{18}{figure.caption.28}\protected@file@percent }
+\newlabel{fig:examples}{{14}{18}{Matched validation predictions from U-Net and the DeepLabV3 reference. Rows show the highest-scoring reference image, its highest-scoring robot-containing image, and its lowest-scoring image. Columns show the input, ground truth, U-Net prediction and DeepLabV3 prediction. Colours identify SUIM classes; the legend uses the class codes introduced in \secref {sec:task}}{figure.caption.28}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {8}{\ignorespaces Controlled comparisons on the same validation split, with seed 42. Scores are percentages; $\Delta $ mIoU is the change from the reference in percentage points.}}{18}{table.caption.29}\protected@file@percent }
+\newlabel{tab:ablation}{{8}{18}{Controlled comparisons on the same validation split, with seed 42. Scores are percentages; $\Delta $ mIoU is the change from the reference in percentage points}{table.caption.29}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {15}{\ignorespaces Per-class IoU changes from the reference, in percentage points. Positive values indicate improvement. Freezing the backbone and halving the input resolution reduce every class score, while the other variants produce smaller, mixed changes.}}{19}{figure.caption.30}\protected@file@percent }
+\newlabel{fig:ablation-classes}{{15}{19}{Per-class IoU changes from the reference, in percentage points. Positive values indicate improvement. Freezing the backbone and halving the input resolution reduce every class score, while the other variants produce smaller, mixed changes}{figure.caption.30}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {16}{\ignorespaces Training time, peak allocated GPU memory and inference latency from the saved comparison measurements. Training covers 40 epochs with validation; inference uses each configuration's input resolution. Each bar represents one run, so the chart does not estimate timing variation.}}{19}{figure.caption.31}\protected@file@percent }
+\newlabel{fig:ablation-compute}{{16}{19}{Training time, peak allocated GPU memory and inference latency from the saved comparison measurements. Training covers 40 epochs with validation; inference uses each configuration's input resolution. Each bar represents one run, so the chart does not estimate timing variation}{figure.caption.31}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.6}Error analysis}{20}{subsection.3.6}\protected@file@percent }
+\newlabel{sec:errors}{{3.6}{20}{Error analysis}{subsection.3.6}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {17}{\ignorespaces Reference-model confusion matrix over 287 validation images. Rows are target classes and columns are predictions. Colour shows the fraction of each target class assigned to a predicted class, while cell annotations give pixel counts.}}{20}{figure.caption.32}\protected@file@percent }
+\newlabel{fig:confusion}{{17}{20}{Reference-model confusion matrix over 287 validation images. Rows are target classes and columns are predictions. Colour shows the fraction of each target class assigned to a predicted class, while cell annotations give pixel counts}{figure.caption.32}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {18}{\ignorespaces Reference-model failures on plants (top) and robots (bottom). Columns show the photograph, target, prediction and error map, where purple marks an incorrect pixel. The selected target class has zero IoU in each row.}}{21}{figure.caption.33}\protected@file@percent }
+\newlabel{fig:rare-failures}{{18}{21}{Reference-model failures on plants (top) and robots (bottom). Columns show the photograph, target, prediction and error map, where purple marks an incorrect pixel. The selected target class has zero IoU in each row}{figure.caption.33}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.7}Comparison and discussion}{21}{subsection.3.7}\protected@file@percent }
+\newlabel{sec:discussion}{{3.7}{21}{Comparison and discussion}{subsection.3.7}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {19}{\ignorespaces Whole-mask, boundary and interior validation mIoU. A boundary includes both sides of a transition between neighbouring target classes. Each region uses its own pooled confusion matrix.}}{22}{figure.caption.34}\protected@file@percent }
+\newlabel{fig:regional-errors}{{19}{22}{Whole-mask, boundary and interior validation mIoU. A boundary includes both sides of a transition between neighbouring target classes. Each region uses its own pooled confusion matrix}{figure.caption.34}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {20}{\ignorespaces Distribution of reference per-image mIoU over the validation split. The dashed line marks the median. Each image score averages IoU over classes present in either the annotation or prediction.}}{22}{figure.caption.35}\protected@file@percent }
+\newlabel{fig:image-errors}{{20}{22}{Distribution of reference per-image mIoU over the validation split. The dashed line marks the median. Each image score averages IoU over classes present in either the annotation or prediction}{figure.caption.35}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.8}Limitations and conclusion}{23}{subsection.3.8}\protected@file@percent }
+\newlabel{sec:conclusion}{{3.8}{23}{Limitations and conclusion}{subsection.3.8}{}}
 \bibcite{handbook}{1}
 \bibcite{repository}{2}
 \bibcite{suim}{3}
@@ -124,9 +126,9 @@
 \bibcite{unet}{5}
 \bibcite{deeplabv3}{6}
 \bibcite{torchvision}{7}
-\@writefile{toc}{\contentsline {section}{AI usage disclosure}{23}{section*.35}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{References}{23}{section*.36}\protected@file@percent }
-\newlabel{LastPage}{{3.8}{23}{AI usage disclosure}{page.23}{}}
-\gdef\lastpage@lastpage{23}
-\gdef\lastpage@lastpageHy{23}
-\gdef \@abspage@last{26}
+\@writefile{toc}{\contentsline {section}{AI usage disclosure}{24}{section*.36}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{References}{24}{section*.37}\protected@file@percent }
+\newlabel{LastPage}{{3.8}{24}{AI usage disclosure}{page.24}{}}
+\gdef\lastpage@lastpage{24}
+\gdef\lastpage@lastpageHy{24}
+\gdef \@abspage@last{27}

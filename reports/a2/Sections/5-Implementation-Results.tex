@@ -146,7 +146,7 @@ unchanged.
 
 \subsection{Qualitative results}
 \label{sec:qualitative}
-We compare reference and CE + Dice predictions on the same validation images
+We compare U-Net and the DeepLabV3 reference on the same validation images
 (see \figref{fig:examples}). To choose examples reproducibly, we rank images by
 the reference model's per-image mIoU, averaging over classes present in either
 the target or prediction. The figure shows the highest-scoring image, the
@@ -154,23 +154,22 @@ highest-scoring image containing a robot, and the lowest-scoring image. These
 cases illustrate how the models behave across different scenes, while the
 split-wide scores in \secref{sec:quantitative} describe their overall performance.
 
-In the first image, \texttt{w\_r\_148\_}, both predictions closely follow the
-large wreck region and its boundary with water. The robot image,
-\texttt{d\_r\_211\_}, is more revealing: the reference recovers most of the
-robot body but simplifies its thin extensions, while CE + Dice assigns parts
-of the body to diver and fish classes. Thus, its higher aggregate robot IoU
-does not imply a better prediction on every robot image. In the last image,
+In the first image, \texttt{w\_r\_148\_}, DeepLabV3 closely follows the
+large wreck region and its boundary with water, while U-Net assigns parts of
+the wreck to reef, fish and sea floor. The robot image, \texttt{d\_r\_211\_},
+shows a similar difference: DeepLabV3 recovers most of the robot body but
+simplifies its thin extensions, whereas U-Net misses the robot class and
+labels parts of the object as fish or water. In the last image,
 \texttt{w\_r\_162\_}, both models label most of the scene as reef even though
-the annotation contains plants and wrecks. The shared failure suggests that
-changing the loss alone does not resolve this scene's class confusion.
+the annotation contains plants and wrecks. Therefore, the stronger overall
+DeepLabV3 scores still leave substantial errors in this scene.
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=\linewidth]{Images/analysis/qualitative_examples.pdf}
-\caption{Matched validation predictions from the reference and CE + Dice
-models. Rows show the highest-scoring reference image, its highest-scoring
+\caption{Matched validation predictions from U-Net and the DeepLabV3 reference. Rows show the highest-scoring reference image, its highest-scoring
 robot-containing image, and its lowest-scoring image. Columns show the
-photograph, annotation and the two predictions. Colours identify SUIM classes;
+input, ground truth, U-Net prediction and DeepLabV3 prediction. Colours identify SUIM classes;
 the legend uses the class codes introduced in \secref{sec:task}.}
 \label{fig:examples}
 \end{figure}
@@ -329,8 +328,8 @@ Fine-tuning the backbone and retaining the original input resolution contribute
 more than increasing backbone depth or changing the loss. ResNet101 gives
 almost the same overall score at a higher compute cost, while CE + Dice trades
 better robot segmentation for lower scores on some other classes. The paired
-examples show why these aggregate gains need inspection: Dice can improve
-robot IoU across the split yet fragment the robot in a particular image. We
+U-Net and DeepLabV3 examples also show that a higher overall score can coexist
+with severe errors in individual scenes. We
 therefore retain ResNet50 with full fine-tuning and cross-entropy as our
 reference. Its simpler loss and smaller backbone avoid additional cost without
 a clear loss of overall accuracy among the near-tied configurations.

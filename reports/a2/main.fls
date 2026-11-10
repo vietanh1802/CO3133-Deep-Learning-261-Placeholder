@@ -367,7 +367,6 @@ INPUT ./Sections/2-Abstract.tex
 INPUT Sections/2-Abstract.tex
 INPUT /usr/local/texlive/2026basic/texmf-dist/fonts/tfm/vntex/vnr/vnr12.tfm
 INPUT /usr/local/texlive/2026basic/texmf-dist/fonts/tfm/vntex/vnr/vnbx12.tfm
-INPUT /usr/local/texlive/2026basic/texmf-dist/fonts/tfm/vntex/vnr/vnbx10.tfm
 INPUT ./Images/bachkhoa_logo.png
 INPUT ./Images/bachkhoa_logo.png
 INPUT ./Images/bachkhoa_logo.png
@@ -406,6 +405,7 @@ INPUT ./Tables/eda_classes.tex
 INPUT ./Tables/eda_classes.tex
 INPUT ./Tables/eda_classes.tex
 INPUT Tables/eda_classes.tex
+INPUT /usr/local/texlive/2026basic/texmf-dist/fonts/tfm/vntex/vnr/vnbx10.tfm
 INPUT /usr/local/texlive/2026basic/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex7.tfm
 INPUT /usr/local/texlive/2026basic/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex7.tfm
 INPUT /usr/local/texlive/2026basic/texmf-dist/fonts/tfm/public/amsfonts/symbols/msam10.tfm
@@ -434,6 +434,10 @@ INPUT ./Images/bachkhoa_logo.png
 INPUT ./Images/bachkhoa_logo.png
 INPUT ./Images/bachkhoa_logo.png
 INPUT ./Images/bachkhoa_logo.png
+INPUT ./Images/suim_class_colour_distribution.pdf
+INPUT ./Images/suim_class_colour_distribution.pdf
+INPUT ./Images/suim_class_colour_distribution.pdf
+INPUT ./Images/suim_class_colour_distribution.pdf
 INPUT ./Images/suim_off_code_examples.png
 INPUT ./Images/suim_off_code_examples.png
 INPUT ./Images/suim_off_code_examples.png
@@ -455,6 +459,10 @@ INPUT ./Tables/data_splits.tex
 INPUT ./Tables/data_splits.tex
 INPUT ./Tables/data_splits.tex
 INPUT Tables/data_splits.tex
+INPUT ./Images/bachkhoa_logo.png
+INPUT ./Images/bachkhoa_logo.png
+INPUT ./Images/bachkhoa_logo.png
+INPUT ./Images/bachkhoa_logo.png
 INPUT ./Images/bachkhoa_logo.png
 INPUT ./Images/bachkhoa_logo.png
 INPUT ./Images/bachkhoa_logo.png
