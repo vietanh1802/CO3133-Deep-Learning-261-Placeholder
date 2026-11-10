@@ -52,6 +52,7 @@ def unet_macros(summary: dict) -> dict[str, str]:
     return {
         "unetBestEpoch": count(summary["best_epoch"]),
         "unetBestValMiou": f"{100 * best['validation_miou']:.1f}",
+        "unetValDice": f"{100 * summary['validation']['all']['mean_dice']:.2f}",
         "unetWarmupValMiou": f"{100 * warmup['validation_miou']:.1f}",
         "unetLastGap": f"{100 * (best['validation_miou'] - last['validation_miou']):.2f}",
         "unetFirstTrainLoss": f"{first['train_loss']:.2f}",
@@ -82,14 +83,17 @@ def cost_macros(summary: dict, deeplab: dict[str, dict]) -> dict[str, str]:
         "diceTimeOverhead": f"{100 * overhead:.0f}",
     }
     for key, row in deeplab.items():
+        macros[f"deeplab{key}BestEpoch"] = count(int(row["best_epoch"]))
+        macros[f"deeplab{key}ValMiou"] = f"{100 * row['miou']:.2f}"
+        macros[f"deeplab{key}ValDice"] = f"{100 * row['mean_dice']:.2f}"
         macros[f"deeplab{key}TrainMinutes"] = f"{row['training_seconds'] / 60:.1f}"
         macros[f"deeplab{key}Latency"] = f"{row['inference_ms_per_image']:.1f}"
         macros[f"deeplab{key}PeakMemory"] = gigabytes(row["peak_training_memory_mb"])
     return macros
 
 
-def cost_table(summary: dict, macros: dict[str, str]) -> str:
-    """Compute cost per model. DeepLabV3 hardware is not recorded in the ablation results."""
+def cost_table(summary: dict, macros: dict[str, str], devices: dict[str, str]) -> str:
+    """Compute cost with hardware identified by each saved run summary."""
     unet = (
         rf"U-Net & {summary['parameters'] / 1e6:.2f} & {macros['unetGflops']} & "
         rf"{macros['unetTrainMinutes']} & {macros['unetLatency']} & "
@@ -100,7 +104,7 @@ def cost_table(summary: dict, macros: dict[str, str]) -> str:
         rows.append(
             rf"{label} & {macros['deeplabMillions']} & {macros['deeplabGflops']} & "
             rf"{macros[f'deeplab{key}TrainMinutes']} & {macros[f'deeplab{key}Latency']} & "
-            rf"{macros[f'deeplab{key}PeakMemory']} & \pending\\"
+            rf"{macros[f'deeplab{key}PeakMemory']} & {device_name(devices[key])}\\"
         )
     return (
         HEADER
@@ -108,17 +112,15 @@ def cost_table(summary: dict, macros: dict[str, str]) -> str:
             [
                 r"\begin{table}[htbp]",
                 r"\centering\small",
-                r"\caption{Compute cost. GFLOPs are counted for one $\suimInputHeight\times"
-                r"\suimInputWidth$ image and do not depend on hardware. Training time, latency",
-                r"and peak training memory are measured on the hardware listed; latency excludes",
-                rf"data loading and is measured on the validation set at batch size"
-                rf" {macros['unetInferenceBatch']}.}}",
+                r"\caption{Compute cost for $\suimInputHeight\times\suimInputWidth$ inputs. "
+                r"Latency excludes data loading and uses validation batches of "
+                rf"{macros['unetInferenceBatch']}. Memory is peak allocated GPU memory.}}",
                 r"\label{tab:compute-cost}",
                 r"\footnotesize\setlength{\tabcolsep}{3pt}",
                 r"\begin{tabular}{lrrrrrl}",
                 r"\toprule",
                 r"& & & Train time & Latency & Peak memory & Training\\",
-                r"Model & Params (M) & GFLOPs & (min) & (ms/image) & (GB) & hardware\\",
+                r"Model & Params (M) & GFLOPs & (min) & (ms/image) & (GiB) & hardware\\",
                 r"\midrule",
                 *rows,
                 r"\bottomrule",
@@ -135,6 +137,84 @@ def macro_file(macros: dict[str, str]) -> str:
     return HEADER + "\n".join(lines) + "\n"
 
 
+def quantitative_tables(summary: dict, deeplab: dict[str, dict]) -> dict[str, str]:
+    """Validation results at the selected checkpoints, including all eight classes."""
+    validation = summary["validation"]["all"]
+    records = [
+        (
+            "U-Net",
+            "CE",
+            validation["mean_iou"],
+            validation["mean_dice"],
+            summary["parameters"],
+            list(validation["per_class_iou"].values()),
+        )
+    ]
+    for key, loss in (("Ce", "CE"), ("Dice", "CE + Dice")):
+        row = deeplab[key]
+        records.append(
+            (
+                "DeepLabV3",
+                loss,
+                row["miou"],
+                row["mean_dice"],
+                row["parameters"],
+                [row[f"iou_{name}"] for name in ("BW", "HD", "PF", "WR", "RO", "RI", "FV", "SR")],
+            )
+        )
+    overall, per_class = [], []
+    for model, loss, miou, dice, parameters, values in records:
+        assert len(values) == 8 and all(0 <= value <= 1 for value in values)
+        assert abs(sum(values) / 8 - miou) < 1e-10
+        overall.append(
+            rf"{model} & {loss} & {100 * miou:.2f} & {100 * dice:.2f} & "
+            rf"{parameters / 1e6:.2f}\\"
+        )
+        per_class.append(
+            f"{model} ({loss}) & " + " & ".join(f"{100 * value:.2f}" for value in values) + r"\\"
+        )
+    return {
+        "quantitative_results.tex": HEADER
+        + "\n".join(
+            [
+                r"\begin{table}[htbp]",
+                r"\centering\small",
+                r"\caption{Validation results on 287 SUIM images at the selected checkpoints. "
+                r"Each configuration uses seed 42.}",
+                r"\label{tab:quantitative-results}",
+                r"\begin{tabular}{llrrr}",
+                r"\toprule",
+                r"Model & Loss & mIoU (\%) & Mean Dice (\%) & Params (M)\\",
+                r"\midrule",
+                *overall,
+                r"\bottomrule",
+                r"\end{tabular}",
+                r"\end{table}",
+                "",
+            ]
+        ),
+        "per_class_iou.tex": HEADER
+        + "\n".join(
+            [
+                r"\begin{table}[htbp]",
+                r"\centering\footnotesize",
+                r"\setlength{\tabcolsep}{3pt}",
+                r"\caption{Per-class validation IoU (\%) on the same 287 SUIM images.}",
+                r"\label{tab:per-class-iou}",
+                r"\begin{tabular}{lrrrrrrrr}",
+                r"\toprule",
+                r"Model & BW & HD & PF & WR & RO & RI & FV & SR\\",
+                r"\midrule",
+                *per_class,
+                r"\bottomrule",
+                r"\end{tabular}",
+                r"\end{table}",
+                "",
+            ]
+        ),
+    }
+
+
 def main() -> None:
     summary = json.loads(UNET_SUMMARY.read_text(encoding="utf-8"))
     with COMPARISONS.open(encoding="utf-8", newline="") as handle:
@@ -143,10 +223,29 @@ def main() -> None:
         key: {name: float(value) for name, value in rows[run].items() if name != "run"}
         for key, run in DEEPLAB_RUNS.items()
     }
-    macros = unet_macros(summary) | cost_macros(summary, deeplab)
+    run_summaries = {
+        key: json.loads((Path("results/a2") / run / "training_summary.json").read_text())
+        for key, run in DEEPLAB_RUNS.items()
+    }
+    compute = {}
+    for key, record in run_summaries.items():
+        assert (
+            record["validation_inference"]["batch_size"]
+            == summary["validation_inference"]["batch_size"]
+        )
+        compute[key] = {
+            **deeplab[key],
+            "training_seconds": record["training_seconds"],
+            "peak_training_memory_mb": record["peak_training_memory_mb"],
+            "inference_ms_per_image": record["validation_inference"]["milliseconds_per_image"],
+        }
+    macros = unet_macros(summary) | cost_macros(summary, compute)
     outputs = {
         "results_numbers.tex": macro_file(macros),
-        "compute_cost.tex": cost_table(summary, macros),
+        "compute_cost.tex": cost_table(
+            summary, macros, {key: record["device"] for key, record in run_summaries.items()}
+        ),
+        **quantitative_tables(summary, deeplab),
     }
     for name, text in outputs.items():
         (TABLE_DIR / name).write_text(text, encoding="utf-8", newline="\n")

@@ -107,8 +107,8 @@ def release(version: str) -> str:
     return version.split("+")[0]
 
 
-def training_table(unet: dict, macros: dict[str, str]) -> str:
-    """Settings of the reported runs. The DeepLabV3 column is filled in by its owner."""
+def training_table(unet: dict, macros: dict[str, str], deeplab_config: dict) -> str:
+    """Settings from the U-Net summary and the saved DeepLabV3 configuration."""
     config = unet["config"]
     batch, accumulation = config["batch_size"], config["accumulation_steps"]
     rows = [
@@ -127,7 +127,27 @@ def training_table(unet: dict, macros: dict[str, str]) -> str:
         ("Hardware", macros["unetDevice"]),
         ("Software", f"PyTorch {macros['unetTorchVersion']}, CUDA {macros['unetCudaVersion']}"),
     ]
-    body = [rf"{setting} & {value} & \pending\\" for setting, value in rows]
+    deep = deeplab_config
+    deep_values = [
+        rf"${deep['image_height']}\times{deep['image_width']}$",
+        "COCO, VOC labels; new head",
+        "AdamW",
+        f"{rate(deep['backbone_learning_rate'])} backbone, {rate(deep['learning_rate'])} head",
+        f"{deep['warmup_epochs']}-epoch warm-up, cosine",
+        f"{deep['batch_size']} ({deep['batch_size'] * deep['accumulation_steps']})",
+        f"{deep['epochs']} / {deep['seed']}",
+        rate(deep["weight_decay"]),
+        "Horizontal flip" if deep["augment"] else "None",
+        "Cross-entropy",
+        "No",
+        "Best validation mIoU",
+        macros["deeplabDevice"],
+        f"PyTorch {macros['deeplabTorchVersion']}, CUDA {macros['deeplabCudaVersion']}",
+    ]
+    body = [
+        rf"{setting} & {value} & {deep_value}\\"
+        for (setting, value), deep_value in zip(rows, deep_values, strict=True)
+    ]
     return (
         HEADER
         + "\n".join(
@@ -163,8 +183,7 @@ def model_table(macros: dict[str, str]) -> str:
             [
                 r"\begin{table}[htbp]",
                 r"\centering\small",
-                r"\caption{Compared models. Implementation states whether the group wrote the",
-                r"model or used a library.}",
+                r"\caption{Initialization and parameter counts of U-Net and DeepLabV3.}",
                 r"\label{tab:model-summary}",
                 r"\begin{tabular}{llllr}",
                 r"\toprule",
@@ -188,10 +207,18 @@ def main() -> None:
         deeplab = next(row for row in csv.DictReader(handle) if row["run"] == DEEPLAB_RUN)
     manifest = json.loads((ABLATION_DIR / "manifest.json").read_text(encoding="utf-8"))
     macros = number_macros(unet, deeplab, manifest[DEEPLAB_RUN])
+    summary = json.loads((Path("results/a2") / DEEPLAB_RUN / "training_summary.json").read_text())
+    macros.update(
+        {
+            "deeplabDevice": device_name(summary["device"]),
+            "deeplabTorchVersion": release(summary["software"]["torch"]),
+            "deeplabCudaVersion": summary["software"]["cuda"],
+        }
+    )
     outputs = {
         "method_numbers.tex": macro_file(macros),
         "model_summary.tex": model_table(macros),
-        "training_setup.tex": training_table(unet, macros),
+        "training_setup.tex": training_table(unet, macros, manifest[DEEPLAB_RUN]),
     }
     for name, text in outputs.items():
         (TABLE_DIR / name).write_text(text, encoding="utf-8", newline="\n")

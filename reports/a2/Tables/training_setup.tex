@@ -7,20 +7,20 @@
 \toprule
 Setting & U-Net & DeepLabV3\\
 \midrule
-Input size & $240\times320$ & \pending\\
-Initialization & Random & \pending\\
-Optimizer & AdamW & \pending\\
-Learning rate & $10^{-3}$ & \pending\\
-Scheduler & 5-epoch linear warm-up, cosine & \pending\\
-Batch size (effective) & 4 (16) & \pending\\
-Epochs / seed & 40 / 42 & \pending\\
-Weight decay & $10^{-4}$ & \pending\\
-Augmentation & Horizontal flip & \pending\\
-Loss & Cross-entropy & \pending\\
-Mixed precision & No & \pending\\
-Checkpoint rule & Best validation mIoU & \pending\\
-Hardware & RTX 4060 Laptop GPU & \pending\\
-Software & PyTorch 2.14.0, CUDA 13.0 & \pending\\
+Input size & $240\times320$ & $240\times320$\\
+Initialization & Random & COCO, VOC labels; new head\\
+Optimizer & AdamW & AdamW\\
+Learning rate & $10^{-3}$ & $10^{-4}$ backbone, $10^{-3}$ head\\
+Scheduler & 5-epoch linear warm-up, cosine & 5-epoch warm-up, cosine\\
+Batch size (effective) & 4 (16) & 4 (16)\\
+Epochs / seed & 40 / 42 & 40 / 42\\
+Weight decay & $10^{-4}$ & $10^{-4}$\\
+Augmentation & Horizontal flip & Horizontal flip\\
+Loss & Cross-entropy & Cross-entropy\\
+Mixed precision & No & No\\
+Checkpoint rule & Best validation mIoU & Best validation mIoU\\
+Hardware & RTX 4060 Laptop GPU & RTX 4060 Ti\\
+Software & PyTorch 2.14.0, CUDA 13.0 & PyTorch 2.14.0, CUDA 12.6\\
 \bottomrule
 \end{tabular}
 \end{table}

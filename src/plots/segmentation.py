@@ -31,10 +31,21 @@ def plot_segmentation_curves(
     best_epoch = int(np.argmax(validation_miou)) + 1
 
     apply()
-    figure, (loss_axes, miou_axes) = plt.subplots(1, 2)
+    # Size labels for the report's full text width rather than a scaled-down canvas.
+    plt.rcParams.update(
+        {
+            "font.size": 10,
+            "axes.labelsize": 10,
+            "axes.titlesize": 11,
+            "xtick.labelsize": 9,
+            "ytick.labelsize": 9,
+            "legend.fontsize": 9,
+        }
+    )
+    figure, (loss_axes, miou_axes) = plt.subplots(1, 2, figsize=(6.3, 3.1))
     loss_axes.plot(epochs, train_loss, marker="o", label="Training loss")
     loss_axes.plot(epochs, validation_loss, marker="s", label="Validation loss")
-    loss_axes.set_ylabel("Cross-entropy loss")
+    loss_axes.set_ylabel("Loss")
     loss_axes.set_title("Training and validation loss")
     miou_axes.plot(epochs, validation_miou, marker="s", color=COLORS[0])
     miou_axes.set_ylabel("Validation mIoU")
@@ -46,7 +57,7 @@ def plot_segmentation_curves(
             color=COLORS[2],
             linestyle="--",
             linewidth=1,
-            label=f"Selected epoch ({best_epoch}, highest mIoU)",
+            label=f"Best epoch: {best_epoch}",
         )
         axes.set_xlabel("Epoch")
         axes.legend()

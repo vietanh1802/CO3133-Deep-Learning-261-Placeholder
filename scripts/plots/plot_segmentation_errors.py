@@ -14,9 +14,9 @@ from matplotlib.patches import Patch
 
 from src.data.suim import CLASS_NAMES
 from src.plots.common import plot_confusion_matrix, save_figure
-from src.plots.format import COLORS, apply
+from src.plots.format import COLORS, DIVERGING, apply
 
-RUN = Path("results/a2/suim_deeplabv3_ce_seed42_2gpu")
+RUN = Path("results/a2/suim_ablation_reference_seed42")
 OUTPUT = Path("web/images/a2/errors")
 
 
@@ -27,8 +27,8 @@ def main() -> None:
     predictions = evidence["predictions"].numpy()
     images = evidence["images"].numpy()
     ids = evidence["sample_ids"]
-    record = json.loads((RUN / "evaluation/metrics.json").read_text())
-    assert evidence["split"] == record["split"] == "validation"
+    summary = json.loads((RUN / "training_summary.json").read_text())
+    assert evidence["split"] == "validation"
     assert targets.shape == predictions.shape == (len(ids), 240, 320)
     assert images.shape == (len(ids), 3, 240, 320)
     assert targets.max() < 8 and predictions.max() < 8
@@ -40,8 +40,12 @@ def main() -> None:
             for target, pred in zip(targets, predictions, strict=True)
         ]
     )
-    # Check the plotted predictions against the committed split-wide metric record.
-    np.testing.assert_array_equal(counts.sum(0), record["metrics"]["all"]["confusion_matrix"])
+    pooled = counts.sum(0)
+    diagonal = pooled.diagonal()
+    pooled_iou = diagonal / (pooled.sum(0) + pooled.sum(1) - diagonal)
+    np.testing.assert_allclose(
+        pooled_iou, list(summary["validation"]["all"]["per_class_iou"].values())
+    )
     intersection = counts.diagonal(axis1=1, axis2=2)
     union = counts.sum(1) + counts.sum(2) - intersection
     iou = np.divide(intersection, union, out=np.zeros_like(union, dtype=float), where=union > 0)
@@ -85,6 +89,31 @@ def main() -> None:
     plt.close(figure)
 
     palette = np.array([[(i >> bit) & 1 for bit in (2, 1, 0)] for i in range(8)], dtype=float)
+    examples = {}
+    robot_candidates = np.flatnonzero(counts.sum(2)[:, 4] > 0)
+    for label, index in (
+        ("best", int(np.argmax(scores))),
+        ("worst", int(np.argmin(scores))),
+        ("robot", int(robot_candidates[np.argmax(scores[robot_candidates])])),
+    ):
+        apply()
+        figure, axes = plt.subplots(1, 3, figsize=(7.1, 2.4), layout="constrained")
+        for axis, panel, title in zip(
+            axes,
+            (
+                images[index].transpose(1, 2, 0),
+                palette[targets[index]],
+                palette[predictions[index]],
+            ),
+            ("Input", "Ground truth", "Prediction"),
+            strict=True,
+        ):
+            axis.imshow(panel)
+            axis.set_title(title)
+            axis.axis("off")
+        save_figure(figure, OUTPUT / f"example_{label}.png")
+        plt.close(figure)
+        examples[label] = {"sample_id": ids[index], "miou": float(scores[index])}
     selected = {}
     apply()
     figure, axes = plt.subplots(2, 4, figsize=(7.1, 4.0), layout="constrained")
@@ -117,7 +146,9 @@ def main() -> None:
     )
     save_figure(figure, OUTPUT / "rare_class_failures.png")
     plt.close(figure)
-    plot_confusion_matrix(counts.sum(0), CLASS_NAMES, OUTPUT / "confusion_matrix.png")
+    plot_confusion_matrix(
+        counts.sum(0), CLASS_NAMES, OUTPUT / "confusion_matrix.png", cmap=DIVERGING
+    )
     analysis = {
         "split": "validation",
         "run": RUN.name,
@@ -126,6 +157,7 @@ def main() -> None:
         "median_per_image_miou": median,
         "failure_selection": "Lowest target-class IoU; ties: largest target area, then filename",
         "failures": selected,
+        "examples": examples,
         "per_image": [
             {"sample_id": name, "miou": float(score)}
             for name, score in zip(ids, scores, strict=True)

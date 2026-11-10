@@ -9,6 +9,7 @@ matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
+from matplotlib.colors import Colormap  # noqa: E402
 from matplotlib.figure import Figure  # noqa: E402
 
 from src.plots.format import SEQUENTIAL, apply, style_axes, text_color  # noqa: E402
@@ -37,6 +38,8 @@ def plot_confusion_matrix(
     matrix: np.ndarray,
     class_names: Sequence[str],
     output_path: str | Path,
+    *,
+    cmap: Colormap = SEQUENTIAL,
 ) -> None:
     """Save a labeled confusion-matrix figure."""
     counts = np.asarray(matrix)
@@ -58,7 +61,7 @@ def plot_confusion_matrix(
     size = max(6.0, 0.7 * len(class_names))
     apply("heatmap")
     figure, axes = plt.subplots(figsize=(size, size))
-    image = axes.imshow(normalized, cmap=SEQUENTIAL, vmin=0.0, vmax=1.0)
+    image = axes.imshow(normalized, cmap=cmap, vmin=0.0, vmax=1.0)
     figure.colorbar(image, ax=axes, fraction=0.046, label="Proportion of true class")
 
     axes.set_xticks(np.arange(len(class_names)))
@@ -78,7 +81,7 @@ def plot_confusion_matrix(
                 ha="center",
                 va="center",
                 fontsize=8,
-                color=text_color(SEQUENTIAL(normalized[row, column])),
+                color=text_color(cmap(normalized[row, column])),
             )
 
     figure.tight_layout()
