@@ -1,0 +1,126 @@
+{
+  "name": "suim_ablation_ce_dice_seed42",
+  "split": "test",
+  "images": 110,
+  "evaluated_at": "2026-11-10T16:40:31+00:00",
+  "checkpoint": ".tmp\\checkpoint-a2\\suim_ablation_ce_dice_seed42\\best.pt",
+  "checkpoint_sha256": "53ab5bc845e2cbb78bc1ea576e466481e9f22c114026009db4786bd59973acea",
+  "checkpoint_epoch": 24,
+  "checkpoint_validation_miou": 0.6227693799716096,
+  "device": "CPU",
+  "software": {
+    "python": "3.12.7",
+    "torch": "2.14.0+cpu",
+    "torchvision": "0.29.0+cpu",
+    "cuda": null,
+    "cudnn": null
+  },
+  "git": {
+    "commit": "88adde182f78721c8de668c546c7edbc046f1ce9",
+    "dirty": true
+  },
+  "test": {
+    "all": {
+      "mean_iou": 0.6918131046595796,
+      "mean_dice": 0.8077641048659444,
+      "per_class_iou": {
+        "BW": 0.9003778735760156,
+        "HD": 0.7708839794714321,
+        "PF": 0.34779416791252166,
+        "WR": 0.6953180670133424,
+        "RO": 0.6887125372260763,
+        "RI": 0.6940233570617377,
+        "FV": 0.7044335305339421,
+        "SR": 0.7329613244815687
+      },
+      "per_class_dice": {
+        "BW": 0.9475777276671183,
+        "HD": 0.8706205357411648,
+        "PF": 0.5160938905844786,
+        "WR": 0.820280371621699,
+        "RO": 0.815665806990897,
+        "RI": 0.8193787342643404,
+        "FV": 0.8265896180923719,
+        "SR": 0.8459061539654854
+      }
+    },
+    "boundary": {
+      "mean_iou": 0.3086087731581433,
+      "mean_dice": 0.4649265520529797,
+      "per_class_iou": {
+        "BW": 0.4009922292252006,
+        "HD": 0.39364165906379395,
+        "PF": 0.11920696422281488,
+        "WR": 0.3291356928880506,
+        "RO": 0.26075324140769707,
+        "RI": 0.3137029941186954,
+        "FV": 0.33712140890435865,
+        "SR": 0.3143159954345345
+      },
+      "per_class_dice": {
+        "BW": 0.572440333158684,
+        "HD": 0.5649108671568134,
+        "PF": 0.2130204118334682,
+        "WR": 0.49526274051504654,
+        "RO": 0.41364675155076724,
+        "RI": 0.47758587066195235,
+        "FV": 0.5042495119132031,
+        "SR": 0.47829592963390277
+      }
+    },
+    "interior": {
+      "mean_iou": 0.717579684343393,
+      "mean_dice": 0.8254206458035498,
+      "per_class_iou": {
+        "BW": 0.9174141496712207,
+        "HD": 0.8133991916667326,
+        "PF": 0.3621436874557768,
+        "WR": 0.7132259084071151,
+        "RO": 0.7277765253982567,
+        "RI": 0.7111881506178215,
+        "FV": 0.7466793735771945,
+        "SR": 0.748810487953027
+      },
+      "per_class_dice": {
+        "BW": 0.9569285277554981,
+        "HD": 0.8970988797222531,
+        "PF": 0.5317261178696819,
+        "WR": 0.8326116303835754,
+        "RO": 0.8424428908484012,
+        "RI": 0.8312214531885909,
+        "FV": 0.8549701620944858,
+        "SR": 0.8563655045659126
+      }
+    }
+  },
+  "config": {
+    "name": "suim_ablation_ce_dice_seed42",
+    "model": "deeplabv3",
+    "model_config": {
+      "num_classes": 8,
+      "pretrained": true,
+      "freeze_batch_norm": true,
+      "backbone": "resnet50",
+      "freeze_backbone": false
+    },
+    "dataset": "suim",
+    "seed": 42,
+    "batch_size": 4,
+    "accumulation_steps": 4,
+    "learning_rate": 0.001,
+    "backbone_learning_rate": 0.0001,
+    "weight_decay": 0.0001,
+    "epochs": 40,
+    "warmup_epochs": 5,
+    "image_height": 240,
+    "image_width": 320,
+    "num_workers": 4,
+    "augment": true,
+    "loss": "ce_dice",
+    "evaluation_height": 240,
+    "evaluation_width": 320,
+    "data_dir": "data/suim",
+    "checkpoint_dir": "checkpoints",
+    "results_dir": "results"
+  }
+}

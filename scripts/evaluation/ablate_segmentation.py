@@ -71,9 +71,14 @@ def write_comparisons(configs: list[SegmentationConfig], output: Path) -> None:
     for config in configs:
         run = summaries[config.name]
         reference = summaries[f"suim_ablation_reference_seed{config.seed}"]
-        for key in ("device", "software", "world_size", "effective_batch_size", "git"):
+        for key in ("device", "software", "world_size", "effective_batch_size"):
             if run[key] != reference[key]:
                 raise ValueError(f"{config.name}: {key} differs from the reference")
+        # Runs execute one after another, so every run after the first sees the
+        # untracked results of the earlier ones and records a dirty tree. Only the
+        # commit identifies the code that trained the model.
+        if run["git"]["commit"] != reference["git"]["commit"]:
+            raise ValueError(f"{config.name}: git commit differs from the reference")
         scores = run["validation"]["all"]
         reference_scores = reference["validation"]["all"]
         rows.append(

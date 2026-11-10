@@ -56,9 +56,13 @@ def parse_args() -> argparse.Namespace:
 
 @torch.no_grad()
 def export_evidence(
-    model: nn.Module, dataloader: torch.utils.data.DataLoader, device: torch.device, path: Path
+    model: nn.Module,
+    dataloader: torch.utils.data.DataLoader,
+    device: torch.device,
+    path: Path,
+    split: str = "validation",
 ) -> None:
-    """Save validation targets, predictions, and display images for eval_segmentation."""
+    """Save targets, predictions, and display images of one split for eval_segmentation."""
     dataset = dataloader.dataset
     if not isinstance(dataset, SegmentationDataset):
         raise TypeError("evidence export expects a SegmentationDataset")
@@ -79,7 +83,7 @@ def export_evidence(
         images.append(display)
     torch.save(
         {
-            "split": "validation",
+            "split": split,
             "targets": torch.cat(targets),
             "predictions": torch.cat(predictions),
             "images": torch.cat(images),
