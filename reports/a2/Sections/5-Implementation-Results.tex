@@ -1,78 +1,462 @@
 \section{Implementation results}
 \label{sec:results}
 
+% Run numbers below come from the run records through
+% scripts/report/a2_results_tables.py and the error-analysis numbers through
+% scripts/report/a2_analysis_figures.py. Both macro files are loaded in main.tex;
+% regenerate instead of editing them.
+
 \subsection{Training behavior}
 \label{sec:training-behavior}
-\reporttodo{Describe the loss and validation mIoU curves for each run: the
-selected epoch, signs of overfitting or underfitting, and training time.
-Record implementation issues found during training and how they were fixed.}
+For U-Net, training loss decreases from \unetFirstTrainLoss{} to
+\unetLastTrainLoss{} over \unetEpochs{} epochs, while validation loss follows
+a similar trend (see \figref{fig:unet-curves}). Validation loss is lower than
+training loss in \unetValBelowTrain{} epochs and exceeds it by at most
+\unetLossGap{}. This can occur because training loss averages predictions made
+as the weights change throughout an epoch, while validation uses the final
+weights and the stored batch normalization statistics. During warm-up,
+validation mIoU reaches \unetWarmupValMiou\% at epoch \unetWarmupEpochs{}, then
+continues rising to \unetBestValMiou\% at epoch \unetBestEpoch{}. This epoch also
+has the lowest validation loss and supplies the selected checkpoint. The final
+mIoU is only \unetLastGap{} percentage points below the peak.
 
-\reportfigure{Images/unet_learning_curves.png}{U-Net training loss and
-validation mIoU on SUIM, seed 42.}{fig:unet-curves}
+Both losses continue decreasing near the end of training, with no widening gap
+that would suggest overfitting. This suggests that the fixed schedule may limit
+learning, although a longer run would be needed to test that explanation. At
+the selected checkpoint, PF and RO still have zero validation IoU. These are
+the classes with the fewest labelled pixels (see \tabref{tab:eda-classes}),
+so the improving overall score does not imply that all classes are learned.
+The run takes \unetTrainMinutes{} minutes, averaging about
+\unetEpochSeconds{} seconds per epoch.
 
-\reportfigure{Images/deeplabv3_ce_learning_curves.png}{DeepLabV3 with
-cross-entropy: training loss and validation mIoU on SUIM, seed 42.}{fig:deeplab-curves}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth]{Images/unet_learning_curves.pdf}
+\caption{U-Net training and validation
+losses alongside validation mIoU over \unetEpochs{} epochs, with seed
+\unetSeed{}. Validation mIoU selects the checkpoint at epoch
+\unetBestEpoch{}.}
+\label{fig:unet-curves}
+\end{figure}
 
-\reportfigure{Images/deeplabv3_dice_learning_curves.png}{DeepLabV3 with
-cross-entropy plus Dice: training loss and validation mIoU on SUIM, seed 42.}{fig:dice-curves}
+DeepLabV3 shows a different pattern: training loss keeps falling while
+validation loss begins to rise (see \figref{fig:deeplab-curves}). With
+cross-entropy, training loss decreases from 1.22 to 0.08, while validation loss
+reaches its minimum at epoch 11 and rises to 0.98 by epoch 40. However,
+validation mIoU continues improving beyond the loss minimum and selects epoch
+\deeplabCeBestEpoch{}. The final mIoU is only 0.15 percentage points below this peak. Thus, the
+rising validation loss suggests overfitting in the predicted probabilities,
+while the overlap score remains largely stable near the end of training.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth]{Images/deeplabv3_ce_learning_curves.pdf}
+\caption{Training and validation losses alongside validation mIoU for the
+DeepLabV3 reference run with cross-entropy. The dashed line marks epoch
+\deeplabCeBestEpoch{}, selected by validation mIoU.}
+\label{fig:deeplab-curves}
+\end{figure}
+
+With CE + Dice, training loss falls from 1.03 to 0.13, while validation loss
+again reaches its minimum at epoch 11 before increasing to 1.66
+(see \figref{fig:dice-curves}). Validation mIoU peaks at epoch
+\deeplabDiceBestEpoch{} and finishes
+1.32 percentage points below that peak, showing a larger late-training decline
+than the reference. The decline starts abruptly: right after the peak,
+validation mIoU falls by \diceDropPoints{} points by epoch \diceDropEpoch{} and
+then only partly recovers. This sudden drop suggests unstable training in this
+run, and because the selected checkpoint lies just before it, its score partly
+reflects where the peak happened to fall. Therefore, selecting the best
+validation checkpoint matters more for this run than taking the final epoch. The two losses use different
+objectives, so their absolute loss values should be read within each run rather
+than compared as a common measure. Both histories cover \unetEpochs{} epochs,
+with recorded training times of \deeplabCeTrainMinutes{} minutes for
+cross-entropy and \deeplabDiceTrainMinutes{} minutes for CE + Dice.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth]{Images/deeplabv3_dice_learning_curves.pdf}
+\caption{Training and validation losses alongside validation mIoU for
+DeepLabV3 with CE + Dice. Validation mIoU selects epoch \deeplabDiceBestEpoch{},
+before the decline in the later epochs.}
+\label{fig:dice-curves}
+\end{figure}
 
 \subsection{Quantitative results}
 \label{sec:quantitative}
-\reporttodo{Report test mIoU and mean Dice for every model, using the
-checkpoint selected on validation. Give per-class IoU, parameter counts,
-training time, and inference cost. State that each configuration uses one seed,
-or give mean and standard deviation if more seeds are run.}
+Each model is evaluated at the checkpoint with the highest validation mIoU,
+and after the configurations were fixed we scored U-Net and the two DeepLabV3
+variants once on the \testImages{} official test images
+(see \tabref{tab:quantitative-results}). On the test split, DeepLabV3 with
+cross-entropy scores \deeplabCeTestMiou\% mIoU and \deeplabCeTestDice\% mean
+Dice, while U-Net scores \unetTestMiou\% and \unetTestDice\%, respectively.
+DeepLabV3 therefore gains \deeplabTestGain{} percentage points in test mIoU and
+\deeplabGain{} points on validation, but also uses \deeplabMillions{} million
+parameters compared with U-Net's \unetMillions{} million. Since the models
+differ in architecture and initialization, this comparison does not isolate
+the contribution of pretraining.
 
-\input{Tables/test_results}
+\input{Tables/quantitative_results}
+
+The test scores of DeepLabV3 are \deeplabCeValTestGap{} points higher than its
+validation scores, while those of U-Net differ by only \unetValTestGap{}
+points. Selecting checkpoints on validation would, if anything, make validation
+scores optimistic, so the higher test scores point to a difference between the
+two image sets rather than to the selection. Two checks support this. First,
+test images are no closer to the training images than validation images are:
+comparing difference hashes with the nearest training image, including mirrored
+copies, the median distance is \nearestTestMedian{} bits for test and
+\nearestValMedian{} for validation, and \nearestTestClose\% and
+\nearestValClose\% of the images lie within \closeBits{} bits. Second, the
+median per-image mIoU of the reference is similar, \imageMiouTestMedian\% on
+test and \imageMiouValMedian\% on validation, so individual test images are not
+much easier. The official test split, prepared separately by the dataset
+authors, differs instead in its class mix: reefs appear in
+\suimPresenceTestRI\% of test images against \suimPresenceValRI\% of validation
+images, and sea floor in \suimPresenceTestSR\% against \suimPresenceValSR\%.
+Because mIoU pools pixels over the whole split, this mix changes the overall
+score, and DeepLabV3 scores higher on test for most classes, especially sea
+floor and plants. With only \testImages{} test images, the absolute level of the scores
+therefore depends on which images are evaluated, and the comparisons between
+models, which always use the same images, are more informative than the
+absolute values.
+
+To understand the gap between the models, we examine the class-level scores
+(see \tabref{tab:per-class-iou}). On the test split, U-Net scores
+\unetTestIouBW\% IoU on water and \unetTestIouRI\% on reefs, yet almost no
+plant or robot pixels are correct (\unetTestIouPF\% and \unetTestIouRO\%).
+DeepLabV3 raises plant IoU to \deeplabCeTestIouPF\% and robot IoU to
+\deeplabCeTestIouRO\%, while diver IoU increases from \unetTestIouHD\% to
+\deeplabCeTestIouHD\% and fish IoU from \unetTestIouFV\% to
+\deeplabCeTestIouFV\%. DeepLabV3 scores higher on every class on both splits,
+so its advantage extends beyond the large water and reef regions. However,
+plants remain difficult, with a much lower IoU than any other class.
+
 \input{Tables/per_class_iou}
+
+The loss comparison shows a much smaller overall change. As planned in our
+proposal, we assess it on validation. With CE + Dice,
+DeepLabV3 scores \deeplabDiceValMiou\% mIoU and \deeplabDiceValDice\% mean Dice,
+\diceDeltaMiou{} and \diceDeltaDice{} percentage points above cross-entropy. The
+class scores move in both directions: plant IoU rises from \deeplabCeIouPF\% to
+\deeplabDiceIouPF\% and sea-floor IoU from \deeplabCeIouSR\% to
+\deeplabDiceIouSR\%, while robot IoU falls from \deeplabCeIouRO\% to
+\deeplabDiceIouRO\% and wreck IoU from \deeplabCeIouWR\% to \deeplabDiceIouWR\%.
+Adding Dice therefore helps one of the three target rare classes but not the
+other two. The overall gap is also smaller than the variation between repeated
+training runs: retraining the reference with the same seed changed its mIoU by
+\repeatReferenceGap{} points (see \secref{sec:conclusion}). The test split, used
+only as a check, shows the same pattern: CE + Dice raises mIoU by
+\diceTestDeltaMiou{} points and plant IoU by \diceTestDeltaPF{}, but lowers
+robot IoU by \diceTestDeltaRO{} and wreck IoU by \diceTestDeltaWR{}. With one
+seed per configuration, these results give no reliable basis for preferring
+either loss, and on both splits Dice fails to improve all three target classes.
+The next subsection compares their training time, memory use and inference
+cost.
 
 \subsection{Compute cost}
 \label{sec:compute}
-\reporttodo{Compare parameters, training time, inference latency, throughput,
-and peak memory. Name the hardware for each run (RTX 4060 Laptop or
-$2\times$ RTX 3090). Explain why time measured on different hardware cannot be
-compared directly, and remeasure inference on one device if possible.}
+DeepLabV3 uses \parameterRatio{} times as many parameters as U-Net and
+requires \flopRatio{} times as many floating-point operations per image
+(see \tabref{tab:compute-cost}). Its \deeplabGflops{} GFLOPs compare with
+U-Net's \unetGflops{} GFLOPs at the same input size. U-Net performs much of its
+computation at full resolution in the first encoder and last decoder blocks,
+while DeepLabV3 processes most features on a smaller spatial grid. This explains
+why the difference in operation counts is smaller than the difference in
+parameter counts. We count operations with the \texttt{PyTorch} FLOP counter,
+treating a multiplication and an addition as two operations. These counts
+describe computational work, while measured latency also depends on the device
+and execution efficiency.
+
+U-Net trains in \unetTrainMinutes{} minutes on an RTX 4060 Laptop GPU, using
+\unetPeakMemory{}~GiB of peak allocated GPU memory. On an RTX 4060 Ti,
+DeepLabV3 with cross-entropy takes \deeplabCeTrainMinutes{} minutes and
+\deeplabCePeakMemory{}~GiB, while CE + Dice takes
+\deeplabDiceTrainMinutes{} minutes and \deeplabDicePeakMemory{}~GiB. Adding Dice
+therefore increases training time by about \diceTimeOverhead\% without changing
+the network's parameter count or inference operations. The runs use different
+GPUs, so these timings describe their observed cost rather than a hardware-matched
+speed comparison.
+
+For inference, U-Net averages \unetLatency{}~ms per image, while both DeepLabV3
+variants average about \deeplabCeLatency{}~ms. These measurements use batches of
+\unetInferenceBatch{} validation images and exclude data loading. The similar
+latencies of the two DeepLabV3 variants are expected because the loss is used
+only during training. Together, the measurements show the cost accompanying
+the accuracy gains in \secref{sec:quantitative}: DeepLabV3 has a larger model
+and higher operation count, while adding Dice leaves inference cost essentially
+unchanged.
 
 \input{Tables/compute_cost}
 
 \subsection{Qualitative results}
 \label{sec:qualitative}
-\reporttodo{Show test images with ground truth and predictions from each model:
-correct predictions, difficult but correct cases, and failures. State the rule
-used to select the examples so the selection is reproducible.}
+We compare U-Net and the DeepLabV3 reference on the same validation images
+(see \figref{fig:examples}). To choose examples reproducibly, we rank images by
+the reference model's per-image mIoU, averaging over classes present in either
+the target or prediction. The figure shows the highest-scoring image, the
+highest-scoring image containing a robot, and the lowest-scoring image. These
+cases illustrate how the models behave across different scenes, while the
+split-wide scores in \secref{sec:quantitative} describe their overall performance.
 
-\reportfigure{Images/a2_test_examples.png}{Test images, ground truth, and
-predictions from U-Net and DeepLabV3. State the selection rule.}{fig:examples}
+In the first image, \texttt{w\_r\_148\_}, DeepLabV3 closely follows the
+large wreck region and its boundary with water, while U-Net assigns parts of
+the wreck to reef, fish and sea floor. The robot image, \texttt{d\_r\_211\_},
+shows a similar difference: DeepLabV3 recovers most of the robot body but
+simplifies its thin extensions, whereas U-Net misses the robot class and
+labels parts of the object as fish or water. In the last image,
+\texttt{w\_r\_162\_}, both models label most of the scene as reef even though
+the annotation contains plants and wrecks. Therefore, the stronger overall
+DeepLabV3 scores still leave substantial errors in this scene.
 
-\subsection{Controlled experiment: loss function}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth]{Images/analysis/qualitative_examples.pdf}
+\caption{Matched validation predictions from U-Net and the DeepLabV3 reference. Rows show the highest-scoring reference image, its highest-scoring
+robot-containing image, and its lowest-scoring image. Columns show the
+input, ground truth, U-Net prediction and DeepLabV3 prediction. Colours identify SUIM classes;
+the legend uses the class codes introduced in \secref{sec:task}.}
+\label{fig:examples}
+\end{figure}
+
+\subsection{Controlled experiments}
 \label{sec:ablation}
-\reporttodo{Report the cross-entropy against cross-entropy plus Dice result on
-DeepLabV3. Compare mIoU, mean Dice, and the IoU of the rare classes RO, PF and
-WR. State whether the hypothesis is supported under the decision criterion in
-Section~\ref{sec:experiments}.}
+We examine five choices against the DeepLabV3-ResNet50 reference, changing one
+factor at a time: backbone freezing, augmentation, backbone depth, loss and
+input resolution. All runs use the same split, seed \unetSeed{},
+\unetEpochs{} epochs and an effective batch of \suimEffectiveBatch{}. The
+reference fine-tunes the full network with horizontal flips, cross-entropy and
+$\suimInputHeight\times\suimInputWidth$ inputs. For the half-resolution run,
+we resize output scores to the common target grid before assigning labels,
+so all configurations are evaluated at the same mask resolution
+(see \tabref{tab:ablation}).
 
 \input{Tables/ablation}
 
+Two factors have a clear effect. Freezing the backbone reduces mIoU by
+\ablationFrozenDelta{} percentage points, the largest drop among the variants,
+so fine-tuning the full network matters more than retaining a fixed pretrained
+feature extractor. Reducing the input to $120\times160$ lowers mIoU by
+\ablationLowResDelta{} points and boundary mIoU from \referenceBoundaryIoU\% to
+\ablationLowResBoundary\%, which is consistent with the disappearance of small
+structures during resizing. The class changes in \figref{fig:ablation-classes}
+show that freezing and reduced resolution lower IoU for every class, rather
+than affecting only one difficult category.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth]{Images/analysis/ablation_class_deltas.pdf}
+\caption{Per-class IoU changes from the reference, in percentage points.
+Positive values indicate improvement. Freezing the backbone and halving the
+input resolution reduce every class score, while the other variants produce
+smaller, mixed changes.}
+\label{fig:ablation-classes}
+\end{figure}
+
+The other three variants change mIoU by less than half a point. Removing
+horizontal flips lowers it by \ablationNoAugDelta{}, while ResNet101 raises it
+by \ablationResnetDelta{} and CE + Dice by \ablationDiceDelta{}. None of these
+gaps exceeds the \repeatReferenceGap{}-point change we observed when retraining
+the reference with the same seed (see \secref{sec:conclusion}), so this
+single-seed study cannot show that flips, a deeper backbone or the Dice term
+help. Dice raises plant IoU by \diceDeltaPF{} points but lowers robot IoU by
+\diceDeltaRO{} and wreck IoU by \diceDeltaWR{}, so it does not meet the goal of
+improving all three target rare classes. The recorded compute measurements also show a trade-off
+(see \figref{fig:ablation-compute}): freezing and lower resolution reduce
+training time and peak memory, while ResNet101 increases both. The nearly
+unchanged inference cost of freezing reflects the fact that the same network
+still executes at prediction time. We retain the full ResNet50 reference with
+cross-entropy as the simpler choice among the configurations with similar
+overall scores.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth]{Images/analysis/ablation_compute.pdf}
+\caption{Training time, peak allocated GPU memory and inference latency from
+the saved comparison measurements. Training covers 40 epochs with validation;
+inference uses each configuration's input resolution. Each bar represents one
+run, so the chart does not estimate timing variation.}
+\label{fig:ablation-compute}
+\end{figure}
+
 \subsection{Error analysis}
 \label{sec:errors}
-\reporttodo{Group the errors, for example PF predicted as RI, boundary errors,
-small objects missed, and background confusion. For each group give a
-description, its frequency or rate from the confusion matrix, examples, a
-hypothesized cause, and an improvement idea.}
+The reference model's largest plant confusion is with reefs: it assigns
+\plantsAsReef\% of annotated plant pixels to RI
+(see \figref{fig:confusion}). The matrix pools all pixels from the
+\suimValImages{} validation images, while its row normalization makes the
+errors of small classes visible alongside the much larger water and reef
+classes. Plant and reef regions can share fine, branching textures, but the
+matrix alone does not establish whether appearance or class imbalance causes
+this confusion. The plant example in \figref{fig:rare-failures} makes the error
+concrete: plants cover 73.2\% of the annotation, yet the model assigns no
+correct plant pixels and predicts mainly reef. This is a failure to distinguish
+classes even when the target region is large.
 
-\reportfigure{Images/deeplabv3_test_confusion_matrix.png}{Row-normalized
-confusion matrix of the best model on the SUIM test set.}{fig:confusion}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.88\linewidth]{Images/analysis/confusion_matrix.pdf}
+\caption{Reference-model confusion matrix over 287 validation images. Rows are
+target classes and columns are predictions. Colour shows the fraction of each
+target class assigned to a predicted class, while cell annotations give pixel
+counts.}
+\label{fig:confusion}
+\end{figure}
+
+Small objects introduce a different failure mode. Across validation images,
+\robotsAsDivers\% of robot pixels are assigned to the diver class. For example,
+in \texttt{d\_r\_798\_}, the robot occupies only 3.9\% of the annotation and
+is missed entirely, with much of its region absorbed into the nearby diver
+prediction (see the second row of \figref{fig:rare-failures}). The model's
+coarse score map and close contact between the two objects are possible
+contributors, although this example cannot separate their effects. We select
+these plant and robot failures by lowest target-class IoU, breaking ties by
+largest target area and then filename, rather than choosing them by appearance.
+
+Both confusions persist on the test split (see \figref{fig:test-confusion}).
+There the reference assigns \testPlantsAsReef\% of plant pixels to reef and
+\testRobotsAsDivers\% of robot pixels to divers, so the plant confusion is
+weaker than on validation but remains the largest error for that class, while
+the robot confusion is slightly larger. The remaining analysis in this section
+uses the validation split, on which we inspected the individual failures.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.88\linewidth]{Images/analysis/test_confusion_matrix.pdf}
+\caption{Reference-model confusion matrix over the \testImages{} test images,
+in the same format as \figref{fig:confusion}.}
+\label{fig:test-confusion}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth]{Images/analysis/rare_class_failures.pdf}
+\caption{Reference-model failures on plants (top) and robots (bottom). Columns
+show the photograph, target, prediction and error map, where purple marks an
+incorrect pixel. The selected target class has zero IoU in each row.}
+\label{fig:rare-failures}
+\end{figure}
+
+Boundary scores confirm that errors also concentrate along object edges
+(see \figref{fig:regional-errors}). The reference reaches
+\referenceBoundaryIoU\% mIoU at boundaries and \referenceInteriorIoU\% in
+interiors, while U-Net reaches \unetBoundaryIoU\% and \unetInteriorIoU\%,
+respectively. Thus, both
+models struggle more with boundaries than with region interiors. Resizing and
+coarse predictions can remove thin details, while uncertain annotations can
+also contribute near edges. These scores quantify the gap but do not identify
+a single cause.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth]{Images/analysis/regional_iou.pdf}
+\caption{Whole-mask, boundary and interior validation mIoU. A boundary includes
+both sides of a transition between neighbouring target classes. Each region
+uses its own pooled confusion matrix.}
+\label{fig:regional-errors}
+\end{figure}
+
+Finally, performance varies substantially across images. The reference has a
+median per-image mIoU of \referenceMedianImageIoU\%
+(see \figref{fig:image-errors}), with successful and failed cases illustrated
+in \secref{sec:qualitative}. This median gives each image equal weight and
+averages only over classes present in its target or prediction, so it measures
+a different aspect of performance from split-wide mIoU. Together, the image
+scores and failure panels show why one overall score is insufficient: the
+model can segment large, clear regions well while missing a small robot or
+assigning an entire plant region to reef.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth]{Images/analysis/per_image_iou.pdf}
+\caption{Distribution of reference per-image mIoU over the validation split.
+The dashed line marks the median. Each image score averages IoU over classes
+present in either the annotation or prediction.}
+\label{fig:image-errors}
+\end{figure}
 
 \subsection{Comparison and discussion}
 \label{sec:discussion}
-\reporttodo{Explain which model is better and by how much, where the
-differences appear (which classes and region sizes), and likely causes in data,
-architecture, loss, or training. Discuss accuracy, speed, and parameter
-trade-offs. Say which conclusions cannot yet be drawn. Listing the highest score
-is not enough.}
+DeepLabV3 performs better than U-Net in our comparison, gaining
+\deeplabTestGain{} percentage points in test mIoU and \deeplabGain{} on
+validation. The gain extends beyond water and reef regions to
+divers, fish and robots, which U-Net segments less accurately or misses
+entirely. Pretrained features and wider scene context offer plausible
+explanations, but the comparison also changes architecture and model size.
+Therefore, it supports choosing this DeepLabV3 configuration for SUIM without
+showing how much of the improvement comes from pretraining alone. U-Net's
+falling losses also suggest that its fixed \unetEpochs{}-epoch schedule may
+leave room for further learning. This gap is far larger than the variation
+between repeated training runs, so the comparison holds despite the single seed.
+
+The controlled comparisons help distinguish useful choices within DeepLabV3.
+Fine-tuning the backbone and retaining the original input resolution contribute
+clearly, while increasing backbone depth, removing flips or changing the loss
+produce differences within the variation between repeated runs. ResNet101 gives
+almost the same overall score at a higher compute cost, while CE + Dice trades
+better plant segmentation for lower robot and wreck scores. The paired U-Net
+and DeepLabV3 examples also show that a higher overall score can coexist with
+severe errors in individual scenes. We therefore retain ResNet50 with full
+fine-tuning and cross-entropy as our reference. Its simpler loss and smaller
+backbone avoid additional cost without
+a clear loss of overall accuracy among the near-tied configurations.
+
+This choice still leaves substantial errors. Plants remain difficult, and the
+reference often assigns their pixels to reefs, while both models score lower
+at boundaries than in region interiors. These failures occur at different
+scales: a small robot can disappear into a neighbouring diver prediction, but
+a large plant region can also receive the wrong class throughout. Consequently,
+resolution alone cannot explain all remaining errors. DeepLabV3 also uses more
+parameters, operations and measured memory than U-Net, so the accuracy gain
+comes with a larger computational footprint. The timings describe the saved
+runs on different GPUs and cannot establish which architecture is faster on
+the same device.
 
 \subsection{Limitations and conclusion}
 \label{sec:conclusion}
-\reporttodo{List data, method, and experimental limits (single seed, different
-hardware, source overlap, resizing). Discuss generalization and future work.
-End with a short answer to the research question.}
+Each configuration uses one seed, so we cannot estimate the spread between
+seeds. A repeated training run shows that this spread matters. The six
+DeepLabV3 configurations were first trained once with the same code, seed and
+GPU, and the runs reported here repeat them; we report the repeat because its
+checkpoints and training records are complete. Between the two runs, mIoU
+changed by up to \repeatMaxMiouGap{} points and the IoU of a single class by up
+to \repeatMaxClassGap{} points (\repeatMaxClassName{}), most likely because
+some GPU operations are not deterministic (see \secref{sec:training}). The loss comparison even changed sign:
+CE + Dice scored \repeatDiceDeltaFirst{} points below cross-entropy in the first
+run and \diceDeltaMiou{} points above it in the second. Differences of this size
+between the reference, ResNet101, the run without flips and CE + Dice are
+therefore not reliable, and robot IoU is measured on only \suimImagesValRO{}
+validation images. Validation mIoU also selects the checkpoints, so the
+validation scores reflect that selection. The test scores avoid this bias, but
+they come from only \testImages{} images whose class mix differs from
+validation, and DeepLabV3 scores \deeplabCeValTestGap{} points higher on them
+than on validation. Only \suimImagesTestRO{} test images contain robots and
+\suimImagesTestPF{} contain plants, so the test IoU of these classes, including
+the effect of Dice on them, rests on few images. The fixed training
+budget and untuned hyperparameters further limit the model comparison,
+particularly for U-Net, whose losses continue falling near the final epoch.
+Since architecture, initialization and parameter count change together, the
+results do not isolate the effect of pretraining.
+
+The data and preprocessing introduce additional limits. Resizing masks to
+$\suimInputHeight\times\suimInputWidth$ pixels removes detail from thin
+structures, while stretching other aspect ratios changes object shapes.
+Duplicate filtering removes repeated photographs but can miss mirrored copies
+and related video frames, so related scenes may remain across splits. SUIM
+also covers a limited range of sites and water conditions, which restricts how
+far these results generalize. Rejecting invalid masks removes some genuine
+rare-class examples, and a single annotation per image leaves uncertainty near
+ambiguous boundaries. Thus, a boundary disagreement can reflect annotation
+uncertainty as well as a model error.
+
+For our first research question, the pretrained DeepLabV3 configuration raises
+test mIoU from \unetTestMiou\% to \deeplabCeTestMiou\% and improves every
+class's IoU over the U-Net baseline on both splits. For the second, adding Dice
+raises plant IoU but lowers robot and wreck IoU on both validation and test, and
+its \diceDeltaMiou{}-point change in validation mIoU is smaller than the
+variation between repeated runs, so the experiment does not support our
+hypothesis. Together with
+the other controlled comparisons, these findings support full fine-tuning of
+ResNet50 with cross-entropy at the original training resolution. The
+single-seed design limits the strength of that choice, especially where the
+overall scores are nearly equal.

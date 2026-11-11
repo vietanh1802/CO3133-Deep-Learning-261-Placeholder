@@ -1,0 +1,58 @@
+# Original theme: AndreyChurkin/BeautifulFigures (MIT).
+# https://github.com/AndreyChurkin/BeautifulFigures
+
+[figure]
+width = 7.1
+height = 3.0
+export_dpi = 400
+facecolor = "white"
+# Preserve figure dimensions rather than cropping on export.
+bbox_inches = "standard"
+
+[typography]
+family = ["Courier New", "DejaVu Sans Mono"]
+base_size = 8
+axis_label_size = 8
+title_size = 9
+tick_label_size = 7
+legend_size = 7
+
+[palette]
+# Reference colors, followed by their darker outlines, for up to six methods.
+methods = ["#9671bd", "#77b5b6", "#7e7e7e", "#6a408d", "#378d94", "#4e4e4e"]
+
+[colormaps]
+sequential = "plasma"
+diverging = "PuOr_r"
+cyclic = "twilight"
+qualitative = "tab10"
+
+[axes]
+full_frame = true
+linewidth = 0.6
+tick_direction = "out"
+tick_width = 0.5
+grid_below_data = true
+
+[grid.major]
+visible = true
+color = "0.5"
+linewidth = 0.5
+alpha = 0.25
+
+[grid.minor]
+visible = true
+color = "0.5"
+linewidth = 0.3
+alpha = 0.15
+
+[line]
+linewidth = 1.1
+markersize = 3
+
+[errorbar]
+capsize = 2
+
+[legend]
+frameon = false
+handlelength = 2.5

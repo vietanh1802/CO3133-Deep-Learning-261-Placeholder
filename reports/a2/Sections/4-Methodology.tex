@@ -1,64 +1,338 @@
 \section{Methodology}
 \label{sec:method}
 
-\subsection{Training and evaluation pipeline}
-\reporttodo{Add a diagram of the form raw data, preprocessing, data loader,
-model, loss, optimization, prediction, post-processing, evaluation (Handbook
-Section 3.2). Explain each stage in one or two sentences and name the main
-source files.}
+% Model numbers below come from the run records through
+% scripts/report/a2_method_tables.py, loaded in main.tex; regenerate instead of
+% editing them.
 
-\reportfigure{Images/a2_pipeline.png}{Training and evaluation pipeline for SUIM
-segmentation.}{fig:pipeline}
+\subsection{Training and evaluation pipeline}
+\label{sec:pipeline}
+We use the same training and evaluation pipeline for both models
+(see \figref{fig:pipeline}). After auditing the SUIM pairs, we preprocess the
+retained images and masks as described in \secref{sec:preprocessing} and load
+them in batches. Each model produces eight class scores, or logits, per pixel,
+which we compare with the target mask through the training loss. We accumulate
+gradients over several batches before updating the weights with AdamW. The
+learning rate increases linearly during warm-up and then follows a cosine decay
+(see \secref{sec:training} for the schedule and batch settings).
+
+After each epoch, we evaluate the model on the validation set and save the
+checkpoint with the highest mIoU. To form a predicted mask, we choose the
+highest-scoring class at each pixel. If the score map and target mask differ in
+size, we first resize the scores with bilinear interpolation. Both have
+$\suimInputHeight\times\suimInputWidth$ pixels in these runs, so no additional
+resize is needed. We then pool pixel counts across the split into a confusion
+matrix and compute the metrics defined in \secref{sec:metrics}, without further
+prediction refinement or test-time augmentation.
+
+\begin{figure}[htbp]
+\centering
+\resizebox{\linewidth}{!}{%
+\begin{tikzpicture}[
+  stage/.style={draw=#1, line width=0.7pt, fill=white, rounded corners=3pt,
+    align=flush center, font=\scriptsize, text width=2.35cm, minimum height=1.9cm,
+    inner sep=2pt},
+  model/.style={stage=figmodel, line width=1.1pt, fill=figmodel!12},
+  lane/.style={draw=#1!55, fill=#1!7, rounded corners=6pt, line width=0.5pt, inner sep=5pt},
+  tag/.style={font=\tiny\bfseries, text=#1!80!black, inner sep=1pt},
+  flow/.style={-{Stealth[length=5pt]}, thick, draw=black!70}]
+\def\dx{2.8}
+\node[stage=figdata] (raw)  at (0*\dx, 0) {\textbf{Raw data}\\[1pt]JPEG images,\\RGB BMP masks};
+\node[stage=figdata] (prep) at (1*\dx, 0) {\textbf{Preprocessing}\\[1pt]audit, decode,\\resize, flip,\\normalize};
+\node[stage=figdata] (load) at (2*\dx, 0) {\textbf{Data loader}\\[1pt]fixed split files,\\shuffled batches};
+\node[model]         (net)  at (3*\dx, 0) {\textbf{Model}\\[1pt]U-Net or\\DeepLabV3\\[2pt]{\tiny\color{black!65}8 scores per pixel}};
+\node[stage=figtrain] (loss) at (4*\dx, 0) {\textbf{Loss}\\[1pt]CE or CE + Dice\\against the\\target mask};
+\node[stage=figtrain] (opt)  at (5*\dx, 0) {\textbf{Optimization}\\[1pt]AdamW, warm-up\\then cosine,\\accumulation};
+\node[stage=figeval] (pred) at (3*\dx, -2.75) {\textbf{Prediction}\\[1pt]argmax over\\the 8 classes};
+\node[stage=figeval] (post) at (4*\dx, -2.75) {\textbf{Post-processing}\\[1pt]resize scores\\only if sizes differ};
+\node[stage=figeval] (eval) at (5*\dx, -2.75) {\textbf{Evaluation}\\[1pt]pooled confusion\\matrix, mIoU, mDice;\\best mIoU kept};
+\begin{scope}[on background layer]
+  \node[lane=figdata, fit={(raw) (load) ($(raw.north)+(0,0.3)$)}] (dataLane) {};
+  \node[lane=figtrain, fit={(loss) (opt) ($(loss.north)+(0,0.3)$)}] (trainLane) {};
+  \node[lane=figeval, fit={(pred) (eval) ($(pred.south)+(0,-0.3)$)}] (evalLane) {};
+\end{scope}
+\node[tag=figdata, anchor=north west] at ($(dataLane.north west)+(5pt,-3pt)$) {DATA};
+\node[tag=figtrain, anchor=north west] at ($(trainLane.north west)+(5pt,-3pt)$) {TRAINING, every batch};
+\node[tag=figeval, anchor=south west] at ($(evalLane.south west)+(5pt,3pt)$)
+  {EVALUATION, validation after every epoch, test once};
+\draw[flow] (raw) -- (prep);
+\draw[flow] (prep) -- (load);
+\draw[flow] (load) -- (net);
+\draw[flow] (net) -- (loss);
+\draw[flow] (loss) -- (opt);
+\draw[flow, draw=figtrain] (opt.north) .. controls +(0,1.25) and +(0.4,1.25) ..
+  node[pos=0.5, above, font=\scriptsize, text=figtrain!80!black] {weight update}
+  ($(net.north)+(0.4,0)$);
+\draw[flow] (net) -- (pred);
+\draw[flow] (pred) -- (post);
+\draw[flow] (post) -- (eval);
+\end{tikzpicture}}
+\caption{The shared SUIM pipeline. Grey steps prepare the data, the green
+training path computes the loss and updates the model weights after every
+batch, and the amber evaluation path turns model scores into class masks and
+measures segmentation quality. We evaluate validation predictions after every
+epoch, keep the checkpoint with the best validation mIoU, and reserve the
+official test set for the selected models.}
+\label{fig:pipeline}
+\end{figure}
+
+To limit memory use, we read and preprocess images from disk as batches are
+requested. The \unetWorkers{} loader workers prepare upcoming batches while
+the GPU processes the current one, and pinned host memory supports transfer to
+the GPU. We seed shuffling with the run seed and epoch number so that batch
+order is reproducible, including after resuming a run. Gradient accumulation
+lets us keep the physical batch small while using a larger effective batch
+(\secref{sec:training}). When training on multiple GPUs, we divide the training
+set across devices and synchronize gradients at optimizer steps, while
+validation uses the full split on one device.
+
+We implement the audit and duplicate search, dataset transforms, U-Net,
+combined cross-entropy and Dice loss, metrics, and training loop. The loop
+handles gradient accumulation, learning-rate scheduling, checkpointing and
+resume. For the underlying operations, we use \texttt{PyTorch} for layers,
+automatic differentiation, optimization and data loading, while \texttt{torchvision}
+provides DeepLabV3 and its pretrained weights. \texttt{Pillow} handles image decoding
+and resizing, \texttt{NumPy} supports mask decoding, and \texttt{scikit-learn} provides the
+stratified group split.
 
 \subsection{Model architectures}
 \label{sec:models}
 
 \subsubsection{U-Net baseline}
-\reporttodo{Describe the encoder and decoder depth, channel widths, skip
-connections, normalization, and output head. Give the parameter count. State
-that the model is implemented by the group and trained from scratch. List its
-strengths and limits for this task.}
+The baseline is a U-Net \cite{unet} that we implemented ourselves and train from
+random initialization. Each encoder level applies two $3\times3$ convolutions,
+each followed by batch normalization and a ReLU, and then halves the resolution
+with $2\times2$ max pooling. This repeats \unetDepth{} times, and one more block
+of two convolutions forms the bottleneck. The number of channels starts at
+\unetWidthFirst{} and doubles at every level up to \unetWidthLast{} at the
+bottleneck, where a $\suimInputHeight\times\suimInputWidth$ input has shrunk to
+$\unetBottleneckHeight\times\unetBottleneckWidth$. The decoder mirrors the
+encoder: a $2\times2$ transposed convolution with stride 2 doubles the
+resolution and halves the channels, a skip connection concatenates the result
+with the encoder features of the same resolution, and another block of two
+convolutions fuses them. A final $1\times1$ convolution maps the
+\unetWidthFirst{} channels to eight logits per pixel at the input resolution.
+All convolutions are padded, so the output has the size of the input, and both
+input sides must be divisible by \unetDownsample{}, which holds for our input
+size. Compared with the original U-Net, our version uses padded instead of
+unpadded convolutions, adds batch normalization, and starts with half as many
+channels. It has \unetParameters{} parameters. \figref{fig:unet} shows
+the resulting network.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\linewidth]{Images/models/unet.png}
+\caption{The U-Net baseline. Each bar is a block of two $3\times3$
+convolutions, each followed by batch normalization and ReLU, labelled with its
+output channels and resolution for our input size. Every layer is written by
+the group and starts from random weights.}
+\label{fig:unet}
+\end{figure}
+
+The skip connections carry full-resolution features to the output, which helps
+the model place boundaries and keep small objects such as fish and divers. Its
+main limitation for this task is that it starts without any knowledge of
+natural images and must learn all its features from \suimTrainImages{} training
+images. Its context is also limited, because each bottleneck feature sees only
+a part of the image, so it has fewer global cues than DeepLabV3 for telling reef
+from rock and sea floor.
 
 \subsubsection{Pretrained DeepLabV3}
-\reporttodo{Describe the ResNet backbone, atrous convolution, the ASPP module,
-the output stride, and the new eight-class head. Name the pretrained weights
-(torchvision \codepath{COCO_WITH_VOC_LABELS_V1}) and the library. Give the
-parameter count and state which parts come from torchvision and which were
-written by the group.}
+We use DeepLabV3 with a ResNet-50 backbone and pretrained weights from
+\texttt{torchvision} \cite{deeplabv3,torchvision}. In the last two backbone stages,
+dilated convolutions replace spatial downsampling, giving an output stride of
+\deeplabOutputStride{}. An input of
+$\suimInputHeight\times\suimInputWidth$ pixels therefore produces a
+$\deeplabFeatureHeight\times\deeplabFeatureWidth$ feature map with
+\deeplabBackboneChannels{} channels. This retains more spatial detail while
+allowing the filters to cover a larger region of the input.
+The atrous spatial pyramid pooling (ASPP) module then combines five branches:
+a $1\times1$ convolution, three $3\times3$ dilated convolutions with rates
+\deeplabAtrousRates{}, and global average pooling. Each branch produces
+\deeplabAsppChannels{} channels. We concatenate their outputs and project them
+back to \deeplabAsppChannels{} channels through a $1\times1$ convolution with
+dropout, followed by a $3\times3$ convolution. A final $1\times1$ convolution
+produces class scores, which we upsample bilinearly to the input size.
+At our feature-map height of \deeplabFeatureHeight{} pixels, many outer filter
+taps at the larger dilation rates fall on padding. These branches therefore
+behave partly like $1\times1$ convolutions. The global pooling branch supplies
+image-level context in this setting, as discussed in the DeepLabV3 paper
+\cite{deeplabv3}.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth]{Images/models/deeplabv3.png}
+\caption{DeepLabV3 adapted for SUIM. Blue layers retain the pretrained
+initialization, while the orange output layer starts from random weights and
+predicts eight classes. The white box has no learned parameters. We fix batch
+normalization statistics throughout the network and remove the auxiliary head.}
+\label{fig:deeplab}
+\end{figure}
+
+The pretrained network learns from a COCO subset containing the Pascal VOC
+categories, with \deeplabLibraryCategories{} classes including background.
+The \texttt{torchvision} documentation reports \deeplabLibraryMiou\% mIoU on COCO
+val2017 with VOC labels \cite{torchvision}. To adapt it to SUIM, we replace the
+final classifier with a randomly initialized eight-class $1\times1$
+convolution and remove the auxiliary head attached to the third backbone stage.
+The backbone and ASPP module retain their pretrained initialization, and we
+fine-tune all remaining \deeplabParameters{} parameters. The original model
+with both heads has \deeplabLibraryParameters{} parameters.
+We implement these adaptations in a wrapper, which also fixes batch
+normalization statistics and assigns separate learning rates to the backbone
+and classifier (see \secref{sec:finetune}).
+
+Pretraining provides an initial set of image features, while ASPP combines
+local features with wider scene context. These features may help distinguish
+large regions such as reefs and sea floor. However, the model computes scores
+at one eighth of the input resolution and upsamples them without decoder skip
+connections, which can blur thin structures and object boundaries. Its
+pretraining data also differ from SUIM in colour cast and turbidity. We examine
+these limitations through class-level and boundary metrics. DeepLabV3 has
+\parameterRatio{} times as many parameters as our U-Net
+(see \tabref{tab:model-summary}).
 
 \input{Tables/model_summary}
 
 \subsection{Fine-tuning procedure}
 \label{sec:finetune}
-\reporttodo{Explain how the pretrained model is adapted: replaced classifier
-head, which layers are trained, separate learning rates for the backbone and the
-head, and why this choice was made.}
+We fine-tune all layers of DeepLabV3 using two learning-rate groups. The
+backbone uses \deeplabBackboneRate{}, while the head uses
+\deeplabHeadRate{}. The head includes ASPP, the $3\times3$ convolution and the
+new output layer. We choose a lower rate for the backbone to limit changes to
+its pretrained features, while the higher head rate allows the classifier to
+adapt to SUIM's eight classes. This group includes both the pretrained ASPP
+layers and the randomly initialized output layer. Both rates follow the same
+warm-up and cosine schedule, so their ratio stays fixed throughout training
+(see \secref{sec:training}). We set these rates before training and do not tune
+them on validation scores.
+
+We also keep the pretrained running mean and variance fixed in every batch
+normalization layer, while learning its scale and shift parameters. Each
+forward pass contains only \deeplabBatch{} images, which can give noisy batch
+statistics. Gradient accumulation increases the effective batch for weight
+updates, but each normalization layer still sees the same small physical batch.
+Therefore, we use the stored statistics during both training and evaluation.
+The input images are normalized with the ImageNet channel values described in
+\secref{sec:preprocessing}.
 
 \subsection{Loss and evaluation metrics}
 \label{sec:metrics}
-\reporttodo{Define pixel-wise cross-entropy and the class-averaged soft Dice
-loss, and the combined loss $\mathcal{L}=0.5\,\mathcal{L}_{\mathrm{CE}}
-+0.5\,\mathcal{L}_{\mathrm{Dice}}$. Define per-class IoU
-$\mathrm{IoU}_k=\mathrm{TP}_k/(\mathrm{TP}_k+\mathrm{FP}_k+\mathrm{FN}_k)$ and
-Dice $=2\mathrm{TP}_k/(2\mathrm{TP}_k+\mathrm{FP}_k+\mathrm{FN}_k)$, with
-confusion counts accumulated over the whole split. State how mIoU and mean Dice
-average over the eight classes and how absent classes are treated.}
+For the baseline comparison, both models use pixel-wise cross-entropy with
+equal class weights. The loss averages over the $N$ pixels in each batch:
+\begin{equation}
+\mathcal{L}_{\mathrm{CE}}=-\frac{1}{N}\sum_{i=1}^{N}\log p_{i,y_i},
+\end{equation}
+where $p_{i,k}$ is the softmax probability for class $k$ at pixel $i$, and $y_i$
+is the target label. To examine whether an overlap-based loss helps rare
+classes, the controlled experiment adds soft Dice. For image $n$ in a batch of
+$B$ images and class $k$ among the $K=8$ classes, let $g_{i,k}$ equal one when
+pixel $i$ belongs to class $k$ and zero otherwise. Then,
+\begin{equation}
+D_{n,k}=\frac{2\sum_{i}p_{i,k}\,g_{i,k}+\epsilon}{\sum_{i}p_{i,k}+\sum_{i}g_{i,k}+\epsilon},
+\qquad
+\mathcal{L}_{\mathrm{Dice}}=1-\frac{1}{BK}\sum_{n=1}^{B}\sum_{k=1}^{K}D_{n,k},
+\end{equation}
+where the pixel sums are taken within image $n$, and $\epsilon$ prevents
+division by zero. The combined loss weights the two terms equally:
+$\mathcal{L}=0.5\,\mathcal{L}_{\mathrm{CE}}+0.5\,\mathcal{L}_{\mathrm{Dice}}$.
+Because Dice weights each class equally regardless of its area, it may improve
+learning for classes that occupy few pixels. Computing it per image before
+averaging also keeps the loss independent of how batches are grouped for
+gradient accumulation. Classes absent from an image remain in the average.
+Their Dice numerator contains only $\epsilon$, giving a score near zero unless
+the total predicted probability for that class is also very small. Such classes
+usually contribute a nearly constant loss with little gradient, so most of the
+Dice term's effect comes from classes present in each image.
+
+For evaluation, predictions and target masks form a $K\times K$ confusion
+matrix $C$, where $C_{jk}$ counts pixels of true class $j$ predicted as class
+$k$. Counts are pooled across the entire split before calculating the scores.
+For each class, $\mathrm{TP}_k=C_{kk}$,
+$\mathrm{FP}_k=\sum_{j\ne k}C_{jk}$ and
+$\mathrm{FN}_k=\sum_{j\ne k}C_{kj}$, giving
+\begin{equation}
+\mathrm{IoU}_k=\frac{\mathrm{TP}_k}{\mathrm{TP}_k+\mathrm{FP}_k+\mathrm{FN}_k},
+\qquad
+\mathrm{Dice}_k=\frac{2\,\mathrm{TP}_k}{2\,\mathrm{TP}_k+\mathrm{FP}_k+\mathrm{FN}_k}.
+\end{equation}
+The reported mIoU and mean Dice average these class scores equally across all
+eight classes, including background. Pooling counts gives more influence to
+images containing larger regions of a class, while averaging per-image scores
+would give each image equal weight. The implementation assigns zero when a
+class has neither target nor predicted pixels across the split, although all
+eight target classes appear in our validation and test data. Evaluation uses
+the $\suimInputHeight\times\suimInputWidth$ mask grid described in
+\secref{sec:preprocessing}. Since BW and RI dominate the pixel counts
+(see \secref{sec:eda}), pixel accuracy would give limited information about the
+rare classes, so we focus on mIoU and class-level scores.
+
+To locate errors more precisely, we also calculate scores separately for
+boundaries and interiors. A target pixel belongs to the boundary if any of its
+four neighbours has a different class label. This marks both sides of a class
+transition, creating a two-pixel-wide band, while the image border alone does
+not count as a boundary. Separate confusion matrices for boundary and interior
+pixels then give IoU and Dice through the same equations. Comparing these
+scores reveals whether errors concentrate along object edges. Unit tests check
+the metric calculations against a hand-computed confusion matrix.
 
 \subsection{Training configuration}
 \label{sec:training}
-\reporttodo{Fill Table~\ref{tab:training-setup} from the configs in
-\codepath{configs/segmentation/suim/} and the saved launch configs. Explain how
-hyperparameters were chosen. Note any difference between a config file and the
-reported run, such as batch size.}
+Both models train for \unetEpochs{} epochs with AdamW and weight decay
+\unetWeightDecay{} (see \tabref{tab:training-setup}). The learning rate rises
+linearly over the first \unetWarmupEpochs{} epochs, then follows a cosine decay
+to zero, with an update after each optimizer step. U-Net uses
+\unetLearningRate{} throughout the network, while DeepLabV3 uses the backbone
+and head rates described in \secref{sec:finetune}. Each update accumulates
+\suimAccumulation{} batches of \suimBatch{} images, giving an effective batch
+of \suimEffectiveBatch{}. Both runs use full single precision, with weight
+decay and random horizontal flips for regularization. DeepLabV3 also retains
+dropout in ASPP.
+
+Training continues for the full schedule without early stopping. After each
+epoch, validation mIoU determines whether to save a new best checkpoint, which
+we retain for subsequent evaluation. Seed \unetSeed{} controls new-layer
+initialization, batch order and random flips, and convolution algorithms run
+deterministically. Some other GPU operations, such as the backward pass of
+bilinear upsampling, do not, so retraining with the same seed does not
+reproduce a run exactly (\secref{sec:conclusion}). The hyperparameters are fixed before training, so validation
+selects the checkpoint rather than tuning the configuration. This budget may
+limit U-Net, whose loss is still decreasing near the end of training
+(see \secref{sec:training-behavior}).
+
+U-Net runs on an \unetDevice{} with \texttt{PyTorch} \unetTorchVersion{}
+and CUDA \unetCudaVersion{}, while DeepLabV3 runs on an \deeplabDevice{}
+with \texttt{PyTorch} \deeplabTorchVersion{} and CUDA \deeplabCudaVersion{}. The
+table lists the settings for U-Net and the DeepLabV3 reference configuration.
 
 \input{Tables/training_setup}
 
 \subsection{Experimental design}
 \label{sec:experiments}
-\reporttodo{For each experiment, state the hypothesis, the changed factor, the
-fixed factors, the metrics, and the decision criterion (Handbook Section 21).
-The comparisons are U-Net against DeepLabV3, and the controlled experiment of
-cross-entropy against cross-entropy plus Dice on DeepLabV3. Define in advance
-what counts as a meaningful difference given a single seed.}
+We run six comparisons (see \tabref{tab:experiment-design}). Unless stated
+otherwise, every run shares the same split and preprocessing, a
+$\suimInputHeight\times\suimInputWidth$ input, AdamW with warm-up and cosine
+decay, \unetEpochs{} epochs, an effective batch of \suimEffectiveBatch{},
+seed \unetSeed{}, and checkpoint selection by validation mIoU. The five
+DeepLabV3 variants each change one factor of the reference configuration. The
+comparison of U-Net and DeepLabV3 changes architecture, size and initialization
+together, so it cannot isolate the effect of pretraining.
+
+We make every comparison and decision on the \suimValImages{} validation
+images, including the assessment of the loss hypothesis, as our proposal
+planned. Only after these decisions do we score U-Net and the two DeepLabV3
+loss variants once on the \suimTestUsable{} official test images, to report
+their final performance (see \secref{sec:quantitative}).
 
 \input{Tables/experiment_design}
+
+Only the loss comparison carries a hypothesis stated in advance, in our
+dataset proposal; its criterion follows directly from that statement. The
+other rows give the expectation that motivated each run. The four ablations
+cover the controlled factors suggested for this assignment and were added
+after the proposal. To judge whether a difference exceeds chance, we compare it
+with the variation between repeated training runs: the six DeepLabV3
+configurations were trained twice with the same code, seed and GPU, and their
+mIoU differed by up to \repeatMaxMiouGap{} points (see \secref{sec:conclusion}).
+We treat smaller differences as indistinguishable. This threshold was derived
+from the repeated run, not set before the experiments.

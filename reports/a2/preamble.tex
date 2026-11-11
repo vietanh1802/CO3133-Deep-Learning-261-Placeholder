@@ -1,7 +1,12 @@
 % Presentation only: keep report content in Sections/.
 \usepackage{hcmut}
 \usepackage{booktabs,longtable,float,microtype}
-\usetikzlibrary{positioning,arrows.meta}
+\usetikzlibrary{positioning,arrows.meta,calc,fit,backgrounds}
+% Diagram colours: data steps, model, training-only steps, evaluation steps.
+\definecolor{figdata}{HTML}{6B7280}
+\definecolor{figmodel}{HTML}{1E4E79}
+\definecolor{figtrain}{HTML}{4E8A3A}
+\definecolor{figeval}{HTML}{B7791F}
 \thesislayout
 \setlength{\parskip}{5pt}
 \setcounter{secnumdepth}{3}
@@ -9,7 +14,7 @@
 \renewcommand{\arraystretch}{1.18}
 \captionsetup{font=small,labelfont=bf}
 \hypersetup{pdftitle={Assignment 2 - Deep Learning on Large-Scale Data and Specialized Tasks},pdfauthor={Group Placeholder}}
-\fancyfoot[L]{\scriptsize CO3133 / Semester 261 / Group Placeholder / A2}
+\fancyfoot[L]{\footnotesize CO3133 / Semester 261 / Group Placeholder / A2}
 % Use the body font everywhere, including file paths and URLs.
 \urlstyle{same}
 \newcolumntype{Y}{>{\raggedright\arraybackslash}X}
@@ -18,6 +23,11 @@
 \newcommand{\reporttodo}[1]{\par\begingroup\small\color{blue!65!black}\noindent\textbf{To complete:} #1\par\endgroup}
 \newcommand{\pending}{\textit{Pending}}
 \newcommand{\codepath}[1]{\detokenize{#1}}
+
+% Cross-references whose whole text, such as "Figure 3", is the link.
+\newcommand{\figref}[1]{\hyperref[#1]{Figure~\ref*{#1}}}
+\newcommand{\tabref}[1]{\hyperref[#1]{Table~\ref*{#1}}}
+\newcommand{\secref}[1]{\hyperref[#1]{Section~\ref*{#1}}}
 
 % A missing image remains a visible, compilable placeholder, never silent evidence.
 % Usage: \reportfigure{path}{caption}{label}

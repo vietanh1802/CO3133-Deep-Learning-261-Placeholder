@@ -10,6 +10,7 @@ from loguru import logger
 from torch import distributed as dist
 from torch import nn
 from torch.distributed.elastic.multiprocessing.errors import record
+from torch.nn import functional
 from torch.nn.parallel import DistributedDataParallel
 
 from src.config.segmentation import load_segmentation_config
@@ -17,11 +18,12 @@ from src.data import build_dataloaders
 from src.data.segmentation import SegmentationDataset
 from src.data.suim import CLASS_NAMES, NUM_CLASSES
 from src.evaluation.compute_cost import measure_inference
-from src.evaluation.segmentation import evaluate_model
+from src.evaluation.segmentation import evaluate_model, resize_logits
 from src.models import build_model
 from src.plots.segmentation import (
     plot_segmentation_curves,
 )
+from src.training.losses import build_segmentation_loss
 from src.training.segmentation import (
     build_segmentation_optimizer,
     fit_segmentation,
@@ -54,9 +56,13 @@ def parse_args() -> argparse.Namespace:
 
 @torch.no_grad()
 def export_evidence(
-    model: nn.Module, dataloader: torch.utils.data.DataLoader, device: torch.device, path: Path
+    model: nn.Module,
+    dataloader: torch.utils.data.DataLoader,
+    device: torch.device,
+    path: Path,
+    split: str = "validation",
 ) -> None:
-    """Save validation targets, predictions, and display images for eval_segmentation."""
+    """Save targets, predictions, and display images of one split for eval_segmentation."""
     dataset = dataloader.dataset
     if not isinstance(dataset, SegmentationDataset):
         raise TypeError("evidence export expects a SegmentationDataset")
@@ -65,12 +71,19 @@ def export_evidence(
     for batch, target in dataloader:
         output = model(batch.to(device))
         logits = output["out"] if isinstance(output, dict) else output
+        size = (target.shape[-2], target.shape[-1])
+        logits = resize_logits(logits, size)
         predictions.append(logits.argmax(1).to(torch.uint8).cpu())
         targets.append(target.to(torch.uint8))
-        images.append(dataset.denormalize(batch))
+        display = dataset.denormalize(batch)
+        if display.shape[-2:] != size:
+            display = functional.interpolate(
+                display, size=size, mode="bilinear", align_corners=False
+            )
+        images.append(display)
     torch.save(
         {
-            "split": "validation",
+            "split": split,
             "targets": torch.cat(targets),
             "predictions": torch.cat(predictions),
             "images": torch.cat(images),
@@ -118,6 +131,9 @@ def run() -> None:
             "num_workers": config.num_workers,
             "image_height": config.image_height,
             "image_width": config.image_width,
+            "augment": config.augment,
+            "evaluation_height": config.evaluation_height,
+            "evaluation_width": config.evaluation_width,
         },
     )
 
@@ -155,7 +171,7 @@ def run() -> None:
         dataloaders.validation,
         optimizer,
         scheduler,
-        nn.CrossEntropyLoss(),
+        build_segmentation_loss(config.loss),
         device,
         epochs=config.epochs,
         accumulation_steps=config.accumulation_steps,
@@ -196,6 +212,7 @@ def run() -> None:
         "name": config.name,
         "model": config.model,
         "parameters": parameter_count,
+        "trainable_parameters": sum(p.numel() for p in model.parameters() if p.requires_grad),
         "device": device_name,
         "software": software_versions(),
         "git": revision,

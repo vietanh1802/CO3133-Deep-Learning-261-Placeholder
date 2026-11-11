@@ -25,4 +25,5 @@ def tiny_deeplab(monkeypatch):
     """Keep the wrapper/optimizer real while replacing only torchvision construction."""
     builder = Mock(side_effect=lambda **kwargs: _TinyDeepLab())
     monkeypatch.setattr(deeplabv3_module, "deeplabv3_resnet50", builder)
+    monkeypatch.setattr(deeplabv3_module, "deeplabv3_resnet101", builder)
     return builder

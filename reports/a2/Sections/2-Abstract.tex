@@ -1,8 +1,25 @@
 \section*{Abstract}
 \addcontentsline{toc}{section}{Abstract}
-\reporttodo{Write this last, in one paragraph of about 150 words. State the
-task (eight-class semantic segmentation on SUIM), the protocol (fixed split,
-seed, checkpoint rule, official test set), the U-Net and DeepLabV3 test mIoU
-and Dice, the gap between them, the outcome of the cross-entropy versus
-cross-entropy plus Dice experiment, the main error group, the compute
-trade-off, and the main limitation. Use only test-set numbers here.}
+Underwater robots need to know which parts of a camera image show divers,
+robots, fish, reefs, plants, wrecks, sea floor or open water. We study this as
+eight-class semantic segmentation on the SUIM dataset, predicting one class for
+every pixel. After auditing the image and mask pairs, we split the official
+training pool by duplicate group into \suimTrainImages{} training and
+\suimValImages{} validation images and keep the \testImages{} official test
+images aside. We compare a U-Net trained from scratch with a DeepLabV3-ResNet50
+fine-tuned from pretrained weights. Both models train for \unetEpochs{} epochs
+with seed \unetSeed{}, we keep the checkpoint with the highest validation mIoU,
+and we score each selected model once on the test set. On the test set,
+DeepLabV3 reaches \deeplabCeTestMiou\% mIoU and \deeplabCeTestDice\% mean Dice,
+compared with \unetTestMiou\% and \unetTestDice\% for U-Net, at the cost of
+\parameterRatio{} times the parameters and \flopRatio{} times the operations
+per image. Among five controlled variants of DeepLabV3, only freezing the
+backbone and halving the input resolution clearly lower validation mIoU, by
+\ablationFrozenDelta{} and \ablationLowResDelta{} points. Adding a Dice term to
+the cross-entropy loss raises plant IoU but lowers robot and wreck IoU on both
+validation and test, and its change in validation mIoU is smaller than the
+variation we measured between two identical training runs, so the result does
+not support our hypothesis. The main remaining errors are plants predicted as
+reef, which take \testPlantsAsReef\% of plant pixels on the test set, and
+mistakes along object boundaries. Each configuration uses a single seed, which
+limits the strength of these comparisons.

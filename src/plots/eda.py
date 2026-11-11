@@ -14,7 +14,14 @@ from scipy.spatial.distance import squareform  # noqa: E402
 
 from src.eda.classification import ClassBalance, DatasetProfile, IntensitySummary  # noqa: E402
 from src.plots.common import prepare_output_path, save_figure  # noqa: E402
-from src.plots.format import BLUE, BLUE_RED, CLASS_COLORS, RED, apply  # noqa: E402
+from src.plots.format import (  # noqa: E402
+    CLASS_COLORS,
+    COLORS,
+    DIVERGING,
+    SEQUENTIAL,
+    apply,
+    text_color,
+)
 
 
 def _as_displayable(image: np.ndarray) -> np.ndarray:
@@ -53,7 +60,7 @@ def plot_class_distribution(
     bars = axes.bar(
         names, counts, color=[CLASS_COLORS[i % len(CLASS_COLORS)] for i in range(len(names))]
     )
-    axes.bar_label(bars, fmt="%d", fontsize=10, padding=2)
+    axes.bar_label(bars, fmt="%d", padding=2)
 
     axes.set_xlabel("Class")
     axes.set_ylabel("Number of samples")
@@ -89,14 +96,14 @@ def plot_split_class_distribution(
         train_balance.proportions,
         width,
         label="Train",
-        color=BLUE,
+        color=COLORS[0],
     )
     axes.bar(
         positions + width / 2,
         test_balance.proportions,
         width,
         label="Test",
-        color=RED,
+        color=COLORS[1],
     )
 
     axes.set_xticks(positions)
@@ -125,13 +132,15 @@ def plot_intensity_histogram(
 
     apply()
     figure, axes = plt.subplots(figsize=(7.5, 4.5))
-    axes.bar(centers, counts, width=np.diff(edges), color=BLUE_RED(centers / 255.0), align="center")
+    axes.bar(
+        centers, counts, width=np.diff(edges), color=SEQUENTIAL(centers / 255.0), align="center"
+    )
 
     # Log scale keeps the background spike from hiding foreground counts.
     axes.set_yscale("log")
     axes.axvline(
         intensity.mean,
-        color=RED,
+        color=COLORS[1],
         linestyle="--",
         linewidth=1,
         label=f"Mean {intensity.mean:.1f}",
@@ -194,7 +203,7 @@ def plot_class_similarity(
     np.fill_diagonal(distance, 0.0)
 
     size = max(6.0, 0.75 * len(names))
-    apply()
+    apply("heatmap")
     figure = plt.figure(figsize=(size + 2.6, size))
     grid = figure.add_gridspec(1, 4, width_ratios=(0.65, 1.0, 7.5, 0.3), wspace=0.08)
     tree_axes = figure.add_subplot(grid[0, 0])
@@ -208,7 +217,7 @@ def plot_class_similarity(
             clusters,
             orientation="left",
             no_labels=True,
-            link_color_func=lambda _: "#333333",
+            link_color_func=lambda _: COLORS[5],
             ax=tree_axes,
         )
         order = tree["leaves"]
@@ -221,7 +230,7 @@ def plot_class_similarity(
         order = [0]
         tree_axes.axis("off")
     ordered = similarity[np.ix_(order, order)]
-    image = axes.imshow(ordered, cmap=BLUE_RED, vmin=-1.0, vmax=1.0, aspect="auto")
+    image = axes.imshow(ordered, cmap=DIVERGING, vmin=-1.0, vmax=1.0, aspect="auto")
     figure.colorbar(image, cax=color_axes, label="Cosine similarity")
     axes.set_xticks(np.arange(len(names)), [names[i] for i in order], rotation=45, ha="right")
     axes.set_yticks(np.arange(len(names)), [names[i] for i in order])
@@ -238,7 +247,7 @@ def plot_class_similarity(
                 ha="center",
                 va="center",
                 fontsize=9,
-                color="white" if abs(value) > 0.85 else "black",
+                color=text_color(DIVERGING((value + 1.0) / 2.0)),
             )
     figure.subplots_adjust(left=0.04, right=0.91, top=0.92, bottom=0.19)
     save_figure(figure, path)
@@ -264,7 +273,7 @@ def plot_foreground_coverage(
     bars = axes.barh(
         sorted_names, coverage[order], color=[CLASS_COLORS[i % len(CLASS_COLORS)] for i in order]
     )
-    axes.bar_label(bars, fmt="%.2f", fontsize=10, padding=2)
+    axes.bar_label(bars, fmt="%.2f", padding=2)
 
     axes.invert_yaxis()
     axes.set_xlabel("Foreground fraction")

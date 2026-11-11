@@ -18,7 +18,6 @@ MASK_SUFFIX = ".bmp"
 class SplitPairs:
     """One split's matched image/mask pairs plus the files left unmatched."""
 
-    name: str
     pairs: list[tuple[Path, Path]]
     images_without_mask: list[str]
     masks_without_image: list[str]
@@ -39,7 +38,6 @@ def find_pairs(split_dir: str | Path) -> SplitPairs:
     }
     matched = sorted(images.keys() & masks.keys())
     return SplitPairs(
-        name=split_dir.name,
         pairs=[(images[stem], masks[stem]) for stem in matched],
         images_without_mask=sorted(images.keys() - masks.keys()),
         masks_without_image=sorted(masks.keys() - images.keys()),
@@ -72,6 +70,7 @@ class SuimSegmentation(SegmentationDataset):
         image_size: tuple[int, int] = (240, 320),
         augment: bool = False,
         split_dir: str | Path = SPLIT_DIR,
+        target_size: tuple[int, int] | None = None,
     ) -> None:
         data_dir = Path(data_dir)
         if split == "test":
@@ -98,6 +97,7 @@ class SuimSegmentation(SegmentationDataset):
             augment=augment,
             mean=IMAGENET_MEAN,
             std=IMAGENET_STD,
+            target_size=target_size,
         )
 
     def decode_target(self, mask: Image.Image) -> np.ndarray:
@@ -115,14 +115,26 @@ def build_suim_loaders(
     image_height: int = 240,
     image_width: int = 320,
     split_dir: str | Path = SPLIT_DIR,
+    augment: bool = True,
+    evaluation_height: int | None = None,
+    evaluation_width: int | None = None,
 ) -> DataLoaders[ImageBatch]:
-    """Build train (flipped), validation, and test loaders from the committed split."""
+    """Build SUIM loaders, optionally scoring all input sizes on a common mask grid."""
     size = (image_height, image_width)
+    evaluation_size = (
+        (evaluation_height, evaluation_width)
+        if evaluation_height is not None and evaluation_width is not None
+        else size
+    )
 
     return build_segmentation_loaders(
-        SuimSegmentation(data_dir, "train", image_size=size, augment=True, split_dir=split_dir),
-        SuimSegmentation(data_dir, "val", image_size=size, split_dir=split_dir),
-        SuimSegmentation(data_dir, "test", image_size=size, split_dir=split_dir),
+        SuimSegmentation(data_dir, "train", image_size=size, augment=augment, split_dir=split_dir),
+        SuimSegmentation(
+            data_dir, "val", image_size=size, split_dir=split_dir, target_size=evaluation_size
+        ),
+        SuimSegmentation(
+            data_dir, "test", image_size=size, split_dir=split_dir, target_size=evaluation_size
+        ),
         batch_size=batch_size,
         seed=seed,
         num_workers=num_workers,

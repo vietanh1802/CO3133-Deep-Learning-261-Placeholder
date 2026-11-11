@@ -1,4 +1,4 @@
-"""Pretrained DeepLabV3-ResNet50 adapted to dense SUIM labels."""
+"""Pretrained DeepLabV3 with selectable ResNet backbone adapted to dense SUIM labels."""
 
 from typing import Self
 
@@ -6,7 +6,9 @@ import torch
 from torch import nn
 from torchvision.models.segmentation import (
     DeepLabV3_ResNet50_Weights,
+    DeepLabV3_ResNet101_Weights,
     deeplabv3_resnet50,
+    deeplabv3_resnet101,
 )
 
 from src.models.base import Model, register_model
@@ -25,22 +27,36 @@ class DeepLabV3(Model):
         num_classes: int = 8,
         pretrained: bool = True,
         freeze_batch_norm: bool = True,
+        backbone: str = "resnet50",
+        freeze_backbone: bool = False,
     ) -> None:
         super().__init__()
         if num_classes <= 0:
             raise ValueError("num_classes must be positive")
 
-        weights = DeepLabV3_ResNet50_Weights.COCO_WITH_VOC_LABELS_V1 if pretrained else None
-        self.network = deeplabv3_resnet50(weights=weights, weights_backbone=None)
+        if backbone not in ("resnet50", "resnet101"):
+            raise ValueError("backbone must be resnet50 or resnet101")
+        if not isinstance(freeze_backbone, bool):
+            raise ValueError("freeze_backbone must be a boolean")
+        if backbone == "resnet50":
+            weights = DeepLabV3_ResNet50_Weights.COCO_WITH_VOC_LABELS_V1 if pretrained else None
+            self.network = deeplabv3_resnet50(weights=weights, weights_backbone=None)
+        else:
+            weights101 = DeepLabV3_ResNet101_Weights.COCO_WITH_VOC_LABELS_V1 if pretrained else None
+            self.network = deeplabv3_resnet101(weights=weights101, weights_backbone=None)
+        self.network.backbone.requires_grad_(not freeze_backbone)
         self.network.classifier[-1] = nn.Conv2d(256, num_classes, kernel_size=1)
         self.network.aux_classifier = None
         self.output_dim = num_classes
         self.freeze_batch_norm = freeze_batch_norm
+        self.freeze_backbone = freeze_backbone
         self.train()
 
     def train(self, mode: bool = True) -> Self:
         """Set training mode, keeping BatchNorm running statistics fixed if requested."""
         super().train(mode)
+        if mode and self.freeze_backbone:
+            self.network.backbone.eval()
         if mode and self.freeze_batch_norm:
             for module in self.network.modules():
                 if isinstance(module, nn.BatchNorm2d):

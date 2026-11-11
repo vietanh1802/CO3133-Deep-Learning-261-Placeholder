@@ -1,7 +1,5 @@
 """SUIM quality checks, class statistics, duplicate detection, and split analysis."""
 
-import hashlib
-import io
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
@@ -84,7 +82,6 @@ def usable_checks(checks: Iterable[PairCheck]) -> list[PairCheck]:
 class ClassStat:
     """How much of the data one class owns, counted three ways."""
 
-    index: int
     name: str
     image_count: int
     pixel_count: int
@@ -108,7 +105,6 @@ def class_summary(checks: Iterable[PairCheck]) -> list[ClassStat]:
     grand = int(totals.sum())
     return [
         ClassStat(
-            index=index,
             name=CLASS_NAMES[index],
             image_count=len(areas[index]),
             pixel_count=int(totals[index]),
@@ -125,19 +121,17 @@ DHASH_SIDE = 8
 
 @dataclass(frozen=True)
 class Fingerprint:
-    """Two views of one image: its exact bytes and its coarse light-dark pattern."""
+    """One image identified by its coarse light-dark pattern."""
 
     stem: str
     split: str
     path: Path
-    sha256: str
     dhash: int
 
 
 def image_fingerprint(path: Path, split: str) -> Fingerprint:
-    """Hash one image exactly and perceptually in a single read."""
-    raw = path.read_bytes()
-    with Image.open(io.BytesIO(raw)) as handle:
+    """Hash one image perceptually."""
+    with Image.open(path) as handle:
         thumb = np.asarray(
             handle.convert("L").resize((DHASH_SIDE + 1, DHASH_SIDE), Image.Resampling.BILINEAR),
             dtype=np.int16,
@@ -147,7 +141,6 @@ def image_fingerprint(path: Path, split: str) -> Fingerprint:
         stem=path.stem,
         split=split,
         path=path,
-        sha256=hashlib.sha256(raw).hexdigest(),
         dhash=int(np.packbits(bits).view(">u8")[0]),
     )
 

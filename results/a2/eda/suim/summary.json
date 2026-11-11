@@ -2,11 +2,17 @@
   "splits": {
     "train_val": {
       "pairs_on_disk": 1525,
+      "image_bytes": 162890454,
+      "mask_bytes": 1674271382,
       "images_without_mask": [],
       "masks_without_image": [],
       "decode_errors": 0,
       "size_mismatches": 37,
       "off_code_masks": 85,
+      "off_code_share_range": [
+        0.0256,
+        0.8498
+      ],
       "usable_pairs": 1430,
       "labelled_pixels": 519599104,
       "resolutions": {
@@ -172,11 +178,14 @@
     },
     "TEST": {
       "pairs_on_disk": 110,
+      "image_bytes": 10172592,
+      "mask_bytes": 118250868,
       "images_without_mask": [],
       "masks_without_image": [],
       "decode_errors": 0,
       "size_mismatches": 0,
       "off_code_masks": 0,
+      "off_code_share_range": null,
       "usable_pairs": 110,
       "labelled_pixels": 39414256,
       "resolutions": {
@@ -759,5 +768,87 @@
       }
     }
   },
-  "usable_pairs_total": 1540
+  "usable_pairs_total": 1540,
+  "audit_examples": {
+    "off_code_masks": [
+      {
+        "stem": "f_r_1013_",
+        "image_size": [
+          640,
+          480
+        ],
+        "mask_size": [
+          640,
+          480
+        ],
+        "off_code_share": 0.3456
+      },
+      {
+        "stem": "f_r_1515_",
+        "image_size": [
+          590,
+          375
+        ],
+        "mask_size": [
+          590,
+          430
+        ],
+        "off_code_share": 0.2315
+      }
+    ],
+    "cross_split_pairs": [
+      {
+        "train_val": "d_r_587_",
+        "TEST": "n_l_29_",
+        "pixel_difference": 0.0
+      },
+      {
+        "train_val": "f_r_1827_",
+        "TEST": "f_r_1892_",
+        "pixel_difference": 0.49
+      }
+    ]
+  },
+  "example_batch": {
+    "config": "configs/segmentation/suim/pretrained.yaml",
+    "stems": [
+      "w_r_249_",
+      "d_r_700_",
+      "f_r_1674_",
+      "f_r_1571_"
+    ],
+    "flipped": [
+      false,
+      false,
+      true,
+      false
+    ],
+    "image_shape": [
+      4,
+      3,
+      240,
+      320
+    ],
+    "image_dtype": "float32",
+    "image_range": [
+      -2.12,
+      2.64
+    ],
+    "mask_shape": [
+      4,
+      240,
+      320
+    ],
+    "mask_dtype": "int64",
+    "mask_classes": [
+      "BW",
+      "HD",
+      "PF",
+      "WR",
+      "RO",
+      "RI",
+      "FV",
+      "SR"
+    ]
+  }
 }

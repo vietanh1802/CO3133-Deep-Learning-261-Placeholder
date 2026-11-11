@@ -10,7 +10,8 @@
 \RequirePackage{xcolor,listings,tikz}
 \RequirePackage{caption}
 \RequirePackage{hyperref}
-\newcommand{\thesislayout}{\geometry{a4paper,left=25mm,right=25mm,top=28mm,bottom=25mm,headheight=34pt,headsep=8mm}}
+% fancyhdr fixes the rule width when the page style is set, so match it to the final text width.
+\newcommand{\thesislayout}{\geometry{a4paper,left=25mm,right=25mm,top=28mm,bottom=25mm,headheight=34pt,headsep=8mm}\setlength{\headwidth}{\textwidth}}
 \setlength{\parindent}{0pt}
 \hypersetup{colorlinks=true,urlcolor=blue!60!black,linkcolor=black,citecolor=black}
 \AtBeginDocument{\renewcommand*\contentsname{Table of Contents}}
@@ -18,11 +19,11 @@
 \pagestyle{fancy}
 \fancyhf{}
 \fancyhead[L]{\begin{minipage}[c]{9mm}\includegraphics[width=8mm]{Images/bachkhoa_logo.png}\end{minipage}\hspace{2mm}%
-\begin{minipage}[c]{0.84\textwidth}\scriptsize
+\begin{minipage}[c]{0.84\textwidth}\footnotesize
 \textbf{Ho Chi Minh City University of Technology, VNU-HCM}\\
 Faculty of Computer Science and Engineering\end{minipage}}
-\fancyfoot[L]{\scriptsize CO3133 / Assignment 2}
-\fancyfoot[R]{\scriptsize Page \thepage}
+\fancyfoot[L]{\footnotesize CO3133 / Assignment 2}
+\fancyfoot[R]{\footnotesize Page \thepage/\pageref*{LastPage}}
 \renewcommand{\headrulewidth}{0.3pt}
 \renewcommand{\footrulewidth}{0.3pt}
 \endinput

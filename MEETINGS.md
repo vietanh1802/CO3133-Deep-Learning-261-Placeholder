@@ -33,3 +33,13 @@
 - Internal deadline for all assigned tasks: Thursday, 2026-10-08.
 - Shared checks: All four members review the A1 final report and presentation. For A2.M2, compare the baseline and pretrained model on the same split and record preliminary metrics and compute time.
 - Next meeting: To be scheduled.
+
+## 2026-11-03 (week-07) - 21:00, Google Meet
+- Attendance: Le Nguyen Khang (2352470), Tran Lam Anh (2352067), Tran Nguyen Giap (2352284), Vu Duc Viet Anh (2352074)
+- Decisions: Write proposal and finish A2M3, finish A3M2
+- Task split for the coming week (who does what across all four modules):
+  - 2352470 -> Model Plan and fix full report; 
+  - 2352067 -> Data Access and Information (A3M1); 
+  - 2352284 -> Compute Analysis and Architecture (A3M1);
+  - 2352074 -> EDA (A3M1); 
+- Next meeting: 2026-11-10
