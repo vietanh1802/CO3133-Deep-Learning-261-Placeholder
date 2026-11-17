@@ -1,0 +1,42 @@
+% Training and evaluation pipeline shared by all A1 models.
+% Included by Sections/4-Methodology.tex; needs the tikz libraries and fig* colours in preamble.tex.
+\resizebox{\linewidth}{!}{%
+\begin{tikzpicture}[
+  stage/.style={draw=#1, line width=0.7pt, fill=white, rounded corners=3pt,
+    align=flush center, font=\scriptsize, text width=2.5cm, minimum height=2.2cm,
+    inner sep=2pt},
+  model/.style={stage=figmodel, line width=1.1pt, fill=figmodel!12},
+  lane/.style={draw=#1!55, fill=#1!7, rounded corners=6pt, line width=0.5pt, inner sep=5pt},
+  tag/.style={font=\tiny\bfseries, text=#1!80!black, inner sep=1pt},
+  flow/.style={-{Stealth[length=5pt]}, thick, draw=black!70}]
+\def\dx{3.0}
+\node[stage=figdata] (raw)  at (0*\dx, 0) {\textbf{Raw data}\\[1pt]Fashion-MNIST,\\$28\times28$ grayscale\\images, 10 classes};
+\node[stage=figdata] (prep) at (1*\dx, 0) {\textbf{Preprocessing}\\[1pt]scale to $[-1,1]$;\\training only:\\rotate, translate};
+\node[stage=figdata] (load) at (2*\dx, 0) {\textbf{Data loader}\\[1pt]fixed 90/10 split,\\seed 42,\\batches of 128};
+\node[model]         (net)  at (3*\dx, 0) {\textbf{Model}\\[1pt]Linear, MLP,\\CNN, GRU, LSTM\\or Transformer\\[2pt]{\tiny\color{black!65}10 logits per image}};
+\node[stage=figtrain] (loss) at (4*\dx, 0) {\textbf{Loss}\\[1pt]cross-entropy\\computed directly\\from logits};
+\node[stage=figtrain] (opt)  at (5*\dx, 0) {\textbf{Optimization}\\[1pt]Adam, constant\\learning rate,\\50 epochs};
+\node[stage=figeval] (val)  at (3*\dx, -3.0) {\textbf{Validation}\\[1pt]cross-entropy\\after every epoch};
+\node[stage=figeval] (ckpt) at (4*\dx, -3.0) {\textbf{Checkpoint}\\[1pt]keep the epoch\\with the lowest\\validation loss};
+\node[stage=figeval] (test) at (5*\dx, -3.0) {\textbf{Test evaluation}\\[1pt]argmax label;\\accuracy, macro-F1,\\class recall};
+\begin{scope}[on background layer]
+  \node[lane=figdata, fit={(raw) (load) ($(raw.north)+(0,0.3)$)}] (dataLane) {};
+  \node[lane=figtrain, fit={(loss) (opt) ($(loss.north)+(0,0.3)$)}] (trainLane) {};
+  \node[lane=figeval, fit={(val) (test) ($(val.south)+(0,-0.3)$)}] (evalLane) {};
+\end{scope}
+\node[tag=figdata, anchor=north west] at ($(dataLane.north west)+(5pt,-3pt)$) {DATA};
+\node[tag=figtrain, anchor=north west] at ($(trainLane.north west)+(5pt,-3pt)$) {TRAINING, every batch};
+\node[tag=figeval, anchor=south west] at ($(evalLane.south west)+(5pt,3pt)$)
+  {EVALUATION, validation every epoch, test once};
+\draw[flow] (raw) -- (prep);
+\draw[flow] (prep) -- (load);
+\draw[flow] (load) -- (net);
+\draw[flow] (net) -- (loss);
+\draw[flow] (loss) -- (opt);
+\draw[flow, draw=figtrain] (opt.north) .. controls +(0,1.25) and +(0.4,1.25) ..
+  node[pos=0.5, above, font=\scriptsize, text=figtrain!80!black] {weight update}
+  ($(net.north)+(0.4,0)$);
+\draw[flow] (net) -- (val);
+\draw[flow] (val) -- (ckpt);
+\draw[flow] (ckpt) -- (test);
+\end{tikzpicture}}

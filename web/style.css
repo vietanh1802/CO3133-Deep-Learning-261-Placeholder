@@ -144,9 +144,6 @@ footer { max-width: 1160px; margin: auto; padding: 1.5rem 2.5rem 2.5rem; border-
 .a1-page summary, .a2-page summary { cursor: pointer; font-weight: 600; font-size: .86rem; line-height: 1.6; }
 .a1-page details[open] > summary, .a2-page details[open] > summary { margin-bottom: 1rem; }
 .a1-page caption { text-align: left; color: var(--muted); font-size: .78rem; margin-bottom: .65rem; }
-.a1-page .pipeline { display: flex; flex-wrap: wrap; gap: .7rem; margin: 1.5rem 0; }
-.a1-page .pipeline span { border: 1px solid var(--border); background: var(--surface); border-radius: 3px; padding: .55rem .8rem; font-size: .78rem; }
-.a1-page .pipeline span:not(:last-child)::after { content: " →"; color: var(--accent); }
 .a1-page .video-frame, .a2-page .video-frame { aspect-ratio: 16 / 9; margin-top: 1.5rem; }
 .a1-page .video-frame iframe, .a2-page .video-frame iframe { width: 100%; height: 100%; border: 0; }
 .a1-page #ai-usage td, .a2-page #ai-usage td { overflow-wrap: anywhere; }
