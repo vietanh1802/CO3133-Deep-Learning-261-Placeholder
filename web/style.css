@@ -138,22 +138,22 @@ footer { max-width: 1160px; margin: auto; padding: 1.5rem 2.5rem 2.5rem; border-
 }
 
 /* Assignment 1 final deliverables and supporting evidence. */
-.a1-page .course-details { margin-top: 1.4rem; color: var(--muted); font-size: .8rem; line-height: 1.65; }
-.a1-page .deliverable-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 1rem 1.5rem; margin-top: 1.5rem; font-size: .82rem; }
-.a1-page details { margin: 1rem 0; border: 1px solid var(--border); border-radius: 3px; padding: .9rem 1rem; }
-.a1-page summary { cursor: pointer; font-weight: 600; font-size: .86rem; line-height: 1.6; }
-.a1-page details[open] > summary { margin-bottom: 1rem; }
+.a1-page .course-details, .a2-page .course-details { margin-top: 1.4rem; color: var(--muted); font-size: .8rem; line-height: 1.65; }
+.a1-page .deliverable-actions, .a2-page .deliverable-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 1rem 1.5rem; margin-top: 1.5rem; font-size: .82rem; }
+.a1-page details, .a2-page details { margin: 1rem 0; border: 1px solid var(--border); border-radius: 3px; padding: .9rem 1rem; }
+.a1-page summary, .a2-page summary { cursor: pointer; font-weight: 600; font-size: .86rem; line-height: 1.6; }
+.a1-page details[open] > summary, .a2-page details[open] > summary { margin-bottom: 1rem; }
 .a1-page caption { text-align: left; color: var(--muted); font-size: .78rem; margin-bottom: .65rem; }
 .a1-page .pipeline { display: flex; flex-wrap: wrap; gap: .7rem; margin: 1.5rem 0; }
 .a1-page .pipeline span { border: 1px solid var(--border); background: var(--surface); border-radius: 3px; padding: .55rem .8rem; font-size: .78rem; }
 .a1-page .pipeline span:not(:last-child)::after { content: " →"; color: var(--accent); }
 .a1-page .video-frame, .a2-page .video-frame { aspect-ratio: 16 / 9; margin-top: 1.5rem; }
 .a1-page .video-frame iframe, .a2-page .video-frame iframe { width: 100%; height: 100%; border: 0; }
-.a1-page #ai-usage td { overflow-wrap: anywhere; }
-.a1-page #ai-usage td:first-child { min-width: 8rem; }
+.a1-page #ai-usage td, .a2-page #ai-usage td { overflow-wrap: anywhere; }
+.a1-page #ai-usage td:first-child, .a2-page #ai-usage td:first-child { min-width: 8rem; }
 @media (max-width: 760px) {
   html.a1-page { scroll-padding-top: 9rem; }
-  .a1-page .deliverable-actions { align-items: flex-start; gap: .8rem 1rem; }
+  .a1-page .deliverable-actions, .a2-page .deliverable-actions { align-items: flex-start; gap: .8rem 1rem; }
   .a1-page .gallery.gallery-pair { grid-template-columns: 1fr; }
 }
 
