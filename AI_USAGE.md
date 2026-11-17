@@ -127,4 +127,64 @@ Generate unit tests in tests/test_models.py to check whether the Assignment 1 mo
 - **AI contribution:** Explained tensor shapes, logits, transfer learning, optimizer parameter groups, and BatchNorm behavior; wrote the implementation and tests. BatchNorm running statistics are fixed by default while its affine parameters and the remaining network still receive gradients.
 - **Verification:** `uv run --locked python -m scripts.check` passed lint, formatting, type checking, and 157 CPU tests. Tests cover real randomly initialized DeepLabV3 forward/backward, singleton batches, full-resolution outputs, and BatchNorm statistics. Download-free tests verify weight selection and optimizer groups. A synthetic SUIM integration test uses a small substitute backbone for training, interruption/resume, checkpoint selection, evidence export, and evaluation. A separate CPU smoke check loaded the actual `COCO_WITH_VOC_LABELS_V1` weights and verified forward/backward on one synthetic image. No SUIM training experiment or GPU benchmark was run; student review is pending.
 
+### Entry 2
+
+- **Tool / model:** Claude Opus 5.5 (Claude Code).
+- **Used by:** Vu Duc Viet Anh (2352074)
+- **Date / development stage:** 2026-10-04 to 2026-11-09 - A2.M1 dataset proposal, SUIM data audit, EDA and split.
+- **Purpose:** Understand what the dataset proposal must contain; use AI as a source of reference code and as a code reviewer for the SUIM measurement functions, the EDA runner and the fixed train/validation split; later, check the data audit against the original SUIM release and the Dataset Ninja copy, and extend the EDA with audit examples, storage size and an example batch.
+- **Affected sections / files:** `reports/a2_proposal.md`; image and mask pairing and measurement functions in `src/data/suim.py`; `scripts/eda/run_suim.py`; `src/eda/suim.py`; `results/a2/eda/suim/`; `results/a2/splits/suim/` (commits `e218c44`, `85ab66d` and `dc02a75`).
+- **Representative prompts (the first is reconstructed because the 2026-10-04 session log was not kept; the others are translated from the session log):**
+
+```
+Read the handbook and explain what the A2.M1 dataset proposal must contain. Then give me reference code for pairing SUIM images with their masks, auditing the mask colours and making a group-aware train/validation split, and check my implementation.
+Do I need example figures in the EDA for cases such as images duplicated between train and test, or images among the 85 faulty masks?
+OK, do that part.
+Why put (a) and (b) in one figure? I want one figure for (a) and one for (b), each with two examples.
+Remove sha256, then check whether the EDA code still has unused variables.
+```
+
+- **AI contribution:** For the proposal, explained the requirements and prepared a Vietnamese reading copy that lists where each number comes from, which the member used to check the submitted English version. For the first audit, EDA and split code, provided reference code and reviewed the member's implementation; the member wrote, ran and committed that code. For the EDA extension, compared the two dataset copies, explained how the test duplicates were found, suggested the audit examples, and wrote the requested additions and clean-up in the EDA runner. The member decided which additions to make, changed the figure layout and removed the fields the member judged unnecessary.
+- **How the output was edited and verified:** Each number in the proposal was traced to the EDA summary produced by the member's run. The split files were committed once and are read unchanged by every later training run. The member compared the regenerated EDA figures and `summary.json` with the previous outputs before committing. `tests/contracts/test_suim.py`, `tests/contracts/test_segmentation_data.py` and `tests/components/test_eda.py` check mask decoding, resizing, joint image and mask flips, use of the split files and the EDA summaries; they passed in the repository's continuous-integration run on 2026-11-11.
+- **Member responsible for final verification:** Vu Duc Viet Anh (2352074).
+- **Sources used for verification:** Course handbook (revision 14 Sep 2026), Assignment 2 dataset requirements; the original SUIM release and the Dataset Ninja copy (local); Islam et al., IROS 2020 (arXiv:2004.01241); `results/a2/eda/suim/summary.json`; the repository tests listed above.
+
+### Entry 3
+
+- **Tool / model:** Claude Opus 5.5 (Claude Code).
+- **Used by:** Vu Duc Viet Anh (2352074)
+- **Date / development stage:** 2026-11-08 to 2026-11-11 - U-Net baseline configuration check and one-time test evaluation of the selected checkpoints.
+- **Purpose:** Check that the committed U-Net configuration matches the reported run, and score the selected U-Net and DeepLabV3 checkpoints once on the official test split.
+- **Affected sections / files:** `configs/segmentation/suim/baseline.yaml` and `scripts/report/a2_data_tables.py` (commit `8f4a22b`); `scripts/evaluation/test_segmentation.py`, `scripts/training/train_segmentation.py`, `results/a2/suim_unet_seed42/test_summary.json` and the two DeepLabV3 test summaries (commit `cfc83f3`).
+- **Representative prompts (translated):**
+
+```
+What differs between what I wrote in the proposal and what my teammates are running, for example the different GPUs and batch sizes you mentioned?
+I have put the DeepLabV3 checkpoints in .tmp/checkpoint-a2. Check whether I can now run them on the test set.
+OK, I agree with your approach. Start revising section 2.6 and run the test set.
+```
+
+- **AI contribution:** Found that the committed U-Net batch size differed from the reported run, restored it and added a check that compares the committed configurations with the run records. Wrote the one-time test script and ran it on the three selected checkpoints. The member chose which training run to report, approved the hypothesis and the test plan before the test split was used, and reviewed the test results for anomalies.
+- **How the output was edited and verified:** The test script refuses a checkpoint whose epoch differs from the selected epoch in `training_summary.json` and refuses to overwrite an existing test summary, so each model is scored once. Each `test_summary.json` records the SHA-256 hash of the scored checkpoint. The full test suite passed in the repository's continuous-integration run on 2026-11-11.
+- **Member responsible for final verification:** Vu Duc Viet Anh (2352074).
+- **Sources used for verification:** `training_summary.json` and `history.json` of each run; the committed configurations; course handbook, Assignment 2 experimental requirements (selection on validation, single test evaluation).
+
+### Entry 4
+
+- **Tool / model:** Claude Opus 5.5 (Claude Code).
+- **Used by:** Tran Nguyen Giap (2352284)
+- **Date / development stage:** 2026-10-26 - A2.M2 U-Net baseline implementation and first training run.
+- **Purpose:** Use AI as a source of reference code and as a code reviewer for the U-Net baseline, the segmentation training loop and the minimal SUIM loader written to train it.
+- **Affected sections / files:** `src/models/unet.py`; segmentation training in `src/training/segmentation.py` and `scripts/training/train_segmentation.py`; `src/evaluation/compute_cost.py`; `configs/segmentation/suim/baseline.yaml`; `results/a2/suim_unet_seed42/` (commits `ae6d38e` and `a66bf14`; later restructured with the rest of the repository).
+- **Representative prompt (reconstructed; the session log was not kept):**
+
+```
+Here is my U-Net baseline and the segmentation training loop for SUIM. Give me a reference implementation to compare against, then check my code and mark what is wrong.
+```
+
+- **AI contribution:** Provided reference code and checked the member's implementation; the member wrote, trained and committed the final model.
+- **How the output was edited and verified:** `tests/components/test_segmentation_model.py` checks the U-Net output shape, rejects input sizes the network cannot handle and compares the parameter count with the proposal. `tests/pipelines/test_segmentation_resume.py` checks the warm-up and cosine schedule, checkpoint selection and exact resumption. The committed run records software versions, git commit, seed and the checkpoint selection rule.
+- **Member responsible for final verification:** Tran Nguyen Giap (2352284).
+- **Sources used for verification:** The repository tests listed above and the committed run records in `results/a2/suim_unet_seed42/`.
+
 ## Assignment 3
