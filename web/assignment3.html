@@ -50,7 +50,42 @@
 
   <section id="dataset">
     <h2>Dataset and EDA</h2>
-    <p class="pending">(To be added: pair counts, missing-modality rates and pair quality.)</p>
+    <p><a href="https://doi.org/10.1613/jair.3994">Flickr8k</a> pairs 8,091 everyday photographs with five English captions each, all written for that photograph. Image-text retrieval asks a model to find the matching captions for an image, and the matching image for a caption.</p>
+    <div class="gallery">
+      <figure><a href="images/a3/m1/flickr8k_pair_examples.png?v=bfcc2bd6db88"><img src="images/a3/m1/flickr8k_pair_examples.png?v=bfcc2bd6db88" width="2840" height="2720" alt="Four Flickr8k test photographs, two of dogs and two of people, each beside its five reference captions" loading="lazy"></a><figcaption>The first four images of the official test list with their five captions. The examples follow this fixed rule rather than being hand-picked.</figcaption></figure>
+    </div>
+
+    <h3>Data quality and splits</h3>
+    <p>Every image decodes and has exactly five captions, and every caption belongs to an existing image, so no modality is missing. Five caption lines name an image that is not in the archive, and we drop them. We keep the official split and leave out the 91 images that appear in no split file.</p>
+    <div class="table-scroll"><table>
+      <caption>Official split used in the project.</caption>
+      <thead><tr><th scope="col">Split</th><th scope="col" class="num">Images</th><th scope="col" class="num">Image-caption pairs</th><th scope="col">Use</th></tr></thead>
+      <tbody>
+        <tr><td>Training</td><td class="num">6,000</td><td class="num">30,000</td><td>Fit model parameters.</td></tr>
+        <tr><td>Validation (dev)</td><td class="num">1,000</td><td class="num">5,000</td><td>Select checkpoints and compare configurations.</td></tr>
+        <tr><td>Official test</td><td class="num">1,000</td><td class="num">5,000</td><td>Reserved for final evaluation.</td></tr>
+      </tbody>
+    </table></div>
+    <p>The split unit is one image with all five of its captions, and no image is listed in two splits. So no test image or test pair is seen during training or model selection. We choose models and checkpoints on the dev split and evaluate the test split once, after all configurations are fixed. A perceptual-hash search followed by a pixel comparison found one pair of identical images, both in the training split, so no duplicate crosses splits.</p>
+    <p>Two weaker forms of overlap remain. 62 of the 5,000 test captions have exactly the same wording as a training caption, such as "two dogs playing in the snow", although they describe different images. The duplicate check also cannot find different photographs of the same event, because the release has no photographer or event identifiers.</p>
+    <div class="gallery">
+      <figure><a href="images/a3/m1/flickr8k_duplicate_examples.png?v=b542eaacd49c"><img src="images/a3/m1/flickr8k_duplicate_examples.png?v=b542eaacd49c" width="2840" height="960" alt="Two identical training photographs with different filenames, shown side by side with a pixel difference of 0.0" loading="lazy"></a><figcaption>The only confirmed duplicate pair. Both copies are in the training split.</figcaption></figure>
+    </div>
+
+    <h3>Captions and images</h3>
+    <p>Training captions have 2 to 36 tokens, with a median of 10, and the three splits have nearly the same length distribution. Dogs and people dominate the content: "dog" occurs 6,159 times and "man" 5,374 times in the 30,000 training captions. Only 1.22% of test tokens never occur in the training captions.</p>
+    <div class="gallery">
+      <figure><a href="images/a3/m1/flickr8k_caption_length.png?v=33d74a6cb2d7"><img src="images/a3/m1/flickr8k_caption_length.png?v=33d74a6cb2d7" width="2840" height="1200" alt="Overlapping step histograms of caption length for the training, dev and test splits, peaking around 10 tokens" loading="lazy"></a><figcaption>Caption length by split, as a share of each split's captions.</figcaption></figure>
+      <figure><a href="images/a3/m1/flickr8k_top_words.png?v=a7cd90533e97"><img src="images/a3/m1/flickr8k_top_words.png?v=a7cd90533e97" width="2840" height="1600" alt="Horizontal bar chart of the 20 most frequent content words in training captions, led by dog and man, followed by colour words and words for people" loading="lazy"></a><figcaption>The 20 most frequent content words in training captions, with stop words removed.</figcaption></figure>
+    </div>
+    <p>Images span 597 sizes, and their long side is at most 500 pixels. Only 48 of 8,091 images have a short side below 224 pixels, the usual input size of pretrained image encoders.</p>
+    <div class="gallery">
+      <figure><a href="images/a3/m1/flickr8k_resolution_distribution.png?v=7b9d4a820b64"><img src="images/a3/m1/flickr8k_resolution_distribution.png?v=7b9d4a820b64" width="2840" height="1200" alt="Scatter plot of image width against height; most sizes lie on the lines where width or height equals 500 pixels" loading="lazy"></a><figcaption>Image sizes across all 8,091 images. Marker area grows with the number of images of that size.</figcaption></figure>
+    </div>
+
+    <h3>Pair quality</h3>
+    <p>The release includes human judgements of image-caption pairs on the 1,000 test images. Crowd workers confirmed 700 of the 721 captions they judged against their own image, and the 21 others are kept for inspection during error analysis.</p>
+    <p>The judgements also show a weakness of the retrieval metric, which accepts only the captions written for an image. Three experts all gave the top score to 103 of 5,664 captions written for another image. In addition, 7 test captions are identical for two or more images. Recall@K therefore slightly underestimates true retrieval quality.</p>
   </section>
 
   <section id="methodology">

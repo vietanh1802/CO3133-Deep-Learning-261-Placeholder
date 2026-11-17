@@ -1,0 +1,92 @@
+\section{Problem and data description}
+\label{sec:data}
+
+\subsection{Task and research question}
+\reporttodo{Give the real-world motivation for image-text retrieval (for
+example, photo search by description and description search by photo). Define
+the two modalities: an RGB image $x\in\mathbb{R}^{3\times H\times W}$ and a
+caption $t$ given as a token sequence. Define the prediction unit as one
+image-caption pair, scored by a similarity $s(x,t)$. Image-to-text retrieval
+ranks all test captions for each image, and text-to-image retrieval ranks all
+test images for each caption. State the research question and the main
+difficulties: many visually similar scenes, several valid descriptions per
+image, and captions that also fit other images.}
+
+\subsection{Dataset and study scope}
+\reporttodo{Describe Flickr8k \cite{flickr8k}: source URL, version or access
+date, licence status, collection and captioning process, number of images and
+captions, the human judgement files, file formats, and storage size. Note the
+dominance of dog and people scenes as a bias and limitation. Take the counts
+from \codepath{results/a3/eda/flickr8k/summary.json}.}
+
+\subsection{Dataset proposal and approval}
+\label{sec:proposal}
+\reporttodo{Summarize the Dataset Proposal submitted at Milestone 1
+(\codepath{reports/a3_proposal.md}). Record the approval status (Approved,
+Approved with conditions, or Rejected), the approval date, and any conditions.
+State whether the retrieval threshold of about 5,000 image-text pairs
+(Handbook Section 28.2) and the cross-modal validity constraints (Section 28.1)
+are met.}
+
+\subsection{Exploratory data analysis}
+\label{sec:eda}
+\reporttodo{Cover the multimodal EDA items in Handbook Section 31: pair counts,
+missing modality rate, text length, and pair quality. Use
+\codepath{results/a3/eda/flickr8k/summary.json} and explain what each figure
+shows and why it matters for the models.}
+
+\input{Tables/eda_summary}
+
+\reportfigure{Images/flickr8k_pair_examples.png}{The first four images of the
+official Flickr8k test list with their five reference captions.}{fig:pair-examples}
+
+\reportfigure{Images/flickr8k_caption_length.png}{Caption length in tokens for
+the train, dev and test splits, as a share of each split's
+captions.}{fig:caption-length}
+
+\reportfigure{Images/flickr8k_top_words.png}{The 20 most frequent content words
+in training captions, with stop words removed.}{fig:top-words}
+
+\reportfigure{Images/flickr8k_resolution_distribution.png}{Image sizes across
+all 8,091 Flickr8k images. Marker area grows with the number of images of that
+size.}{fig:resolutions}
+
+\reporttodo{Describe pair quality: the CrowdFlower and expert judgements of
+captions against their own images, captions shared by several images, and
+captions written for another image that still fit. Explain how these cases make
+Recall@K underestimate retrieval quality.}
+
+\subsection{Splits and leakage prevention}
+\label{sec:splits}
+\reporttodo{State the split rule: the official Flickr8k train, dev and test
+files, with dev used as validation and the test split held out. Give the split
+unit (one image with all five of its captions), the images left out of every
+split, and how leakage is prevented. State that the official split needs no
+random seed or stratification, and give the seed used elsewhere, for example
+for caption sampling and training. Cite the SHA-256 digests of the split files
+(\texttt{split\_files} in \codepath{summary.json}). Report the duplicate check
+across splits and the overlap that remains: dev and test captions whose text is
+identical to a training caption (\texttt{identical\_to\_train\_caption}), and
+different photographs of the same event. State the test isolation rule: models
+and checkpoints are selected on dev, the test split is evaluated once after
+configurations are fixed, and the human judgements are used only for
+analysis.}
+
+\input{Tables/data_splits}
+
+\reportfigure{Images/flickr8k_duplicate_examples.png}{The only confirmed
+duplicate image pair. Both copies are in the training split.}{fig:duplicates}
+
+\subsection{Preprocessing and augmentation}
+\label{sec:preprocessing}
+\reporttodo{Describe data cleaning and the handling of invalid annotations: the
+captions whose key names no image, the images outside every split, and the
+suspect pairs found in the EDA, with what is dropped and what is kept. Describe
+image preprocessing (resize or crop to the encoder input
+size, normalization constants, training augmentation) and text preprocessing
+(tokenizer, lowercasing, maximum length, padding and truncation). Explain how
+the five captions of an image are sampled during training. Give the image and
+text tensor shapes and show one example batch after preprocessing.}
+
+\reportfigure{Images/flickr8k_example_batch.png}{One training batch after
+preprocessing: images with the caption sampled for each.}{fig:example-batch}

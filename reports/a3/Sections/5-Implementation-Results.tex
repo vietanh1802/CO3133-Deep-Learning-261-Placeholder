@@ -1,0 +1,86 @@
+\section{Implementation results}
+\label{sec:results}
+
+\subsection{Training behavior}
+\label{sec:training-behavior}
+\reporttodo{Describe the loss and validation recall curves for each trained
+model: the selected epoch, signs of overfitting or underfitting, and training
+time. Record implementation issues found during training and how they were
+fixed.}
+
+\reportfigure{Images/a3_learning_curves.png}{Training loss and validation
+recall for each trained model on Flickr8k.}{fig:learning-curves}
+
+\subsection{Quantitative results}
+\label{sec:quantitative}
+\reporttodo{Report Recall@1, Recall@5, Recall@10 and median rank in both
+directions for every model on the test split, using the checkpoint selected on
+validation. Give parameter counts, training time and inference cost. State the
+number of seeds, or give mean and standard deviation if more seeds are run.
+Make every reported number traceable (Handbook Section 4.2): name the config
+file, split files, checkpoint, log or experiment ID, and the commit or git tag
+that produced it.}
+
+\input{Tables/retrieval_results}
+
+\subsection{Compute cost}
+\label{sec:compute}
+\reporttodo{Compare parameters, training time, time to encode the test set,
+retrieval latency, and peak memory. Name the hardware and software versions for
+each run. If runs used different hardware, say why their times cannot be
+compared directly.}
+
+\input{Tables/compute_cost}
+
+\subsection{Qualitative results}
+\label{sec:qualitative}
+\reporttodo{Show test queries with their top-ranked results from each model:
+correct retrievals, difficult but correct cases, and failures. Mark the ground
+truth in each ranking. State the rule used to select the examples so the
+selection is reproducible.}
+
+\reportfigure{Images/a3_retrieval_examples.png}{Test queries with the top
+retrieved results from each model. State the selection rule.}{fig:retrieval-examples}
+
+\subsection{Modality interaction: support and conflict}
+\label{sec:interaction}
+\reporttodo{Show cases where the two modalities support each other (the fused
+model succeeds where a unimodal baseline fails) and cases where they conflict
+(the fused model fails where a unimodal baseline succeeds). Count how often
+each case occurs on the test split and explain likely causes with evidence
+(Handbook Sections 24.1 and 30).}
+
+\reportfigure{Images/a3_interaction_examples.png}{Test cases where the
+modalities support each other and where they conflict.}{fig:interaction}
+
+\subsection{Ablation study}
+\label{sec:ablation}
+\reporttodo{Report the ablation that removes or changes a modality or a fusion
+component. Compare the retrieval metrics and state whether the hypothesis is
+supported under the decision criterion in \secref{sec:experiments}.}
+
+\input{Tables/ablation}
+
+\subsection{Error analysis}
+\label{sec:errors}
+\reporttodo{Group the errors, for example a near-correct caption ranked above
+the true one, captions shared by several images, confusion between similar dog
+or people scenes, and counting or colour mistakes. For each group give a
+description, its frequency or rate, examples, a hypothesized cause, and an
+improvement idea. Use the 21 own pairs without a CrowdFlower majority yes and
+the expert judgements to separate model errors from metric false negatives.}
+
+\subsection{Comparison and discussion}
+\label{sec:discussion}
+\reporttodo{Explain which model is better and by how much, in which direction
+and on which kinds of query the differences appear, and likely causes in data,
+encoders, fusion, loss or training. If the multimodal model does not beat a
+unimodal baseline, explain why with evidence (Handbook Section 29.1). Discuss
+accuracy, speed and parameter trade-offs. Say which conclusions cannot yet be
+drawn. Listing the highest score is not enough.}
+
+\subsection{Limitations and conclusion}
+\label{sec:conclusion}
+\reporttodo{List data, method and experimental limits (dataset size and topic
+bias, metric false negatives, number of seeds, compute). Discuss generalization
+and future work. End with a short answer to the research question.}
