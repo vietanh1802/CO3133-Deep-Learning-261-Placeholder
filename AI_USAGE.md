@@ -101,19 +101,6 @@ Generate unit tests in tests/test_models.py to check whether the Assignment 1 mo
 - **AI contribution:** Drafted test cases and assertions to support validation of the existing models. The AI-generated code for this use concerns the tests.
 - **How the output was edited and verified:** The current test file includes checks for model-factory dispatch, output shapes, forward/backward behavior, finite loss and gradients, invalid inputs, checkpoint reloading, and comparisons of custom LSTM/GRU outputs with PyTorch under matched weights. No test-run result is recorded for this use.
 
-### Entry 8
-
-- **Tool / model:** Codex
-- **Used by:** Vu Duc Viet Anh (2352074)
-- **Date / development stage:** 2026-10-28 - Assignment 1 presentation and website preparation.
-- **Purpose:** Support slide updates, draft and revise the English YouTube narration for four speakers, and complete the Assignment 1 website using the final report, slides, and saved experiment results.
-- **Affected sections / files:** Assignment 1 PowerPoint and narration files; `web/index.html`; `web/assignment1.html`; `web/data/a1/`; `web/downloads/a1/`; website figures; `scripts/maintenance/build_a1_web.py`; `scripts/evaluation/compare.py`; `tests/components/test_comparison.py`.
-- **Representative prompt (translated):** "Complete the Assignment 1 website using Placeholder_A1_Report.pdf and Placeholder_A1_Slide.pptx in .tmp, and the YouTube link already provided."
-- **AI contribution:** Drafted and edited narration, assisted with slide result updates, generated website text and HTML, selected saved experiment records, and prepared downloadable evidence and figures. Completed the shared landing-page directory and changed comparison selection to exclude legacy CNN runs. This included content generation as well as review assistance.
-- **How the output was edited and verified:** Narration was revised according to the student’s speaker allocation and number-format instructions. Website figures and tables are built from an explicit list of 18 saved seed-42, 50-epoch runs, with the spatial CNN variant selected for every dataset. Automated checks validate record counts, checkpoint-selection losses, result values, links, and copied download checksums. These checks do not establish that a student has completed final review.
-- **Member responsible for final verification:** Vu Duc Viet Anh (2352074); final student review of these website and presentation changes is pending.
-- **Sources used for verification:** Saved test_result.json, training_summary.json, and test_error_analysis.json records; Fashion-MNIST EDA summary; model and evaluation source code; the supplied final report and slides.
-
 ## Assignment 2
 
 ### Entry 1
@@ -126,5 +113,101 @@ Generate unit tests in tests/test_models.py to check whether the Assignment 1 mo
 - **Representative prompt (translated):** "Give me the knowledge I need, then implement and test. I will review before committing, pushing, and creating a PR."
 - **AI contribution:** Explained tensor shapes, logits, transfer learning, optimizer parameter groups, and BatchNorm behavior; wrote the implementation and tests. BatchNorm running statistics are fixed by default while its affine parameters and the remaining network still receive gradients.
 - **Verification:** `uv run --locked python -m scripts.check` passed lint, formatting, type checking, and 157 CPU tests. Tests cover real randomly initialized DeepLabV3 forward/backward, singleton batches, full-resolution outputs, and BatchNorm statistics. Download-free tests verify weight selection and optimizer groups. A synthetic SUIM integration test uses a small substitute backbone for training, interruption/resume, checkpoint selection, evidence export, and evaluation. A separate CPU smoke check loaded the actual `COCO_WITH_VOC_LABELS_V1` weights and verified forward/backward on one synthetic image. No SUIM training experiment or GPU benchmark was run; student review is pending.
+
+### Entry 2
+
+- **Tool / model:** Claude Opus 5.5 (Claude Code).
+- **Used by:** Vu Duc Viet Anh (2352074)
+- **Date / development stage:** 2026-10-04 to 2026-11-09 - A2.M1 dataset proposal, SUIM data audit, EDA and split.
+- **Purpose:** Understand what the dataset proposal must contain; use AI as a source of reference code and as a code reviewer for the SUIM measurement functions, the EDA runner and the fixed train/validation split; later, check the data audit against the original SUIM release and the Dataset Ninja copy, and extend the EDA with audit examples, storage size and an example batch.
+- **Affected sections / files:** `reports/a2_proposal.md`; image and mask pairing and measurement functions in `src/data/suim.py`; `scripts/eda/run_suim.py`; `src/eda/suim.py`; `results/a2/eda/suim/`; `results/a2/splits/suim/` (commits `e218c44`, `85ab66d` and `dc02a75`).
+- **Representative prompts (the first is reconstructed because the 2026-10-04 session log was not kept; the others are translated from the session log):**
+
+```
+Read the handbook and explain what the A2.M1 dataset proposal must contain. Then give me reference code for pairing SUIM images with their masks, auditing the mask colours and making a group-aware train/validation split, and check my implementation.
+Do I need example figures in the EDA for cases such as images duplicated between train and test, or images among the 85 faulty masks?
+OK, do that part.
+Why put (a) and (b) in one figure? I want one figure for (a) and one for (b), each with two examples.
+Remove sha256, then check whether the EDA code still has unused variables.
+```
+
+- **AI contribution:** For the proposal, explained the requirements and prepared a Vietnamese reading copy that lists where each number comes from, which the member used to check the submitted English version. For the first audit, EDA and split code, provided reference code and reviewed the member's implementation; the member wrote, ran and committed that code. For the EDA extension, compared the two dataset copies, explained how the test duplicates were found, suggested the audit examples, and wrote the requested additions and clean-up in the EDA runner. The member decided which additions to make, changed the figure layout and removed the fields the member judged unnecessary.
+- **How the output was edited and verified:** Each number in the proposal was traced to the EDA summary produced by the member's run. The split files were committed once and are read unchanged by every later training run. The member compared the regenerated EDA figures and `summary.json` with the previous outputs before committing. `tests/contracts/test_suim.py`, `tests/contracts/test_segmentation_data.py` and `tests/components/test_eda.py` check mask decoding, resizing, joint image and mask flips, use of the split files and the EDA summaries; they passed in the repository's continuous-integration run on 2026-11-11.
+- **Member responsible for final verification:** Vu Duc Viet Anh (2352074).
+- **Sources used for verification:** Course handbook (revision 14 Sep 2026), Assignment 2 dataset requirements; the original SUIM release and the Dataset Ninja copy (local); Islam et al., IROS 2020 (arXiv:2004.01241); `results/a2/eda/suim/summary.json`; the repository tests listed above.
+
+### Entry 3
+
+- **Tool / model:** Claude Opus 5.5 (Claude Code).
+- **Used by:** Vu Duc Viet Anh (2352074)
+- **Date / development stage:** 2026-11-08 to 2026-11-11 - U-Net baseline configuration check and one-time test evaluation of the selected checkpoints.
+- **Purpose:** Check that the committed U-Net configuration matches the reported run, and score the selected U-Net and DeepLabV3 checkpoints once on the official test split.
+- **Affected sections / files:** `configs/segmentation/suim/baseline.yaml` and `scripts/report/a2_data_tables.py` (commit `8f4a22b`); `scripts/evaluation/test_segmentation.py`, `scripts/training/train_segmentation.py`, `results/a2/suim_unet_seed42/test_summary.json` and the two DeepLabV3 test summaries (commit `cfc83f3`).
+- **Representative prompts (translated):**
+
+```
+What differs between what I wrote in the proposal and what my teammates are running, for example the different GPUs and batch sizes you mentioned?
+I have put the DeepLabV3 checkpoints in .tmp/checkpoint-a2. Check whether I can now run them on the test set.
+OK, I agree with your approach. Start revising section 2.6 and run the test set.
+```
+
+- **AI contribution:** Found that the committed U-Net batch size differed from the reported run, restored it and added a check that compares the committed configurations with the run records. Wrote the one-time test script and ran it on the three selected checkpoints. The member chose which training run to report, approved the hypothesis and the test plan before the test split was used, and reviewed the test results for anomalies.
+- **How the output was edited and verified:** The test script refuses a checkpoint whose epoch differs from the selected epoch in `training_summary.json` and refuses to overwrite an existing test summary, so each model is scored once. Each `test_summary.json` records the SHA-256 hash of the scored checkpoint. The full test suite passed in the repository's continuous-integration run on 2026-11-11.
+- **Member responsible for final verification:** Vu Duc Viet Anh (2352074).
+- **Sources used for verification:** `training_summary.json` and `history.json` of each run; the committed configurations; course handbook, Assignment 2 experimental requirements (selection on validation, single test evaluation).
+
+### Entry 4
+
+- **Tool / model:** Claude Opus 5.5 (Claude Code).
+- **Used by:** Tran Nguyen Giap (2352284)
+- **Date / development stage:** 2026-10-26 - A2.M2 U-Net baseline implementation and first training run.
+- **Purpose:** Use AI as a source of reference code and as a code reviewer for the U-Net baseline, the segmentation training loop and the minimal SUIM loader written to train it.
+- **Affected sections / files:** `src/models/unet.py`; segmentation training in `src/training/segmentation.py` and `scripts/training/train_segmentation.py`; `src/evaluation/compute_cost.py`; `configs/segmentation/suim/baseline.yaml`; `results/a2/suim_unet_seed42/` (commits `ae6d38e` and `a66bf14`; later restructured with the rest of the repository).
+- **Representative prompt (reconstructed; the session log was not kept):**
+
+```
+Here is my U-Net baseline and the segmentation training loop for SUIM. Give me a reference implementation to compare against, then check my code and mark what is wrong.
+```
+
+- **AI contribution:** Provided reference code and checked the member's implementation; the member wrote, trained and committed the final model.
+- **How the output was edited and verified:** `tests/components/test_segmentation_model.py` checks the U-Net output shape, rejects input sizes the network cannot handle and compares the parameter count with the proposal. `tests/pipelines/test_segmentation_resume.py` checks the warm-up and cosine schedule, checkpoint selection and exact resumption. The committed run records software versions, git commit, seed and the checkpoint selection rule.
+- **Member responsible for final verification:** Tran Nguyen Giap (2352284).
+- **Sources used for verification:** The repository tests listed above and the committed run records in `results/a2/suim_unet_seed42/`.
+
+### Entry 5
+
+- **Tool / model:** Codex.
+- **Used by:** Le Nguyen Khang (2352470)
+- **Date / development stage:** 2026-10-25 to 2026-10-27 - Segmentation metrics, evaluation and two-GPU training.
+- **Purpose:** Use AI as a coding assistant for the confusion-matrix metrics (IoU, Dice and per-class IoU), the evaluation command that exports metrics and qualitative examples, and the two-GPU training support used for the first DeepLabV3 run.
+- **Affected sections / files:** `src/evaluation/segmentation.py`; `scripts/evaluation/eval_segmentation.py`; segmentation metric tests; `scripts/training/train_segmentation.py` and the restructured `src/config/` and `src/data/` modules; `results/a2/suim_deeplabv3_ce_seed42_2gpu/` (commits `01ed515`, `a856c5b` and `65bc040`).
+- **Representative prompt (reconstructed; the session log was not kept):**
+
+```
+Implement IoU and Dice for SUIM from a confusion matrix accumulated over the whole split, with per-class IoU, and an evaluation command that saves the metrics and qualitative examples. Add tests that compare the metrics with hand-computed values.
+```
+
+- **AI contribution:** Assisted with the metric functions, the evaluation command, the two-GPU training support and their tests; the member reviewed, tested and committed the final code.
+- **How the output was edited and verified:** `tests/components/test_segmentation_metrics.py` compares the metrics with hand-computed values, rejects invalid labels and mismatched masks, and checks the evaluation command. `tests/pipelines/test_distributed_segmentation.py` trains with two processes and checks that progress is combined and resumed correctly. Both passed in the repository's continuous-integration run on 2026-11-11.
+- **Member responsible for final verification:** Le Nguyen Khang (2352470).
+- **Sources used for verification:** The repository tests listed above and the saved run records in `results/a2/suim_deeplabv3_ce_seed42_2gpu/`.
+
+### Entry 6
+
+- **Tool / model:** Codex.
+- **Used by:** Le Nguyen Khang (2352470)
+- **Date / development stage:** 2026-11-07 to 2026-11-10 - Controlled study, error-analysis figures, assignment page and report revision.
+- **Purpose:** Use AI as a coding and writing assistant for the one-factor ablation study, the ablation and error-analysis figures, the class colour distribution figure, and revisions of the Assignment 2 page and report.
+- **Affected sections / files:** `scripts/evaluation/ablate_segmentation.py`; `configs/segmentation/suim/ablation.yaml`; `configs/plotting.toml`; `scripts/plots/plot_segmentation_ablation.py`; `scripts/plots/plot_segmentation_errors.py`; `scripts/eda/plot_suim_colour.py`; `results/a2/ablation/`; `web/assignment2.html`; `reports/a2/Sections/` (commits `07cb410`, `cd849e4`, `6032646`, `397fe21`, `88adde1` and `4600fd1`).
+- **Representative prompt (reconstructed; the session log was not kept):**
+
+```
+Build an ablation study that changes one factor at a time from the DeepLabV3 reference configuration, runs each configuration and exports paired comparisons with the reference. Then plot the results and the error analysis for the report and the website.
+```
+
+- **AI contribution:** Assisted with the ablation planner and runner, the plotting scripts, and the text of the assignment page and report; the member reviewed, tested and committed the final code and text.
+- **How the output was edited and verified:** `tests/components/test_segmentation_ablation.py` checks that each configuration changes exactly one factor from the reference, that invalid settings are rejected, that a frozen backbone stays unchanged while the head updates, and that low-resolution scores are resized to the common grid before the argmax. `tests/pipelines/test_segmentation_ablation.py` plans, runs, resumes and exports the paired results, and `tests/components/test_segmentation_plots.py` checks that the ablation figures match the saved measurements. These tests passed in the repository's continuous-integration run on 2026-11-11.
+- **Member responsible for final verification:** Le Nguyen Khang (2352470).
+- **Sources used for verification:** The repository tests listed above; `results/a2/ablation/comparisons.csv` and `results/a2/ablation/manifest.json`.
 
 ## Assignment 3

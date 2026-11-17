@@ -1,0 +1,91 @@
+\section{Methodology}
+\label{sec:method}
+
+\subsection{Training and evaluation pipeline}
+\reporttodo{Add a diagram of the form raw paired data, preprocessing, data
+loader, encoders, fusion, loss, optimization, prediction, evaluation (Handbook
+Section 31). Explain each stage in one or two sentences and name the main source
+files.}
+
+\reportfigure{Images/a3_pipeline.png}{Training and evaluation pipeline for
+image-text retrieval on Flickr8k.}{fig:pipeline}
+
+\subsection{Modality encoders and representations}
+\label{sec:encoders}
+\reporttodo{For each modality, describe the encoder, the representation it
+produces (for example, a pooled embedding of dimension $d$), the pretrained
+weights and library, and which layers are trained. Explain how an image and a
+caption are aligned: every pair comes from the same Flickr8k image and each
+image has five captions.}
+
+\subsection{Unimodal baselines}
+\label{sec:unimodal}
+\reporttodo{Describe the baseline that uses only the image modality and the
+baseline that uses only the text modality (Handbook Section 29.1). State
+exactly how each one produces a ranking for retrieval, which information it
+cannot use, and what its result shows. List the strengths and limits of each
+baseline for this task. Give parameter counts and state which parts were
+written by the group and which come from libraries (name the libraries).}
+
+\subsection{Simple fusion baseline}
+\label{sec:simple-fusion}
+\reporttodo{Describe the simple fusion model: the fusion stage (early,
+intermediate or late), the fusion operation, and how it scores an image-caption
+pair. Explain why it is the simplest reasonable way to combine the two
+modalities, and list its strengths and limits for this task. Give its parameter
+count and state which parts were written by the group and which come from
+libraries.}
+
+\subsection{Improved multimodal model}
+\label{sec:improved}
+\reporttodo{Describe the improved model or fusion design: what changes from the
+simple fusion baseline, why the change should help retrieval, and its pretraining
+and fine-tuning strategy. List its strengths and limits for this task. Give its
+parameter count, the source of each pretrained component, and which parts were
+written by the group.}
+
+\input{Tables/model_summary}
+
+\subsection{Loss and evaluation metrics}
+\label{sec:metrics}
+\reporttodo{Define the per-modality losses, if any, and the overall training
+loss, for example a symmetric contrastive loss over a batch of $B$ pairs with
+temperature $\tau$. Define Recall@$K$ for $K\in\{1,5,10\}$ and the median rank
+for both directions. State that image-to-text retrieval counts a hit when any of
+the image's five captions is in the top $K$, and that each caption has exactly
+one correct image. Name the validation metric used for checkpoint selection.}
+
+\subsection{Missing-modality handling}
+\label{sec:missing}
+\reporttodo{State that every Flickr8k image has five captions and every caption
+has its image, so no sample lacks a modality. Say whether any model is tested
+with one modality removed, and how.}
+
+\subsection{Data loading and training loop}
+\label{sec:loop}
+\reporttodo{Describe how the data loader builds a batch of image-caption pairs:
+how one of the five captions is chosen for each image, how images and captions
+stay aligned, and how padding is applied. Describe one training step: encoding
+both modalities, fusion, the loss over the batch (for example, with the other
+pairs in the batch as negatives), and the optimizer update. Describe how
+validation encodes all images and captions once and ranks them. Name the source
+files.}
+
+\subsection{Training configuration}
+\label{sec:training}
+\reporttodo{Fill Table~\ref{tab:training-setup} from the configs in
+\codepath{configs/} and the saved launch configs. Explain how hyperparameters
+were chosen. Note any difference between a config file and the reported run.}
+
+\input{Tables/training_setup}
+
+\subsection{Experimental design}
+\label{sec:experiments}
+\reporttodo{For each experiment, state the hypothesis, the changed factor, the
+fixed factors, the metrics, and the decision criterion (Handbook Section 30).
+The comparisons are the two unimodal baselines against the simple fusion
+baseline, the simple fusion baseline against the improved model, and at least
+one ablation that removes or changes a modality or a fusion component. Define in
+advance what counts as a meaningful difference given the number of seeds.}
+
+\input{Tables/experiment_design}
