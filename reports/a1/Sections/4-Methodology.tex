@@ -3,13 +3,25 @@
 
 \subsection{Training and evaluation pipeline}
 We train all classifiers from scratch using the shared data splits in
-Section~\ref{sec:splits}. Each training batch passes through the model to produce
+Section~\ref{sec:splits} (see Figure~\ref{fig:pipeline}). Each training batch passes through the model to produce
 ten class scores, and we update the weights to minimize cross-entropy.
 After each epoch, we evaluate validation loss with dropout disabled and batch
 normalization using its running statistics. We use the checkpoint with the
 lowest validation loss for testing. This allows the selected model to come
 from an earlier epoch if validation performance deteriorates before training
 ends. Every model still receives the same 50-epoch training budget.
+
+\begin{figure}[htbp]
+\centering
+\input{Images/pipeline}
+\caption{The shared training and evaluation pipeline. Grey steps prepare the
+data, the green training path computes the loss and updates the weights after
+every batch, and the amber evaluation path measures validation loss after every
+epoch, keeps the checkpoint with the lowest validation loss, and evaluates the
+selected checkpoint once on the official test set. All six models share every
+step except the model block.}
+\label{fig:pipeline}
+\end{figure}
 
 \subsection{Model architectures}
 \label{sec:architectures}
