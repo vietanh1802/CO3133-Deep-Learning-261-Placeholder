@@ -85,7 +85,7 @@
 
 ## 7. Compute and reproducibility estimate
 
-- **Hardware:** We train on Kaggle T4 GPU.
+- **Hardware:** We train on an NVIDIA GeForce RTX 4060 GPU.
 - **Time estimate:** Three 40-epoch runs, comprising U-Net and two DeepLabV3 loss arms, are provisionally estimated at six GPU hours. GPU time has not been measured, short CPU benchmarks and assumptions are in Appendix D. We will replace this estimate with measured timings in M2.
 - **Storage and reproducibility:** SUIM uses about 2.2 GB, new outputs are expected to remain below 1 GB. Seed 42 controls initialization, shuffling and augmentation, while committed split files fix membership. We will select the checkpoint with highest validation mIoU. Dependencies are recorded in `pyproject.toml` and `uv.lock`.
 - **Feasibility:** If memory or time is insufficient, the fallbacks in Appendix D preserve the same dataset, task, and controlled comparison. We will follow any conditions imposed during approval.
