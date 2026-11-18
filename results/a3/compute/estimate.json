@@ -1,0 +1,69 @@
+{
+  "device": "cuda",
+  "torch_version": "2.14.0+cu126",
+  "torchvision_version": "0.29.0+cu126",
+  "cuda_available": true,
+  "batch_size": 128,
+  "benchmark_steps": 10,
+  "warmup_steps": 3,
+  "models": {
+    "image_encoder_resnet50": {
+      "total_params": 23508032,
+      "trainable_params": 23508032,
+      "forward_flops": 8174272512,
+      "forward_gflops": 8.174272512,
+      "checkpoint_trainable_mb": 94.032128,
+      "checkpoint_full_mb": 94.032128,
+      "peak_gpu_memory_mb": null,
+      "pairs_per_second": null,
+      "benchmark_note": "component encoder: has no retrieval training step"
+    },
+    "text_encoder_gru": {
+      "total_params": 6382272,
+      "trainable_params": 6382272,
+      "forward_flops": 292847616,
+      "forward_gflops": 0.292847616,
+      "checkpoint_trainable_mb": 25.529088,
+      "checkpoint_full_mb": 25.529088,
+      "peak_gpu_memory_mb": null,
+      "pairs_per_second": null,
+      "benchmark_note": "component encoder: has no retrieval training step"
+    },
+    "vse_frozen": {
+      "total_params": 31988480,
+      "trainable_params": 8480448,
+      "forward_flops": 8471314432,
+      "forward_gflops": 8.471314432,
+      "checkpoint_trainable_mb": 33.921792,
+      "checkpoint_full_mb": 127.95392,
+      "peak_gpu_memory_mb": 959.566336,
+      "pairs_per_second": 942.4641815751503
+    },
+    "vse_finetune": {
+      "total_params": 31988480,
+      "trainable_params": 23445184,
+      "forward_flops": 8471314432,
+      "forward_gflops": 8.471314432,
+      "checkpoint_trainable_mb": 93.780736,
+      "checkpoint_full_mb": 127.95392,
+      "peak_gpu_memory_mb": 1082.16064,
+      "pairs_per_second": 760.1876342392937
+    },
+    "clip_vitb32_proxy": {
+      "total_params": 151276544,
+      "trainable_params": 151276544,
+      "forward_flops": 14539292672,
+      "forward_gflops": 14.539292672,
+      "checkpoint_trainable_mb": 605.106176,
+      "checkpoint_full_mb": 605.106176,
+      "peak_gpu_memory_mb": 7016.208896,
+      "pairs_per_second": 289.50158800916813
+    }
+  },
+  "resnet50_feature_cache": {
+    "images": 8000,
+    "dim": 2048,
+    "fp32_mb": 65.536,
+    "fp16_mb": 32.768
+  }
+}
