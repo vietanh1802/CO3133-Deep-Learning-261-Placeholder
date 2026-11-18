@@ -154,17 +154,25 @@
 
 ## 7. Compute and reproducibility estimate
 
-- **Available hardware (device and memory):** GPU model, VRAM, and system RAM: to be confirmed before training.
+- **Available hardware (device and memory):** One NVIDIA GeForce RTX 4060 Laptop GPU with 8 GB of VRAM, 14 GB of system RAM and 20 CPU threads, running Ubuntu Linux. Every number below was measured on this machine.
 
-- **Estimated preprocessing, training, and evaluation time:** Pending a short benchmark. Estimate training time from measured epoch time and the planned epoch budget; measure caption generation separately.
+- **Estimated preprocessing, training, and evaluation time:** The measurement used random-weight models at a batch size of 128, with 3 warm-up steps and 10 timed full training steps: forward pass, symmetric InfoNCE loss, backward pass and optimizer step. Three repeats gave identical peak memory and throughput within 0.5 percent. The training split has 6,000 images with five captions each, so one epoch is 30,000 pairs, and the GPU time per epoch is 30,000 divided by the measured pairs per second. The budget is 30 epochs for each VSE variant and 10 epochs for CLIP fine-tuning.
 
-- **Estimated storage and checkpoint size:** Approximately 2.1 GiB for the downloaded archives and extracted dataset. Additional storage for features, model weights, optimizer states, and logs will be measured after implementation.
+| Model | Trainable params | GFLOPs/pair forward | Peak GPU memory | Pairs/s | s/epoch | Total min |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| VSE, frozen ResNet-50 | 8.48 M | 8.47 | 0.96 GB | 942.5 | 31.8 | 15.9 (30 epochs) |
+| VSE, ResNet-50 layer4 fine-tuned | 23.45 M | 8.47 | 1.08 GB | 760.2 | 39.5 | 19.7 (30 epochs) |
+| CLIP ViT-B/32 | 151.28 M | 14.54 | 7.02 GB | 289.5 | 103.6 | 17.3 (10 epochs) |
 
-- **Expected software framework and versions:** Python, PyTorch, and torchvision. Exact versions and caption-evaluation dependencies will be recorded and locked before experiments.
+These are GPU-step times only. JPEG decoding and augmentation, plus validation after each epoch, add to them, so plan with a 2x margin: the three runs are about 53 minutes of measured GPU steps, or about 1 hour 45 minutes with the margin. Evaluation costs less than one epoch. Encoding the 1,000 test images and 5,000 test captions takes seconds to a minute.
 
-- **Planned seed(s) and checkpoint selection rule:** Seed 42 for initial experiments. Select the checkpoint with the highest validation CIDEr; keep test data out of model selection.
+- **Estimated storage and checkpoint size:** The downloaded and extracted dataset takes about 2.1 GiB. Checkpoints hold 33.9 MB of trainable weights, or 128.0 MB for the full model, for the frozen VSE; 93.8 MB or 128.0 MB for the layer4 variant; and 605.1 MB for CLIP. Adam optimizer state roughly doubles a resumable checkpoint of the trainable parameters. If the frozen VSE caches ResNet-50 features once, 8,000 images at 2048 dimensions take 65.5 MB in fp32 or 32.8 MB in fp16. The layer4 variant cannot use that cache, because layer4 is trained.
 
-- **Feasibility risks and fallback within the same approved dataset/task:** Limited GPU memory and training time. Reduce batch size and use gradient accumulation if needed. Cache frozen encoder features during decoder training and reduce the training budget consistently across compared models.
+- **Expected software framework and versions:** Python 3.12.14, PyTorch 2.14.0+cu126 and torchvision 0.29.0+cu126, installed with uv and locked by the committed `uv.lock`. The versions are recorded in `results/a3/compute/estimate.json`.
+
+- **Planned seed(s) and checkpoint selection rule:** Seed 42 for training randomness. Select the checkpoint with the highest validation R@sum, the sum of R@1, R@5 and R@10 in both directions, on the validation split. Use the test split once at the end, after all choices are fixed.
+
+- **Feasibility risks and fallback within the same approved dataset/task:** CLIP at batch 128 peaks at 7.02 GB of the 8 GB of VRAM, so other GPU use, such as a game, can cause an out-of-memory error. The fallbacks are a batch of 64, mixed precision, or freezing the lower CLIP blocks. Batch size matters for InfoNCE, because the loss uses in-batch negatives, so compared models keep the same batch size, or the change is reported. The CLIP row is a size proxy built from scratch. The real run loads pretrained OpenAI ViT-B/32 weights, which have the same shape, so memory and speed carry over.
 
 ## 8. Approval record
 
@@ -215,3 +223,36 @@ The long side of the images is at most 500 pixels, and the short side varies wid
 The single confirmed duplicate pair, both images in the training split.
 
 ![Confirmed duplicate image pair](../results/a3/eda/flickr8k/duplicate_examples.png)
+
+---
+## Appendix B. Architecture and compute analysis
+
+The models here are the compute assumptions behind §7 and must be checked against the model plan in §6.
+
+All numbers come from `results/a3/compute/estimate.json`, written by `scripts/a3/estimate_compute.py`. The script builds each model with random weights, so it downloads nothing, and measures parameters, forward FLOPs per pair, checkpoint size and, on the GPU, the peak memory and pairs per second of one full training step. Every training step uses a symmetric InfoNCE loss with temperature 0.07 over the image-text similarity matrix, and AdamW at a learning rate of 1e-4.
+
+### B.1 VSE baseline with frozen ResNet-50
+
+- **Image encoder:** torchvision ResNet-50 with its classifier replaced by an identity layer. It maps a 224x224 RGB image to a 2048-dimensional feature vector. The encoder is frozen and stays in eval mode.
+- **Text encoder:** a learned token embedding of size 300 for a vocabulary of 7,696 (7,692 training words plus 4 special tokens), then one GRU layer with a hidden size of 1024. The last hidden state is the text embedding.
+- **Embedding dimension:** 1024 for both sides. A linear layer projects the 2048 image features to 1024, and both sides are L2-normalised before the loss.
+- **Trainable:** the image projection (2.10 M parameters) and the text encoder (6.38 M). The model has 31.99 M parameters in total and 8.48 M trainable.
+- **Cost at batch 128:** 8.47 GFLOPs per pair forward, 0.96 GB peak GPU memory, 942.5 pairs per second.
+
+### B.2 VSE with ResNet-50 layer4 fine-tuned
+
+- **Image encoder:** the same ResNet-50, but the parameters of layer4, the last stage of three bottleneck blocks, are also trainable.
+- **Text encoder:** unchanged from B.1.
+- **Embedding dimension:** 1024.
+- **Trainable:** the image projection, the text encoder and layer4, giving 23.45 M trainable parameters out of 31.99 M.
+- **Cost at batch 128:** 8.47 GFLOPs per pair forward, 1.08 GB peak GPU memory, 760.2 pairs per second.
+
+### B.3 CLIP ViT-B/32
+
+- **Image encoder:** torchvision ViT-B/32 (32-pixel patches, 12 transformer layers of width 768 with 12 heads and a feedforward width of 3072) with its classification head replaced by an identity layer, then a linear projection from 768 to 512.
+- **Text encoder:** the CLIP text tower. It embeds CLIP's 49,408-token byte-pair vocabulary at width 512, adds learned position embeddings for 77 tokens, and runs 12 pre-LN transformer layers (8 heads, feedforward width 2048, GELU) under a causal mask. A final LayerNorm and a 512-to-512 projection follow, and the feature at the last token is the text embedding.
+- **Embedding dimension:** 512 for both sides, L2-normalised.
+- **Trainable:** all 151.28 M parameters.
+- **Cost at batch 128:** 14.54 GFLOPs per pair forward, 7.02 GB peak GPU memory, 289.5 pairs per second.
+
+The ladder costs more at each step. Fine-tuning layer4 raises trainable parameters from 8.48 M to 23.45 M and peak memory from 0.96 GB to 1.08 GB, while throughput falls 19 percent, from 942.5 to 760.2 pairs per second. CLIP then raises trainable parameters to 151.28 M, more than four times the entire VSE model, raises the forward cost 1.7 times to 14.54 GFLOPs per pair, takes 7.02 GB of the 8 GB of VRAM and falls to 289.5 pairs per second, 3.3 times slower than the frozen VSE. B.1 and B.2 differ in one factor only, whether layer4 trains, so their gap measures what adapting the image encoder to Flickr8k buys. B.3 changes both encoders at once and starts from image-text pretraining, so it is compared as a different model family, not as a one-factor ablation. Each step up buys more representational power at a measured cost in memory and time.
