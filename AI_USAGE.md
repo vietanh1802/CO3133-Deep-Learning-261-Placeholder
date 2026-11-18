@@ -211,3 +211,21 @@ Build an ablation study that changes one factor at a time from the DeepLabV3 ref
 - **Sources used for verification:** The repository tests listed above; `results/a2/ablation/comparisons.csv` and `results/a2/ablation/manifest.json`.
 
 ## Assignment 3
+
+### Entry 1
+
+- **Tool / model:** Claude Code.
+- **Used by:** Tran Nguyen Giap (2352284)
+- **Date / development stage:** 2026-11-18 - M1 proposal.
+- **Purpose:** Assistance with the compute analysis of the proposal.
+- **Affected sections / files:** `scripts/a3/`; `results/a3/compute/`; `reports/a3_proposal.md`.
+- **Representative prompt (reconstructed):**
+
+```
+Help estimate the compute cost of the planned models for the proposal.
+```
+
+- **AI contribution:** Coding and writing assistance; the member reviewed the final version.
+- **How the output was edited and verified:** The results were checked by rerunning the script.
+- **Member responsible for final verification:** Tran Nguyen Giap (2352284).
+- **Sources used for verification:** `results/a3/compute/`.
