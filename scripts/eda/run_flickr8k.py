@@ -7,9 +7,12 @@ and writes the result to ``results/a3/eda/flickr8k/``.
 
 import hashlib
 import json
+import re
 import statistics
 from collections import Counter
 from pathlib import Path
+from textwrap import fill
+from typing import TypedDict
 
 import matplotlib
 
@@ -46,6 +49,13 @@ HASH_DISTANCE = 12
 PIXEL_TOLERANCE = 5.0
 # Common input side of pretrained image encoders.
 ENCODER_SIDE = 224
+
+
+class DuplicatePair(TypedDict):
+    images: list[str]
+    splits: list[str]
+    hash_bits: int
+    pixel_difference: float
 
 
 def main() -> None:
@@ -94,7 +104,7 @@ def main() -> None:
         image_fingerprint(IMAGE_DIR / c.name, split_of.get(c.name, "none")) for c in decoded
     ]
     candidates = find_duplicate_candidates(fingerprints, HASH_DISTANCE)
-    confirmed = []
+    confirmed: list[DuplicatePair] = []
     for a, b, bits in candidates:
         score = pixel_difference(a.path, b.path)
         if score < PIXEL_TOLERANCE:
@@ -111,8 +121,9 @@ def main() -> None:
     judged = {
         line.split("\t")[0] for line in expert_file.read_text(encoding="utf-8").splitlines() if line
     }
-    widths = [c.size[0] for c in decoded]
-    heights = [c.size[1] for c in decoded]
+    sizes = [c.size for c in decoded if c.size is not None]
+    widths = [width for width, _ in sizes]
+    heights = [height for _, height in sizes]
     # Figure examples follow a fixed rule so that they are not hand-picked.
     examples = split["test"][:4]
 
@@ -130,9 +141,9 @@ def main() -> None:
                 "median": statistics.median(heights),
                 "max": max(heights),
             },
-            "distinct_sizes": len({c.size for c in decoded}),
+            "distinct_sizes": len(set(sizes)),
             f"short_side_below_{ENCODER_SIDE}": sum(
-                1 for c in decoded if min(c.size) < ENCODER_SIDE
+                1 for size in sizes if min(size) < ENCODER_SIDE
             ),
         },
         "captions": {
@@ -254,19 +265,31 @@ def plot_pair_examples(examples: list[str], captions: dict[str, list[str]], path
     """Show test images beside their five reference captions."""
     apply()
     figure, axes = plt.subplots(
-        len(examples), 2, figsize=(7.1, 1.7 * len(examples)), gridspec_kw={"width_ratios": [1, 2.2]}
+        len(examples),
+        2,
+        figsize=(7.1, 2.35 * len(examples)),
+        gridspec_kw={"width_ratios": [1, 2.2]},
+        squeeze=False,
     )
     for row, image in zip(axes, examples, strict=True):
         with Image.open(IMAGE_DIR / image) as handle:
             row[0].imshow(handle.convert("RGB"))
-        row[0].set_title(image, fontsize=6)
+        row[0].set_title(image, fontsize=9)
         row[1].text(
             0,
             0.5,
-            "\n".join(f"{i + 1}. {c}" for i, c in enumerate(captions[image])),
+            "\n".join(
+                fill(
+                    re.sub(r" +([.,!?])", r"\1", c),
+                    width=43,
+                    initial_indent=f"{i + 1}. ",
+                    subsequent_indent="   ",
+                )
+                for i, c in enumerate(captions[image])
+            ),
             va="center",
-            fontsize=6,
-            wrap=True,
+            fontsize=11,
+            linespacing=1.25,
         )
         for axis in row:
             axis.axis("off")
@@ -275,7 +298,7 @@ def plot_pair_examples(examples: list[str], captions: dict[str, list[str]], path
     plt.close(figure)
 
 
-def plot_duplicate_examples(confirmed: list[dict], path: Path) -> None:
+def plot_duplicate_examples(confirmed: list[DuplicatePair], path: Path) -> None:
     """Show each confirmed duplicate pair with its splits and pixel difference."""
     apply()
     figure, axes = plt.subplots(

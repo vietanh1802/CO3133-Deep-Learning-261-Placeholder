@@ -29,7 +29,7 @@
 
   <section id="modalities">
     <h2>Data and task</h2>
-    <p class="pending">(Not yet chosen. Candidate tasks include image-text classification, image-text retrieval, visual question answering, image captioning and RGB-depth prediction.)</p>
+    <p>Image–text retrieval on Flickr8k.</p>
   </section>
 
   <section id="proposal">
@@ -52,7 +52,7 @@
     <h2>Dataset and EDA</h2>
     <p><a href="https://doi.org/10.1613/jair.3994">Flickr8k</a> pairs 8,091 everyday photographs with five English captions each, all written for that photograph. Image-text retrieval asks a model to find the matching captions for an image, and the matching image for a caption.</p>
     <div class="gallery">
-      <figure><a href="images/a3/m1/flickr8k_pair_examples.png?v=bfcc2bd6db88"><img src="images/a3/m1/flickr8k_pair_examples.png?v=bfcc2bd6db88" width="2840" height="2720" alt="Four Flickr8k test photographs, two of dogs and two of people, each beside its five reference captions" loading="lazy"></a><figcaption>The first four images of the official test list with their five captions. The examples follow this fixed rule rather than being hand-picked.</figcaption></figure>
+      <figure><a href="images/a3/m1/flickr8k_pair_examples.png?v=845a52388f2b"><img src="images/a3/m1/flickr8k_pair_examples.png?v=845a52388f2b" width="2840" height="3760" alt="Four Flickr8k test photographs, two of dogs and two of people, each beside its five reference captions" loading="lazy"></a><figcaption>The first four images of the official test list with their five captions. The examples follow this fixed rule rather than being hand-picked.</figcaption></figure>
     </div>
 
     <h3>Data quality and splits</h3>
@@ -85,7 +85,7 @@
 
     <h3>Pair quality</h3>
     <p>The release includes human judgements of image-caption pairs on the 1,000 test images. Crowd workers confirmed 700 of the 721 captions they judged against their own image, and the 21 others are kept for inspection during error analysis.</p>
-    <p>The judgements also show a weakness of the retrieval metric, which accepts only the captions written for an image. Three experts all gave the top score to 103 of 5,664 captions written for another image. In addition, 7 test captions are identical for two or more images. Recall@K therefore slightly underestimates true retrieval quality.</p>
+    <p>The judgements also show a weakness of the retrieval metric, which accepts only the captions written for an image. Three experts all gave the top score to 103 of 5,664 captions written for another image. In addition, 7 test captions are identical for two or more images. Recall@K can count these plausible matches as misses.</p>
   </section>
 
   <section id="methodology">
