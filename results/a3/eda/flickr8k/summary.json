@@ -1,0 +1,550 @@
+{
+  "images": {
+    "files": 8091,
+    "decoded": 8091,
+    "decode_errors": [],
+    "bytes": 1114733885,
+    "formats": {
+      "JPEG": 8091
+    },
+    "modes": {
+      "RGB": 8091
+    },
+    "width": {
+      "min": 164,
+      "median": 500,
+      "max": 500
+    },
+    "height": {
+      "min": 127,
+      "median": 375,
+      "max": 500
+    },
+    "distinct_sizes": 597,
+    "short_side_below_224": 48
+  },
+  "captions": {
+    "images_with_captions": 8091,
+    "captions": 40455,
+    "captions_per_image": {
+      "5": 8091
+    },
+    "malformed_keys": [
+      "2258277193_586949ec62.jpg.1#0",
+      "2258277193_586949ec62.jpg.1#1",
+      "2258277193_586949ec62.jpg.1#2",
+      "2258277193_586949ec62.jpg.1#3",
+      "2258277193_586949ec62.jpg.1#4"
+    ],
+    "text_files_bytes": {
+      "CrowdFlowerAnnotations.txt": 2918552,
+      "ExpertAnnotations.txt": 346674,
+      "Flickr8k.lemma.token.txt": 3244761,
+      "Flickr8k.token.txt": 3395237,
+      "Flickr_8k.devImages.txt": 25801,
+      "Flickr_8k.testImages.txt": 25775,
+      "Flickr_8k.trainImages.txt": 154678,
+      "readme.txt": 1821
+    }
+  },
+  "pairing": {
+    "images_without_captions": [],
+    "captions_without_image": [],
+    "images_in_no_split": 91
+  },
+  "splits": {
+    "train": {
+      "images": 6000,
+      "duplicate_entries": 0,
+      "missing_image": [],
+      "missing_captions": [],
+      "captions": 30000,
+      "length": {
+        "min": 2,
+        "median": 10.0,
+        "mean": 10.79,
+        "max": 36
+      },
+      "at_most_3_tokens": 141,
+      "vocabulary": 7692,
+      "words_seen_once": 3188,
+      "top_words": [
+        [
+          "a",
+          46781
+        ],
+        [
+          "in",
+          14085
+        ],
+        [
+          "the",
+          13509
+        ],
+        [
+          "on",
+          8006
+        ],
+        [
+          "is",
+          6907
+        ],
+        [
+          "and",
+          6672
+        ],
+        [
+          "dog",
+          6159
+        ],
+        [
+          "with",
+          5763
+        ],
+        [
+          "man",
+          5374
+        ],
+        [
+          "of",
+          4967
+        ],
+        [
+          "two",
+          4246
+        ],
+        [
+          "white",
+          2921
+        ],
+        [
+          "black",
+          2854
+        ],
+        [
+          "boy",
+          2634
+        ],
+        [
+          "are",
+          2619
+        ],
+        [
+          "woman",
+          2543
+        ],
+        [
+          "girl",
+          2414
+        ],
+        [
+          "to",
+          2303
+        ],
+        [
+          "wearing",
+          2271
+        ],
+        [
+          "at",
+          2101
+        ]
+      ],
+      "oov_rate_vs_train": null,
+      "shared_captions": {
+        "captions": 142,
+        "images_involved": 299,
+        "examples": {
+          "a biker performs a trick in the air": [
+            "3522076584_7c603d2ac5.jpg",
+            "3658733605_fbcf570843.jpg"
+          ],
+          "a black and white dog is jumping over a hurdle": [
+            "2832487464_2d30634e1e.jpg",
+            "458213442_12c59e61a0.jpg"
+          ],
+          "a black and white dog is running in the grass": [
+            "1330645772_24f831ff8f.jpg",
+            "2730994020_64ac1d18be.jpg"
+          ],
+          "a black and white dog jumps over a hurdle": [
+            "2629445284_83390e83af.jpg",
+            "2695961935_a2a6338f26.jpg"
+          ],
+          "a black dog in the water": [
+            "1884065356_c6c34b4568.jpg",
+            "2864340145_d28b842faf.jpg"
+          ]
+        }
+      },
+      "identical_to_train_caption": null
+    },
+    "dev": {
+      "images": 1000,
+      "duplicate_entries": 0,
+      "missing_image": [],
+      "missing_captions": [],
+      "captions": 5000,
+      "length": {
+        "min": 2,
+        "median": 10.0,
+        "mean": 10.9,
+        "max": 33
+      },
+      "at_most_3_tokens": 19,
+      "vocabulary": 3340,
+      "words_seen_once": 1493,
+      "top_words": [
+        [
+          "a",
+          7824
+        ],
+        [
+          "in",
+          2398
+        ],
+        [
+          "the",
+          2355
+        ],
+        [
+          "on",
+          1282
+        ],
+        [
+          "is",
+          1161
+        ],
+        [
+          "and",
+          1072
+        ],
+        [
+          "dog",
+          998
+        ],
+        [
+          "with",
+          966
+        ],
+        [
+          "man",
+          878
+        ],
+        [
+          "of",
+          866
+        ],
+        [
+          "two",
+          665
+        ],
+        [
+          "black",
+          484
+        ],
+        [
+          "girl",
+          471
+        ],
+        [
+          "woman",
+          461
+        ],
+        [
+          "white",
+          458
+        ],
+        [
+          "to",
+          446
+        ],
+        [
+          "boy",
+          434
+        ],
+        [
+          "people",
+          415
+        ],
+        [
+          "at",
+          394
+        ],
+        [
+          "are",
+          391
+        ]
+      ],
+      "oov_rate_vs_train": 0.0134,
+      "shared_captions": {
+        "captions": 5,
+        "images_involved": 10,
+        "examples": {
+          "a black dog splashes in the water": [
+            "1731546544_9fbf14617b.jpg",
+            "2934628301_41ea2e6cf9.jpg"
+          ],
+          "a person on a bmx bike": [
+            "3100442775_6e2659b973.jpg",
+            "3665169936_01ae94c9fd.jpg"
+          ],
+          "a skateboarder performs a trick in front of a large crowd": [
+            "3294179574_4f67e67d6f.jpg",
+            "3313620862_0c65c645f5.jpg"
+          ],
+          "the children are playing in the water": [
+            "1056249424_ef2a2e041c.jpg",
+            "3570800810_978c993133.jpg"
+          ],
+          "two dogs play in the snow": [
+            "2282522980_45cfa8e0cf.jpg",
+            "3173461705_b5cdeef1eb.jpg"
+          ]
+        }
+      },
+      "identical_to_train_caption": {
+        "captions": 43,
+        "images_involved": 40,
+        "examples": [
+          "a skateboarder doing a jump",
+          "a black dog splashes in the water",
+          "three dogs are running down a snow covered hill",
+          "a black dog runs through the water",
+          "two dogs are wrestling in a grassy field"
+        ]
+      }
+    },
+    "test": {
+      "images": 1000,
+      "duplicate_entries": 0,
+      "missing_image": [],
+      "missing_captions": [],
+      "captions": 5000,
+      "length": {
+        "min": 2,
+        "median": 10.0,
+        "mean": 10.84,
+        "max": 31
+      },
+      "at_most_3_tokens": 28,
+      "vocabulary": 3199,
+      "words_seen_once": 1398,
+      "top_words": [
+        [
+          "a",
+          7823
+        ],
+        [
+          "the",
+          2383
+        ],
+        [
+          "in",
+          2316
+        ],
+        [
+          "on",
+          1385
+        ],
+        [
+          "is",
+          1183
+        ],
+        [
+          "and",
+          1041
+        ],
+        [
+          "with",
+          973
+        ],
+        [
+          "dog",
+          952
+        ],
+        [
+          "man",
+          933
+        ],
+        [
+          "of",
+          810
+        ],
+        [
+          "two",
+          696
+        ],
+        [
+          "white",
+          523
+        ],
+        [
+          "boy",
+          507
+        ],
+        [
+          "black",
+          476
+        ],
+        [
+          "are",
+          456
+        ],
+        [
+          "girl",
+          427
+        ],
+        [
+          "woman",
+          388
+        ],
+        [
+          "wearing",
+          388
+        ],
+        [
+          "to",
+          383
+        ],
+        [
+          "at",
+          374
+        ]
+      ],
+      "oov_rate_vs_train": 0.0122,
+      "shared_captions": {
+        "captions": 7,
+        "images_involved": 13,
+        "examples": {
+          "a dog playing in some water": [
+            "2543589122_ec3e55f434.jpg",
+            "3461041826_0e24cdf597.jpg"
+          ],
+          "a dog swimming with a stick in its mouth": [
+            "2870875612_2cbb9e4a3c.jpg",
+            "3498327617_d2e3db3ee3.jpg"
+          ],
+          "a man skis down a snowy hill": [
+            "3139876823_859c7d7c23.jpg",
+            "3301859683_2d5e4b40a3.jpg"
+          ],
+          "a surfer is riding a wave": [
+            "3071676551_a65741e372.jpg",
+            "3624327440_bef4f33f32.jpg"
+          ],
+          "a surfer rides the waves": [
+            "3168123064_d1983b8f92.jpg",
+            "3624327440_bef4f33f32.jpg"
+          ]
+        }
+      },
+      "identical_to_train_caption": {
+        "captions": 62,
+        "images_involved": 58,
+        "examples": [
+          "two dogs playing in the snow",
+          "a brown dog running",
+          "two dogs play in the grass",
+          "a man climbing a mountain",
+          "a dog runs through the long grass"
+        ]
+      }
+    }
+  },
+  "split_files": {
+    "train": {
+      "file": "Flickr_8k.trainImages.txt",
+      "sha256": "e330ddd5156a4c2d2e2b67bc587e70e588f2d132bd8a10dc54dcb71e58115d8e"
+    },
+    "dev": {
+      "file": "Flickr_8k.devImages.txt",
+      "sha256": "18ba829f47f6df1cb830bf7f0506e2ddf333818925299babbd1bbcaf50fdc504"
+    },
+    "test": {
+      "file": "Flickr_8k.testImages.txt",
+      "sha256": "c0924146c131458ceba45da59670fe9520eadce1e5cafffa16a817672a9b1f17"
+    }
+  },
+  "split_overlap": {
+    "train&dev": 0,
+    "train&test": 0,
+    "dev&test": 0
+  },
+  "duplicates": {
+    "hash_distance": 12,
+    "pixel_tolerance": 5.0,
+    "candidates_from_hash": 6701,
+    "confirmed_by_pixels": [
+      {
+        "images": [
+          "2851198725_37b6027625.jpg",
+          "3050606344_af711c726c.jpg"
+        ],
+        "splits": [
+          "train",
+          "train"
+        ],
+        "hash_bits": 0,
+        "pixel_difference": 0.0
+      }
+    ],
+    "crossing_splits": 0
+  },
+  "judgements": {
+    "expert": {
+      "pairs": 5822,
+      "own_caption_pairs": 158,
+      "own_caption_rounded_mean_score": {
+        "3": 3,
+        "4": 155
+      },
+      "other_caption_pairs": 5664,
+      "other_caption_rounded_mean_score": {
+        "1": 3315,
+        "2": 1691,
+        "3": 506,
+        "4": 152
+      },
+      "other_caption_all_experts_4": 103
+    },
+    "crowdflower": {
+      "pairs": 47830,
+      "own_caption_pairs": 721,
+      "own_caption_without_majority_yes": [
+        "1174525839_7c1e6cfa86.jpg#2",
+        "136552115_6dc3e7231c.jpg#2",
+        "143688283_a96ded20f1.jpg#2",
+        "1714316707_8bbaa2a2ba.jpg#2",
+        "2077079696_03380d218b.jpg#2",
+        "2182488373_df73c7cc09.jpg#2",
+        "2559503010_84f20b3bc9.jpg#2",
+        "2842865689_e37256d9ce.jpg#2",
+        "2891617125_f939f604c7.jpg#2",
+        "3064383768_f6838f57da.jpg#2",
+        "3223055565_68973f5d20.jpg#2",
+        "3287549827_04dec6fb6e.jpg#2",
+        "3350786891_6d39b234e9.jpg#2",
+        "3359551687_68f2f0212a.jpg#2",
+        "3375070563_3c290a7991.jpg#2",
+        "339658315_fbb178c252.jpg#2",
+        "3490736665_38710f4b91.jpg#2",
+        "3518126579_e70e0cbb2b.jpg#2",
+        "3641022607_e7a5455d6c.jpg#2",
+        "373394550_1b2296b8c4.jpg#2",
+        "541063517_35044c554a.jpg#2"
+      ],
+      "other_caption_pairs": 47109,
+      "other_caption_majority_yes": 2004
+    },
+    "expert_images_by_split": {
+      "test": 1000
+    }
+  },
+  "pair_examples": [
+    "3385593926_d3e9c21170.jpg",
+    "2677656448_6b7e7702af.jpg",
+    "311146855_0b65fdb169.jpg",
+    "1258913059_07c613f7ff.jpg"
+  ]
+}
